@@ -1,0 +1,3 @@
+[submodule "django_etebase"]
+	path = django_etebase
+	url = git@github.com:etesync/server.git
