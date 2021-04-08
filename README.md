@@ -27,3 +27,10 @@ const etebase = await Etebase.Account.signup({
 
 console.log(etebase)
 ```
+
+
+
+
+
+
+Deploys to: http://glifftempdeploy3.westeurope.azurecontainer.io:8033/
