@@ -35,4 +35,4 @@ jobs:
             registry-username: ${{ secrets.REGISTRY_USERNAME }}
             registry-password: ${{ secrets.REGISTRY_PASSWORD }}
             name: glifftempdeploy2
-            location: 'west eu'
+            location: 'westeurope'
