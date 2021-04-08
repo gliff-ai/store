@@ -30,7 +30,7 @@ ALLOWED_HOSTS = ["*"]
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
-        "NAME": os.environ.get("ETEBASE_DB_PATH", os.path.join(BASE_DIR, "db.sqlite3")),
+        "NAME": os.environ.get("ETEBASE_DB_PATH", "/mnt/deployfs/db.sqlite"),
     }
 }
 
@@ -107,9 +107,9 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 STATIC_URL = "/static/"
-STATIC_ROOT = os.environ.get("DJANGO_STATIC_ROOT", os.path.join(BASE_DIR, "static"))
+STATIC_ROOT = os.environ.get("DJANGO_STATIC_ROOT", "/mnt/deployfs/static")
 
-MEDIA_ROOT = os.environ.get("DJANGO_MEDIA_ROOT", os.path.join(BASE_DIR, "media"))
+MEDIA_ROOT = os.environ.get("DJANGO_MEDIA_ROOT", "/mnt/deployfs/media")
 MEDIA_URL = "/user-media/"
 
 ETEBASE_CREATE_USER_FUNC = "django_etebase.utils.create_user_blocked"
