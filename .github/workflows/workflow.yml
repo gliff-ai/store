@@ -45,3 +45,5 @@ jobs:
             registry-password: ${{ secrets.REGISTRY_PASSWORD }}
             name: glifftempdeploy3
             location: 'westeurope'
+            ports:
+              8033
