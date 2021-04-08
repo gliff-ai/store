@@ -40,6 +40,7 @@ jobs:
             resource-group: deploy
             dns-name-label: glifftempdeploy3
             image: gliffdeploy.azurecr.io/gliffdeploy:${{ github.sha }}
+            registry-login-server: gliffdeploy.azurecr.io
             registry-username: ${{ secrets.REGISTRY_USERNAME }}
             registry-password: ${{ secrets.REGISTRY_PASSWORD }}
             name: glifftempdeploy3
