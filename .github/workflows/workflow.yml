@@ -21,7 +21,7 @@ jobs:
             username: ${{ secrets.REGISTRY_USERNAME }}
             password: ${{ secrets.REGISTRY_PASSWORD }}
         - run: |
-            docker build .t gliffdeploy.azurecr.io/gliffdeploy:${{ github.sha }}
+            docker build . -t gliffdeploy.azurecr.io/gliffdeploy:${{ github.sha }}
             docker push gliffdeploy.azurecr.io/gliffdeploy:${{ github.sha }}
 
         - name: 'Deploy to Azure Container Instances'
