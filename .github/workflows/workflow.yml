@@ -1,4 +1,12 @@
-on: [push]
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    types: [opened, synchronize, reopened, closed]
+    branches:
+      - main
+
 name: Container_Workflow
 
 jobs:
@@ -30,9 +38,9 @@ jobs:
           uses: 'azure/aci-deploy@v1'
           with:
             resource-group: deploy
-            dns-name-label: glifftempdeploy2
+            dns-name-label: glifftempdeploy3
             image: gliffdeploy.azurecr.io/gliffdeploy:${{ github.sha }}
             registry-username: ${{ secrets.REGISTRY_USERNAME }}
             registry-password: ${{ secrets.REGISTRY_PASSWORD }}
-            name: glifftempdeploy2
+            name: glifftempdeploy3
             location: 'westeurope'
