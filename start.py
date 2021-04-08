@@ -2,7 +2,7 @@ import os
 import uvicorn
 import django
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "craig_etebase_server.settings")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "server.settings")
 
 django.setup()
 
