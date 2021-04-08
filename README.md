@@ -3,6 +3,7 @@ python manage.py migrate
 ```
 
 then
+
 ```bash
 uvicorn server.asgi:application --host 0.0.0.0 --port 8033 --log-level trace --reload
 ```
