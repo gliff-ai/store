@@ -112,7 +112,6 @@ STATIC_ROOT = os.environ.get("DJANGO_STATIC_ROOT", "/mnt/deployfs/static")
 MEDIA_ROOT = os.environ.get("DJANGO_MEDIA_ROOT", "/mnt/deployfs/media")
 MEDIA_URL = "/user-media/"
 
-ETEBASE_CREATE_USER_FUNC = "django_etebase.utils.create_user_blocked"
 
 # Efficient file streaming (for large files)
 SENDFILE_BACKEND = "django_etebase.sendfile.backends.simple"
