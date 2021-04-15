@@ -13,4 +13,9 @@ if __name__ == "__main__":
     django_application = get_asgi_application()
 
     app = create_application()
-    uvicorn.run(app, host="0.0.0.0", port=80)
+
+    @app.get("/")
+    async def root():
+        return {"message": "Hello World"}
+
+    uvicorn.run(app, host="0.0.0.0", port=8000)
