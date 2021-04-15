@@ -2,7 +2,7 @@ import os
 
 from django.core.asgi import get_asgi_application
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "server.settings")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "server.settings.base")
 django_application = get_asgi_application()
 
 def create_app():
