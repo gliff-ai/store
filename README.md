@@ -14,7 +14,6 @@ or
 python start.py
 ```
 
-
 You can then do:
 
 ```typescript
