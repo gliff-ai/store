@@ -6,7 +6,7 @@ name: Azure App Service - store-staging-gliff(Production), Build and deploy Pyth
 on:
   push:
     branches:
-      - main
+      - staging
 
 jobs:
   build-and-deploy:
