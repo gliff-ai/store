@@ -28,7 +28,9 @@ jobs:
       run: |
         cp -r package_tools/ etebase_server/
 
-        ls
+        ls etebase_server/
+
+        pip install -r requirements.txt
 
     - name: Build using AppService-Build
       uses: azure/appservice-build@v2
