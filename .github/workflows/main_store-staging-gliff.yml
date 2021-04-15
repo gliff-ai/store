@@ -19,24 +19,14 @@ jobs:
       with:
           submodules: true
 
-    - name: Set up Python version
-      uses: actions/setup-python@v2
-      with:
-        python-version: '3.8'
-
-    - name: Install dependencies
+    - name: Copy package tools
       run: |
         cp -r package_tools/ etebase_server/
-
-        ls etebase_server/
-
-        pip install -r requirements.txt
+        cat etebase_server/setup.cfg
+        cat etebase_server/setup.py
 
     - name: Build using AppService-Build
       uses: azure/appservice-build@v2
-      with:
-        platform: python
-        platform-version: '3.8'
 
     - name: Run Azure webapp deploy action using publish profile credentials
       uses: azure/webapps-deploy@v2
