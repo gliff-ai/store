@@ -8,6 +8,7 @@ DATABASES = {
         'NAME': get_env_value('POSTGRES_DATABASE'),
         'HOST': get_env_value('POSTGRES_HOST'),
         'PASSWORD': get_env_value('POSTGRES_PASSWORD'),
+        'USER': get_env_value('POSTGRES_USER'),
         'PORT': 5432,
     }
 }
