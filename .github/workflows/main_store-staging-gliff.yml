@@ -16,12 +16,21 @@ jobs:
     # checkout the repo
     - name: 'Checkout Github Action'
       uses: actions/checkout@master
-
+      with:
+          submodules: true
 
     - name: Set up Python version
-      uses: actions/setup-python@v1
+      uses: actions/setup-python@v2
       with:
         python-version: '3.8'
+
+    - name: Install dependencies
+      run: |
+        cp package_tools/ etebase_server/
+        pip install -r ./etebase_server/requirements.txt
+
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
 
     - name: Build using AppService-Build
       uses: azure/appservice-build@v2
