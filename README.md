@@ -28,8 +28,4 @@ console.log(etebase)
 ```
 
 
-
-
-
-
-Deploys to: http://glifftempdeploy3.westeurope.azurecontainer.io:8033/
+Deploys to: https://store.staging.gliff.app/
