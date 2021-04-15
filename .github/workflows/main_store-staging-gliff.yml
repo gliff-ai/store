@@ -17,11 +17,14 @@ jobs:
     - name: 'Checkout Github Action'
       uses: actions/checkout@master
       with:
-          submodules: true
+        submodules: true
 
     - name: Copy package tools
       run: |
+        ls
+        ls etebase_server
         cp -r package_tools/ etebase_server/
+        ls etebase_server
         cat etebase_server/setup.cfg
         cat etebase_server/setup.py
 
