@@ -26,7 +26,7 @@ jobs:
 
     - name: Install dependencies
       run: |
-        cp package_tools/ etebase_server/
+        cp -r package_tools/ etebase_server/
         pip install -r ./etebase_server/requirements.txt
 
         python -m pip install --upgrade pip
