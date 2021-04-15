@@ -20,7 +20,7 @@ pydantic==1.7.3
 PyNaCl==1.4.0
 python-dotenv==0.15.0
 pytz==2020.4
-PyYAML==5.3.1
+PyYAML==5.4
 six==1.15.0
 sqlparse==0.4.1
 starlette==0.13.6
