@@ -10,8 +10,10 @@ This is a Django app consisting of 3 parts:
 ## Setup
 
 ```bash
+git submodule init
+git submodule update
 cp -r package_tools/* etebase_server/
-pip install -r requirement.txt
+pip install -r requirements.txt
 rm -r etebase_server/myauth # we use our copy of this one level up
 ```
 
