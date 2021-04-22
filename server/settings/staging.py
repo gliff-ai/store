@@ -9,7 +9,6 @@ CORS_ALLOW_CREDENTIALS = True
 # CORS_ORIGIN_WHITELIST = config("CORS_ORIGIN_WHITELIST").split(",")
 
 
-
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
@@ -24,5 +23,5 @@ DATABASES = {
 STATIC_URL = "/static/"
 STATIC_ROOT = "/store_media/static"
 
-MEDIA_ROOT = os.environ.get("DJANGO_MEDIA_ROOT")
+MEDIA_ROOT = os.environ.get("DJANGO_MEDIA_ROOT", "/media/")
 MEDIA_URL = "/store_media/media"

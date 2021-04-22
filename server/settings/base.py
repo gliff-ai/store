@@ -117,5 +117,5 @@ MEDIA_URL = "/user-media/"
 
 
 # Efficient file streaming (for large files)
-SENDFILE_BACKEND = "etebase_fastapi.sendfile.backends.simple"
-SENDFILE_ROOT = MEDIA_ROOT
+# SENDFILE_BACKEND = "etebase_fastapi.sendfile.backends.simple"
+# SENDFILE_ROOT = MEDIA_ROOT
