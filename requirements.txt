@@ -1,3 +1,6 @@
 ./etebase_server
-uvicorn==0.13.2
+Django==3.1.4
+django-cors-headers==3.7.0
+fastapi==0.63.0
 psycopg2-binary==2.8.6
+uvicorn==0.13.2
