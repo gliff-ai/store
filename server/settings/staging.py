@@ -24,4 +24,4 @@ STATIC_URL = "/static/"
 STATIC_ROOT = "/store_media/static"
 
 MEDIA_ROOT = os.environ.get("DJANGO_MEDIA_ROOT", "/media/")
-MEDIA_URL = "/store_media/media"
+MEDIA_URL = "/store_media/media/"
