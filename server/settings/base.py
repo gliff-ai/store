@@ -48,8 +48,8 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
      "corsheaders",
     "myauth.apps.MyauthConfig",
-    "django_etebase.apps.DjangoEtebaseConfig",
-    "django_etebase.token_auth.apps.TokenAuthConfig",
+    # "django_etebase.apps.DjangoEtebaseConfig",
+    # "django_etebase.token_auth.apps.TokenAuthConfig",
 ]
 
 MIDDLEWARE = [

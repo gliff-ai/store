@@ -1,44 +1,53 @@
 import typing as t
 
-from django.contrib.auth.models import AbstractUser, UserManager as DjangoUserManager
-from django.core import validators
+from django.contrib.auth.models import AbstractUser
 from django.db import models
-from django.utils.deconstruct import deconstructible
 from django.utils.translation import gettext_lazy as _
+from django.contrib.auth.base_user import BaseUserManager
 
 
-@deconstructible
-class UnicodeUsernameValidator(validators.RegexValidator):
-    regex = r"^[\w.-]+\Z"
-    message = _("Enter a valid username. This value may contain only letters, " "numbers, and ./-/_ characters.")
-    flags = 0
+class UserManager(BaseUserManager):
+    """
+    Custom user model manager with email. We also have username to support etebase, BUT we set this to equal the email
+    and ignore whatever username was sent.
+    """
+    def create_user(self, username, email, **extra_fields):
+        """
+        Create and save a User with the given email and password.
+        """
+        if not email:
+            raise ValueError(_('The Email must be set'))
+        if not username:
+            raise ValueError(_('The Username must be set'))
 
+        user = self.model(email=self.normalize_email(email), username=email)
 
-class UserManager(DjangoUserManager):
-    def get_by_natural_key(self, username: str):
-        return self.get(**{self.model.USERNAME_FIELD + "__iexact": username})
+        user.set_unusable_password()  # They don't need a password as etebase will auth them
+
+        user.save()
+        return user
 
 
 class User(AbstractUser):
+    """
+    We remove the first and last name fields, as we store this info in the user profile
+    """
     id: int
-    username_validator = UnicodeUsernameValidator()
 
-    objects: UserManager = UserManager()
+    first_name = None
+    last_name = None
 
-    username = models.CharField(
-        _("username"),
-        max_length=150,
-        unique=True,
-        help_text=_("Required. 150 characters or fewer. Letters, digits and ./-/_ only."),
-        validators=[username_validator],
-        error_messages={
-            "unique": _("A user with that username already exists."),
-        },
-    )
+    email = models.EmailField(_('email address'), unique=True)
+    username = models.CharField(_('username'), max_length=150, unique=True)
 
-    @classmethod
-    def normalize_username(cls, username: str):
-        return super().normalize_username(username).lower()
+    USERNAME_FIELD = 'email'
+    EMAIL_FIELD = 'email'
+    REQUIRED_FIELDS = []
+
+    objects = UserManager()
+
+    def __str__(self):
+        return self.email
 
 
 UserType = User
