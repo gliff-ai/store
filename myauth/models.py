@@ -50,11 +50,19 @@ class User(AbstractUser):
         return self.email
 
 
+
+# Having this as a model lets us easily add and change tiers
+class Tier(models.Model):
+    id: int
+    name = models.CharField(max_length=50)
+
+
 class Team(models.Model):
     id: int
 
     # Protect means you can't delete an owner, remove the team first!
     owner = models.OneToOneField(User, on_delete=models.PROTECT)
+    tier = models.OneToOneField(Tier, on_delete=models.PROTECT)
 
 
 class UserProfile(models.Model):
@@ -66,13 +74,6 @@ class UserProfile(models.Model):
 
     def __str__(self):
         return self.user.email
-
-
-# Having this as a model lets us easily add and change tiers
-class Tier(models.Model):
-    id: int
-    name = models.CharField(max_length=50)
-    stripe_plan_id = models.CharField(max_length=25, blank=True, null=True, unique=True)  # This may not need to be defined here
 
 
 class Billing(models.Model):
