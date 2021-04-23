@@ -1,5 +1,5 @@
 from django.apps import AppConfig
 
 
-class MyauthConfig(AppConfig):
+class GliffAuthConfig(AppConfig):
     name = "myauth"
