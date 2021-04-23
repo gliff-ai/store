@@ -50,6 +50,47 @@ class User(AbstractUser):
         return self.email
 
 
+class Team(models.Model):
+    id: int
+
+    # Protect means you can't delete an owner, remove the team first!
+    owner = models.OneToOneField(User, on_delete=models.PROTECT)
+
+
+class UserProfile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    first_name = models.CharField(max_length=100)
+    last_name = models.CharField(max_length=100)
+    recovery_key = models.BinaryField(editable=True, blank=False, null=False) #  The users encrypted key
+    team = models.ForeignKey(Team, on_delete=models.RESTRICT)
+
+    def __str__(self):
+        return self.user.email
+
+
+# Having this as a model lets us easily add and change tiers
+class Tier(models.Model):
+    id: int
+    name = models.CharField(max_length=50)
+    stripe_plan_id = models.CharField(max_length=25, blank=True, null=True, unique=True)  # This may not need to be defined here
+
+
+class Billing(models.Model):
+    team = models.OneToOneField(Team, on_delete=models.CASCADE)
+
+    stripe_customer_id = models.CharField(max_length=255, unique=True)
+    stripe_plan_id = models.CharField(max_length=25, blank=True)
+    stripe_state = models.CharField(max_length=255)
+    setup_intent_id = models.CharField(max_length=255)
+    setup_intent_secret = models.CharField(max_length=255)
+    billing_email = models.CharField(max_length=255)
+    coupon = models.CharField(max_length=255, blank=True)
+    start_date = models.TimeField(blank=True, null=True)
+    renewal_date = models.TimeField( blank=True, null=True)
+    subscription_id = models.CharField(max_length=255, blank=True)
+    cancel_date = models.TimeField(blank=True, null=True)
+
+
 UserType = User
 
 
@@ -58,3 +99,4 @@ def get_typed_user_model() -> UserType:
 
     ret: t.Any = get_user_model()
     return ret
+
