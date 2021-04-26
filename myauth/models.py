@@ -9,6 +9,7 @@ from django.core.validators import RegexValidator
 UidValidator = RegexValidator(regex=r"^[a-zA-Z0-9\-_]{20,}$", message="Not a valid UID")
 
 
+        user = self.model(email=self.normalize_email(email), username=email)
 
 class UserManager(BaseUserManager):
     """
@@ -119,3 +120,4 @@ def get_typed_user_model() -> UserType:
 
     ret: t.Any = get_user_model()
     return ret
+
