@@ -120,4 +120,3 @@ def get_typed_user_model() -> UserType:
 
     ret: t.Any = get_user_model()
     return ret
-
