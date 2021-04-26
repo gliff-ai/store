@@ -13,18 +13,21 @@ class ApiKey(APIKeyHeader):
     param_name = "Authorization"
 
     def authenticate(self, request, key):
-        user = get_authenticated_user(key) # Validate with Etebase
+        user = get_authenticated_user(key)  # Validate with Etebase
         return user
+
 
 api = NinjaAPI(auth=ApiKey())
 
 TierSchema = create_schema(Tier)
+
 
 class UserProfileIn(Schema):
     first_name: str
     last_name: str
     team_id: int = None
     recovery_key: str = None
+
 
 class TeamSchema(Schema):
     id: int
@@ -71,9 +74,13 @@ def create_user(request, payload: UserProfileIn):
         # TODO  We need a way to check they have been invited to a team, otherwise you could join any team
         team = Team.objects.get(id=payload.team_id)
 
-    # TODO encrypt recovery key
-
-    UserProfile.objects.create(user_id=user.id, team_id=team.id, first_name=payload.first_name, last_name=payload.last_name)
+    UserProfile.objects.create(
+        user_id=user.id,
+        team_id=team.id,
+        first_name=payload.first_name,
+        last_name=payload.last_name,
+        recovery_key=payload.recovery_key,
+    )
 
     user.save()
     return user.userprofile
@@ -86,7 +93,7 @@ def get_user(request):
 
     return user.userprofile
 
-#
+
 @api.put("/user", response=UserProfileOut)  # Update a user profile
 def update_user(request, payload: UserProfileIn):
     user = request.auth

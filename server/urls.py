@@ -14,6 +14,7 @@ urlpatterns = [
     path("api/", api.urls),
 ]
 
+
 if settings.DEBUG:
 
     def serve_static(request, path):
