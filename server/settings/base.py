@@ -46,8 +46,8 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-     "corsheaders",
-    "myauth.apps.MyauthConfig",
+    "corsheaders",
+    "myauth.apps.GliffAuthConfig",
     "django_etebase.apps.DjangoEtebaseConfig",
     "django_etebase.token_auth.apps.TokenAuthConfig",
 ]
