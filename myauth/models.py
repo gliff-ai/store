@@ -99,5 +99,6 @@ def get_typed_user_model() -> UserType:
     from django.contrib.auth import get_user_model
 
     ret: t.Any = get_user_model()
+    print(ret)
     return ret
 
