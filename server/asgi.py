@@ -11,7 +11,6 @@ from etebase_fastapi.main import create_application
 from fastapi.middleware.wsgi import WSGIMiddleware
 from starlette.middleware.cors import CORSMiddleware
 
-from api.endpoints import api_router
 
 def get_application() -> FastAPI:
     etebase_app = create_application()
@@ -25,8 +24,10 @@ def get_application() -> FastAPI:
         allow_headers=["*"],
     )
 
-    app.include_router(api_router, prefix="/api")
+    # We mount Django (and the API, via urls.py) under /django
     app.mount("/django", WSGIMiddleware(get_wsgi_application()))
+
+    # All the etebase api routes are here
     app.mount("/etebase", etebase_app)
 
     return app
