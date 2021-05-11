@@ -6,7 +6,7 @@ import stripe
 from myauth.models import Tier
 from server.api.schemas import CheckoutSessionIn, CheckoutSessionOut, Error
 
-stripe.api_key = "dadsfsr"  # Temp
+stripe.api_key = ""  # Temp
 endpoint_secret = "whsec_bN6gqLZhC1MP0aFOkMj22i6QOsrivE6I"  # Temp
 
 router = Router()
