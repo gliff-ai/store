@@ -119,11 +119,15 @@ class Migration(migrations.Migration):
                 ),
                 ("name", models.CharField(max_length=50)),
                 (
-                    "stripe_product_id",
+                    "stripe_flat_price_id",
                     models.CharField(blank=True, max_length=25, null=True, unique=True),
                 ),
                 (
-                    "stripe_price_id",
+                    "stripe_storage_price_id",
+                    models.CharField(blank=True, max_length=25, null=True, unique=True),
+                ),
+                (
+                    "stripe_seat_price_id",
                     models.CharField(blank=True, max_length=25, null=True, unique=True),
                 ),
             ],
@@ -152,6 +156,10 @@ class Migration(migrations.Migration):
                     models.OneToOneField(
                         on_delete=django.db.models.deletion.PROTECT, to="myauth.tier"
                     ),
+                ),
+                (
+                    "usage",
+                    models.IntegerField(verbose_name="Storage usage in MB", null=True),
                 ),
             ],
         ),

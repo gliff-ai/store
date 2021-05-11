@@ -6,7 +6,7 @@ import stripe
 from myauth.models import Tier
 from server.api.schemas import CheckoutSessionIn, CheckoutSessionOut, Error
 
-stripe.api_key = ""  # Temp
+stripe.api_key = "sk_test_51IVYtvFauXVlvS5wsMnutkTK7FW4Zb8djXYDjWm4Z9diCdYTZVyLFXcSecQs4V3cdhLlY87iayGkNM8XwUCvjqkt00ZS7w5SzX"  # Temp
 endpoint_secret = "whsec_bN6gqLZhC1MP0aFOkMj22i6QOsrivE6I"  # Temp
 
 router = Router()
@@ -23,13 +23,18 @@ def create_checkout_session(request, payload: CheckoutSessionIn):
     user = request.auth
 
     try:
+        line_items = [{"price": tier.stripe_flat_price_id, "quantity": 1}]
+        if tier.stripe_storage_price_id is not None:
+            line_items.append({"price": tier.stripe_storage_price_id})
+
+        if tier.stripe_seat_price_id is not None:
+            line_items.append({"price": tier.stripe_seat_price_id})
+
         checkout_session = stripe.checkout.Session.create(
             payment_method_types=["card"],
             client_reference_id=user.id,
             customer_email=user.email,
-            line_items=[
-                {"price": tier.stripe_price_id},
-            ],
+            line_items=line_items,
             mode="subscription",
             success_url=YOUR_DOMAIN + "?paid=true",
             cancel_url=YOUR_DOMAIN + "?canceled=true",

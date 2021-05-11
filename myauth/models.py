@@ -56,10 +56,13 @@ class User(AbstractUser):
 class Tier(models.Model):
     id: int
     name = models.CharField(max_length=50)
-    stripe_product_id = models.CharField(
+    stripe_flat_price_id = models.CharField(
         blank=True, max_length=25, null=True, unique=True
     )
-    stripe_price_id = models.CharField(
+    stripe_storage_price_id = models.CharField(
+        blank=True, max_length=25, null=True, unique=True
+    )
+    stripe_seat_price_id = models.CharField(
         blank=True, max_length=25, null=True, unique=True
     )
 
@@ -70,6 +73,7 @@ class Team(models.Model):
     # Protect means you can't delete an owner, remove the team first!
     owner = models.OneToOneField(User, on_delete=models.PROTECT)
     tier = models.OneToOneField(Tier, on_delete=models.PROTECT)
+    usage = models.IntegerField(verbose_name="Storage usage in MB", null=True)
 
 
 class UserProfile(models.Model):
