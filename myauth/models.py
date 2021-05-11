@@ -56,6 +56,12 @@ class User(AbstractUser):
 class Tier(models.Model):
     id: int
     name = models.CharField(max_length=50)
+    stripe_product_id = models.CharField(
+        blank=True, max_length=25, null=True, unique=True
+    )
+    stripe_price_id = models.CharField(
+        blank=True, max_length=25, null=True, unique=True
+    )
 
 
 class Team(models.Model):

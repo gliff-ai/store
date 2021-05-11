@@ -27,3 +27,11 @@ class UserProfileOut(Schema):
     first_name: str
     last_name: str
     team: TeamSchema
+
+
+class CheckoutSessionIn(Schema):
+    tier_id: int
+
+
+class CheckoutSessionOut(Schema):
+    id: str

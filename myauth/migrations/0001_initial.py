@@ -11,72 +11,202 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('auth', '0012_alter_user_first_name_max_length'),
+        ("auth", "0012_alter_user_first_name_max_length"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='User',
+            name="User",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('password', models.CharField(max_length=128, verbose_name='password')),
-                ('last_login', models.DateTimeField(blank=True, null=True, verbose_name='last login')),
-                ('is_superuser', models.BooleanField(default=False, help_text='Designates that this user has all permissions without explicitly assigning them.', verbose_name='superuser status')),
-                ('is_staff', models.BooleanField(default=False, help_text='Designates whether the user can log into this admin site.', verbose_name='staff status')),
-                ('is_active', models.BooleanField(default=True, help_text='Designates whether this user should be treated as active. Unselect this instead of deleting accounts.', verbose_name='active')),
-                ('date_joined', models.DateTimeField(default=django.utils.timezone.now, verbose_name='date joined')),
-                ('email', models.EmailField(max_length=254, unique=True, verbose_name='email address')),
-                ('username', models.CharField(max_length=150, unique=True, verbose_name='username')),
-                ('groups', models.ManyToManyField(blank=True, help_text='The groups this user belongs to. A user will get all permissions granted to each of their groups.', related_name='user_set', related_query_name='user', to='auth.Group', verbose_name='groups')),
-                ('user_permissions', models.ManyToManyField(blank=True, help_text='Specific permissions for this user.', related_name='user_set', related_query_name='user', to='auth.Permission', verbose_name='user permissions')),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("password", models.CharField(max_length=128, verbose_name="password")),
+                (
+                    "last_login",
+                    models.DateTimeField(
+                        blank=True, null=True, verbose_name="last login"
+                    ),
+                ),
+                (
+                    "is_superuser",
+                    models.BooleanField(
+                        default=False,
+                        help_text="Designates that this user has all permissions without explicitly assigning them.",
+                        verbose_name="superuser status",
+                    ),
+                ),
+                (
+                    "is_staff",
+                    models.BooleanField(
+                        default=False,
+                        help_text="Designates whether the user can log into this admin site.",
+                        verbose_name="staff status",
+                    ),
+                ),
+                (
+                    "is_active",
+                    models.BooleanField(
+                        default=True,
+                        help_text="Designates whether this user should be treated as active. Unselect this instead of deleting accounts.",
+                        verbose_name="active",
+                    ),
+                ),
+                (
+                    "date_joined",
+                    models.DateTimeField(
+                        default=django.utils.timezone.now, verbose_name="date joined"
+                    ),
+                ),
+                (
+                    "email",
+                    models.EmailField(
+                        max_length=254, unique=True, verbose_name="email address"
+                    ),
+                ),
+                (
+                    "username",
+                    models.CharField(
+                        max_length=150, unique=True, verbose_name="username"
+                    ),
+                ),
+                (
+                    "groups",
+                    models.ManyToManyField(
+                        blank=True,
+                        help_text="The groups this user belongs to. A user will get all permissions granted to each of their groups.",
+                        related_name="user_set",
+                        related_query_name="user",
+                        to="auth.Group",
+                        verbose_name="groups",
+                    ),
+                ),
+                (
+                    "user_permissions",
+                    models.ManyToManyField(
+                        blank=True,
+                        help_text="Specific permissions for this user.",
+                        related_name="user_set",
+                        related_query_name="user",
+                        to="auth.Permission",
+                        verbose_name="user permissions",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'user',
-                'verbose_name_plural': 'users',
-                'abstract': False,
+                "verbose_name": "user",
+                "verbose_name_plural": "users",
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='Tier',
+            name="Tier",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=50)),
-                ('stripe_plan_id', models.CharField(blank=True, max_length=25, null=True, unique=True)),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(max_length=50)),
+                (
+                    "stripe_product_id",
+                    models.CharField(blank=True, max_length=25, null=True, unique=True),
+                ),
+                (
+                    "stripe_price_id",
+                    models.CharField(blank=True, max_length=25, null=True, unique=True),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='Team',
+            name="Team",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('owner', models.OneToOneField(on_delete=django.db.models.deletion.PROTECT, to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "owner",
+                    models.OneToOneField(
+                        on_delete=django.db.models.deletion.PROTECT,
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
+                (
+                    "tier",
+                    models.OneToOneField(
+                        on_delete=django.db.models.deletion.PROTECT, to="myauth.tier"
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='Billing',
+            name="Billing",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('stripe_customer_id', models.CharField(max_length=255, unique=True)),
-                ('stripe_plan_id', models.CharField(blank=True, max_length=25)),
-                ('stripe_state', models.CharField(max_length=255)),
-                ('setup_intent_id', models.CharField(max_length=255)),
-                ('setup_intent_secret', models.CharField(max_length=255)),
-                ('billing_email', models.CharField(max_length=255)),
-                ('coupon', models.CharField(blank=True, max_length=255)),
-                ('start_date', models.TimeField(blank=True, null=True)),
-                ('renewal_date', models.TimeField(blank=True, null=True)),
-                ('subscription_id', models.CharField(blank=True, max_length=255)),
-                ('cancel_date', models.TimeField(blank=True, null=True)),
-                ('team', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, to='myauth.team')),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("stripe_customer_id", models.CharField(max_length=255, unique=True)),
+                ("stripe_plan_id", models.CharField(blank=True, max_length=25)),
+                ("stripe_state", models.CharField(max_length=255)),
+                ("setup_intent_id", models.CharField(max_length=255)),
+                ("setup_intent_secret", models.CharField(max_length=255)),
+                ("billing_email", models.CharField(max_length=255)),
+                ("coupon", models.CharField(blank=True, max_length=255)),
+                ("start_date", models.TimeField(blank=True, null=True)),
+                ("renewal_date", models.TimeField(blank=True, null=True)),
+                ("subscription_id", models.CharField(blank=True, max_length=255)),
+                ("cancel_date", models.TimeField(blank=True, null=True)),
+                (
+                    "team",
+                    models.OneToOneField(
+                        on_delete=django.db.models.deletion.CASCADE, to="myauth.team"
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='UserProfile',
+            name="UserProfile",
             fields=[
-                ('user', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, primary_key=True, serialize=False, to='myauth.user')),
-                ('first_name', models.CharField(max_length=100)),
-                ('last_name', models.CharField(max_length=100)),
-                ('recovery_key', models.BinaryField(editable=True)),
-                ('team', models.ForeignKey(on_delete=django.db.models.deletion.RESTRICT, to='myauth.team')),
+                (
+                    "user",
+                    models.OneToOneField(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        primary_key=True,
+                        serialize=False,
+                        to="myauth.user",
+                    ),
+                ),
+                ("first_name", models.CharField(max_length=100)),
+                ("last_name", models.CharField(max_length=100)),
+                ("recovery_key", models.BinaryField(editable=True)),
+                (
+                    "team",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.RESTRICT, to="myauth.team"
+                    ),
+                ),
             ],
         ),
     ]
