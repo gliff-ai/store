@@ -116,8 +116,3 @@ STATIC_ROOT = os.environ.get("DJANGO_STATIC_ROOT")
 
 MEDIA_ROOT = os.environ.get("DJANGO_MEDIA_ROOT", os.path.join(BASE_DIR, "../", "media"))
 MEDIA_URL = "/user-media/"
-
-
-# Efficient file streaming (for large files)
-# SENDFILE_BACKEND = "etebase_fastapi.sendfile.backends.simple"
-# SENDFILE_ROOT = MEDIA_ROOT
