@@ -5,7 +5,6 @@ These can be used locally, and are extended for deployment (and then selected by
 """
 
 import os
-
 from django.core.exceptions import ImproperlyConfigured
 
 
