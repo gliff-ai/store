@@ -12,8 +12,6 @@ endpoint_secret = settings.STRIPE_WEBHOOK_SECRET
 
 router = Router()
 
-YOUR_DOMAIN = "http://localhost:3000/signup"
-
 
 @router.post(
     "/create-checkout-session",
@@ -48,8 +46,8 @@ def create_checkout_session(request, payload: CheckoutSessionIn):
             customer_email=user.email,
             line_items=line_items,
             mode="subscription",
-            success_url=YOUR_DOMAIN + "?paid=true",
-            cancel_url=YOUR_DOMAIN + "?canceled=true",
+            success_url=settings.SUCCESS_URL,
+            cancel_url=settings.CANCEL_URL,
             metadata={"tier_id": tier.id, "tier_name": tier.name, "team_id": team.id},
         )
         return {"id": checkout_session.id}
