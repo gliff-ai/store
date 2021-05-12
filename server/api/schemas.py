@@ -10,10 +10,9 @@ class Error(Schema):
 
 
 class UserProfileIn(Schema):
-    first_name: str
-    last_name: str
+    name: str
     team_id: int = None
-    recovery_key: str = None
+    recovery_key: str = "TEMP"
 
 
 class TeamSchema(Schema):
@@ -24,8 +23,7 @@ class TeamSchema(Schema):
 
 class UserProfileOut(Schema):
     id: int
-    first_name: str
-    last_name: str
+    name: str
     team: TeamSchema
 
 

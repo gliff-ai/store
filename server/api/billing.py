@@ -1,13 +1,14 @@
+from datetime import datetime, timezone
+from django.conf import settings
+
 from ninja import Router
 import stripe
 
-# from pydantic import typing
-
-from myauth.models import Tier
+from myauth.models import Tier, Team, Billing
 from server.api.schemas import CheckoutSessionIn, CheckoutSessionOut, Error
 
-stripe.api_key = "sk_test_51IVYtvFauXVlvS5wsMnutkTK7FW4Zb8djXYDjWm4Z9diCdYTZVyLFXcSecQs4V3cdhLlY87iayGkNM8XwUCvjqkt00ZS7w5SzX"  # Temp
-endpoint_secret = "whsec_bN6gqLZhC1MP0aFOkMj22i6QOsrivE6I"  # Temp
+stripe.api_key = settings.STRIPE_SECRET_KEY
+endpoint_secret = settings.STRIPE_WEBHOOK_SECRET
 
 router = Router()
 
@@ -16,28 +17,40 @@ YOUR_DOMAIN = "http://localhost:3000/signup"
 
 @router.post(
     "/create-checkout-session",
-    response={200: CheckoutSessionOut, 409: Error},
+    response={200: CheckoutSessionOut, 403: Error, 409: Error},
 )
 def create_checkout_session(request, payload: CheckoutSessionIn):
-    tier = Tier.objects.get(id__exact=payload.tier_id)
-    user = request.auth
-
     try:
+        user = request.auth
+        tier = Tier.objects.get(id__exact=payload.tier_id)
+        team = Team.objects.get(owner_id=user.id)
+
+        # This is a free plan, no need to bill them
+        if tier.stripe_flat_price_id is None:
+            print("we shouldn't create_checkout_session for a free plan?!")
+            return 409, {"message": "Can't pay for a free tier"}
+
+        # By default, just charge the flat rate
         line_items = [{"price": tier.stripe_flat_price_id, "quantity": 1}]
+
+        # We can also add a Storage price
         if tier.stripe_storage_price_id is not None:
             line_items.append({"price": tier.stripe_storage_price_id})
 
+        # And seats
         if tier.stripe_seat_price_id is not None:
             line_items.append({"price": tier.stripe_seat_price_id})
 
         checkout_session = stripe.checkout.Session.create(
             payment_method_types=["card"],
             client_reference_id=user.id,
+            # We may want different billing emails later, but this is fine for now
             customer_email=user.email,
             line_items=line_items,
             mode="subscription",
             success_url=YOUR_DOMAIN + "?paid=true",
             cancel_url=YOUR_DOMAIN + "?canceled=true",
+            metadata={"tier_id": tier.id, "tier_name": tier.name, "team_id": team.id},
         )
         return {"id": checkout_session.id}
     except Exception as e:
@@ -66,14 +79,40 @@ def stripe_webhook(request):
         # Invalid signature
         return 400, {"message": "Invalid Signature"}
 
-    print("Got valid webhook")
-    print(event)
-    # Handle the checkout.session.completed event
+    # Handle them completing checkout. Add the billling info and update the tier
     if event["type"] == "checkout.session.completed":
         session = event["data"]["object"]
 
         # Fulfill the purchase...
-        print(session)
+        complete_payment(session)
 
-    # Passed signature verification
+    # if event["type"] == "": TODO Handle invoice payments to update expiry date
+
     return 200
+
+
+def complete_payment(session):
+    try:
+        print(session)  # Log properly
+
+        subscription = stripe.Subscription.retrieve(session["subscription"])
+        metatdata = session["metadata"]
+
+        billing = Billing.objects.create(
+            stripe_customer_id=subscription["customer"],
+            start_date=datetime.fromtimestamp(
+                subscription["current_period_start"], timezone.utc
+            ),
+            renewal_date=datetime.fromtimestamp(
+                subscription["current_period_end"], timezone.utc
+            ),
+            team_id=metatdata.team_id,
+            subscription_id=subscription["id"],
+        )
+
+        billing.save()
+
+        return True
+    except Exception as e:
+        print(e)
+        return False

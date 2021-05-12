@@ -72,14 +72,13 @@ class Team(models.Model):
 
     # Protect means you can't delete an owner, remove the team first!
     owner = models.OneToOneField(User, on_delete=models.PROTECT)
-    tier = models.OneToOneField(Tier, on_delete=models.PROTECT)
+    tier = models.ForeignKey(Tier, on_delete=models.PROTECT)
     usage = models.IntegerField(verbose_name="Storage usage in MB", null=True)
 
 
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
-    first_name = models.CharField(max_length=100)
-    last_name = models.CharField(max_length=100)
+    name = models.CharField(max_length=200)
     recovery_key = models.BinaryField(
         editable=True, blank=False, null=False
     )  #  The users encrypted key
@@ -93,14 +92,8 @@ class Billing(models.Model):
     team = models.OneToOneField(Team, on_delete=models.CASCADE)
 
     stripe_customer_id = models.CharField(max_length=255, unique=True)
-    stripe_plan_id = models.CharField(max_length=25, blank=True)
-    stripe_state = models.CharField(max_length=255)
-    setup_intent_id = models.CharField(max_length=255)
-    setup_intent_secret = models.CharField(max_length=255)
-    billing_email = models.CharField(max_length=255)
-    coupon = models.CharField(max_length=255, blank=True)
-    start_date = models.TimeField(blank=True, null=True)
-    renewal_date = models.TimeField(blank=True, null=True)
+    start_date = models.DateTimeField(blank=True, null=True)
+    renewal_date = models.DateTimeField(blank=True, null=True)
     subscription_id = models.CharField(max_length=255, blank=True)
     cancel_date = models.TimeField(blank=True, null=True)
 

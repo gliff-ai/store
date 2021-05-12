@@ -1,7 +1,6 @@
 from .base import *
 
-SECRET_KEY = get_env_value('SECRET_KEY')
-
+SECRET_KEY = get_env_value("SECRET_KEY")
 
 # TODO:
 CORS_ORIGIN_ALLOW_ALL = True
@@ -9,13 +8,13 @@ CORS_ALLOW_CREDENTIALS = True
 # CORS_ORIGIN_WHITELIST = config("CORS_ORIGIN_WHITELIST").split(",")
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': get_env_value('POSTGRES_DATABASE'),
-        'HOST': get_env_value('POSTGRES_HOST'),
-        'PASSWORD': get_env_value('POSTGRES_PASSWORD'),
-        'USER': get_env_value('POSTGRES_USER'),
-        'PORT': 5432,
+    "default": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": get_env_value("POSTGRES_DATABASE"),
+        "HOST": get_env_value("POSTGRES_HOST"),
+        "PASSWORD": get_env_value("POSTGRES_PASSWORD"),
+        "USER": get_env_value("POSTGRES_USER"),
+        "PORT": 5432,
     }
 }
 

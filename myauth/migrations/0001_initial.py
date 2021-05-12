@@ -153,7 +153,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "tier",
-                    models.OneToOneField(
+                    models.ForeignKey(
                         on_delete=django.db.models.deletion.PROTECT, to="myauth.tier"
                     ),
                 ),
@@ -176,16 +176,10 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 ("stripe_customer_id", models.CharField(max_length=255, unique=True)),
-                ("stripe_plan_id", models.CharField(blank=True, max_length=25)),
-                ("stripe_state", models.CharField(max_length=255)),
-                ("setup_intent_id", models.CharField(max_length=255)),
-                ("setup_intent_secret", models.CharField(max_length=255)),
-                ("billing_email", models.CharField(max_length=255)),
-                ("coupon", models.CharField(blank=True, max_length=255)),
-                ("start_date", models.TimeField(blank=True, null=True)),
-                ("renewal_date", models.TimeField(blank=True, null=True)),
+                ("start_date", models.DateTimeField(blank=True, null=True)),
+                ("renewal_date", models.DateTimeField(blank=True, null=True)),
                 ("subscription_id", models.CharField(blank=True, max_length=255)),
-                ("cancel_date", models.TimeField(blank=True, null=True)),
+                ("cancel_date", models.DateTimeField(blank=True, null=True)),
                 (
                     "team",
                     models.OneToOneField(
@@ -206,8 +200,7 @@ class Migration(migrations.Migration):
                         to="myauth.user",
                     ),
                 ),
-                ("first_name", models.CharField(max_length=100)),
-                ("last_name", models.CharField(max_length=100)),
+                ("name", models.CharField(max_length=200)),
                 ("recovery_key", models.BinaryField(editable=True)),
                 (
                     "team",

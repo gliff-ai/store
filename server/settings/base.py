@@ -117,6 +117,9 @@ STATIC_ROOT = os.environ.get("DJANGO_STATIC_ROOT")
 MEDIA_ROOT = os.environ.get("DJANGO_MEDIA_ROOT", os.path.join(BASE_DIR, "../", "media"))
 MEDIA_URL = "/user-media/"
 
+STRIPE_SECRET_KEY = get_env_value("STRIPE_SECRET_KEY")
+STRIPE_WEBHOOK_SECRET = get_env_value("STRIPE_WEBHOOK_SECRET")
+
 
 # Efficient file streaming (for large files)
 # SENDFILE_BACKEND = "etebase_fastapi.sendfile.backends.simple"
