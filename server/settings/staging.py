@@ -21,5 +21,10 @@ DATABASES = {
 STATIC_URL = "/static/"
 STATIC_ROOT = "/store_media/static"
 
-MEDIA_ROOT = os.environ.get("DJANGO_MEDIA_ROOT", "/media/")
-MEDIA_URL = "/store_media/media/"
+DEFAULT_FILE_STORAGE = "storages.backends.azure_storage.AzureStorage"
+
+AZURE_ACCOUNT_NAME = "staginggliff"
+AZURE_CONTAINER = "store-staging-media"
+AZURE_ACCOUNT_KEY = get_env_value("AZURE_ACCOUNT_KEY")
+AZURE_URL_EXPIRATION_SECS = 300
+
