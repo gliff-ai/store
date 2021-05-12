@@ -5,12 +5,14 @@ These can be used locally, and are extended for deployment (and then selected by
 """
 
 import os
+from decouple import config
 from django.core.exceptions import ImproperlyConfigured
 
 
+# Use this if you want to enforce an env var being set. If you want a default, just use decouple directly
 def get_env_value(env_variable):
     try:
-        return os.environ[env_variable]
+        return config(env_variable)
     except KeyError:
         error_msg = "Set the {} environment variable".format(env_variable)
         raise ImproperlyConfigured(error_msg)
