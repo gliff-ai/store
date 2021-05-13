@@ -22,16 +22,15 @@ def create_user(request, payload: UserProfileIn):
         # TODO  We need a way to check they have been invited to a team, otherwise you could join any team
         team = Team.objects.get(id=payload.team_id)
 
-    UserProfile.objects.create(
+    user_profile = UserProfile.objects.create(
         user_id=user.id,
         team_id=team.id,
-        first_name=payload.first_name,
-        last_name=payload.last_name,
-        recovery_key=payload.recovery_key,
+        name=payload.name,
+        recovery_key=payload.recovery_key.encode(),
     )
 
     user.save()
-    return user.userprofile
+    return user_profile
 
 
 @router.get("/", response=UserProfileOut)

@@ -2,7 +2,6 @@ from .base import *
 
 SECRET_KEY = get_env_value("SECRET_KEY")
 
-
 # TODO:
 CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOW_CREDENTIALS = True
@@ -28,3 +27,6 @@ AZURE_ACCOUNT_NAME = "staginggliff"
 AZURE_CONTAINER = "store-staging-media"
 AZURE_ACCOUNT_KEY = get_env_value("AZURE_ACCOUNT_KEY")
 AZURE_URL_EXPIRATION_SECS = 300
+
+SUCCESS_URL = "https://staging.gliff.app/signup/success"
+CANCEL_URL = "https://staging.gliff.app/signup/cancel"

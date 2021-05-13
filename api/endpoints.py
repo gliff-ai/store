@@ -6,14 +6,21 @@ from etebase_fastapi.dependencies import get_authenticated_user
 from server.api.user import router as users_router
 from server.api.tier import router as tiers_router
 from server.api.team import router as teams_router
+from server.api.billing import router as billing_router
 
 
 class ApiKey(APIKeyHeader):
     param_name = "Authorization"
 
     def authenticate(self, request, key):
-        user = get_authenticated_user(key)  # Validate with Etebase
-        return user
+        try:
+            if key is None:
+                return False
+
+            user = get_authenticated_user(key)  # Validate with Etebase
+            return user
+        except Exception as e:
+            return False
 
 
 api = NinjaAPI(auth=ApiKey())
@@ -27,3 +34,4 @@ def healthcheck(request):
 api.add_router("/tier", tiers_router)
 api.add_router("/user", users_router)
 api.add_router("/team", teams_router)
+api.add_router("/billing", billing_router)

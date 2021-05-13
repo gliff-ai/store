@@ -5,13 +5,14 @@ These can be used locally, and are extended for deployment (and then selected by
 """
 
 import os
-
+from decouple import config
 from django.core.exceptions import ImproperlyConfigured
 
 
+# Use this if you want to enforce an env var being set. If you want a default, just use decouple directly
 def get_env_value(env_variable):
     try:
-        return os.environ[env_variable]
+        return config(env_variable)
     except KeyError:
         error_msg = "Set the {} environment variable".format(env_variable)
         raise ImproperlyConfigured(error_msg)
@@ -116,3 +117,10 @@ STATIC_ROOT = os.environ.get("DJANGO_STATIC_ROOT")
 
 MEDIA_ROOT = os.environ.get("DJANGO_MEDIA_ROOT", os.path.join(BASE_DIR, "../", "media"))
 MEDIA_URL = "/user-media/"
+
+
+STRIPE_SECRET_KEY = get_env_value("STRIPE_SECRET_KEY")
+STRIPE_WEBHOOK_SECRET = get_env_value("STRIPE_WEBHOOK_SECRET")
+
+SUCCESS_URL = config("SUCCESS_URL", default="http://localhost:3000/signup/success")
+CANCEL_URL = config("CANCEL_URL", default="http://localhost:3000/signup/cancel")
