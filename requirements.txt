@@ -2,7 +2,7 @@
 Django==3.1.4
 django-cors-headers==3.7.0
 django-ninja==0.12.2
-django-storages==1.11.1
+django-storages[azure]==1.11.1
 psycopg2-binary==2.8.6
 python-decouple==3.4
 stripe==2.56.0
