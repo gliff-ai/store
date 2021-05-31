@@ -1,12 +1,13 @@
 # Docs for the Azure Web Apps Deploy action: https://go.microsoft.com/fwlink/?linkid=2134798
 # More GitHub Actions for Azure: https://go.microsoft.com/fwlink/?linkid=2135048
 
-name: Azure App Service - store-staging-gliff(Production), Build and deploy Python app
+name: Azure App Service - store-staging-gliff, Build and deploy Python app
 
 on:
   push:
     branches:
       - staging
+      - az_storage # Temp to make life easier!
 
 jobs:
   build-and-deploy:
@@ -21,7 +22,7 @@ jobs:
 
     - name: Copy package tools
       run: |
-        cp -r package_tools/* etebase_server/
+        cp -r package_tools/* etebase-server/
 
     - name: Build using AppService-Build
       uses: azure/appservice-build@v2
