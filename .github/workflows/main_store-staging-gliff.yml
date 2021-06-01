@@ -7,7 +7,6 @@ on:
   push:
     branches:
       - staging
-      - az_storage # Temp to make life easier!
 
 jobs:
   build-and-deploy:
