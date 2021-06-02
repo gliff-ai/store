@@ -1,4 +1,4 @@
-./etebase_server
+./etebase-server
 Django==3.1.4
 django-cors-headers==3.7.0
 django-ninja==0.12.2
