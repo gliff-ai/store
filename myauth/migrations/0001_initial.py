@@ -120,15 +120,15 @@ class Migration(migrations.Migration):
                 ("name", models.CharField(max_length=50)),
                 (
                     "stripe_flat_price_id",
-                    models.CharField(blank=True, max_length=25, null=True, unique=True),
+                    models.CharField(blank=True, max_length=50, null=True, unique=True),
                 ),
                 (
                     "stripe_storage_price_id",
-                    models.CharField(blank=True, max_length=25, null=True, unique=True),
+                    models.CharField(blank=True, max_length=50, null=True, unique=True),
                 ),
                 (
                     "stripe_seat_price_id",
-                    models.CharField(blank=True, max_length=25, null=True, unique=True),
+                    models.CharField(blank=True, max_length=50, null=True, unique=True),
                 ),
             ],
         ),

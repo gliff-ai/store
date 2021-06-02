@@ -57,13 +57,13 @@ class Tier(models.Model):
     id: int
     name = models.CharField(max_length=50)
     stripe_flat_price_id = models.CharField(
-        blank=True, max_length=25, null=True, unique=True
+        blank=True, max_length=50, null=True, unique=True
     )
     stripe_storage_price_id = models.CharField(
-        blank=True, max_length=25, null=True, unique=True
+        blank=True, max_length=50, null=True, unique=True
     )
     stripe_seat_price_id = models.CharField(
-        blank=True, max_length=25, null=True, unique=True
+        blank=True, max_length=50, null=True, unique=True
     )
 
 
@@ -95,7 +95,7 @@ class Billing(models.Model):
     start_date = models.DateTimeField(blank=True, null=True)
     renewal_date = models.DateTimeField(blank=True, null=True)
     subscription_id = models.CharField(max_length=255, blank=True)
-    cancel_date = models.TimeField(blank=True, null=True)
+    cancel_date = models.DateTimeField(blank=True, null=True)
 
 
 UserType = User
