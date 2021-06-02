@@ -26,6 +26,7 @@ jobs:
     - name: Build using AppService-Build
       uses: azure/appservice-build@v2
 
+
     - name: Run Azure webapp deploy action using publish profile credentials
       uses: azure/webapps-deploy@v2
       with:
