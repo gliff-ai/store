@@ -12,9 +12,9 @@ This is a Django app consisting of 3 parts:
 ```bash
 git submodule init
 git submodule update
-cp -r package_tools/* etebase_server/
+cp -r package_tools/* etebase-server/
 pip install -r requirements.txt
-rm -r etebase_server/myauth # we use our copy of this one level up
+rm -r etebase-server/myauth # we use our copy of this one level up
 ```
 
 ## Running
@@ -62,4 +62,4 @@ There's also a Docker image if preferred.
 ## Deploying
 
 Staging deploys to: https://store.staging.gliff.app/
-Production TBD
+Production https://store.gliff.app/
