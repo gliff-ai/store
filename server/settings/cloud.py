@@ -17,6 +17,7 @@ DATABASES = {
         "PASSWORD": get_env_value("POSTGRES_PASSWORD"),
         "USER": get_env_value("POSTGRES_USER"),
         "PORT": 5432,
+        "OPTIONS": {"ssl": {"ca": "/store_media/cert/BaltimoreCyberTrustRoot.crt.pem"}},
     }
 }
 
