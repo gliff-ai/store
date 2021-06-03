@@ -28,6 +28,7 @@ SECRET_KEY = "VERYVERYVERYVERYVERYVERYSECRETKEY"
 DEBUG = True
 ALLOWED_HOSTS = ["*"]
 
+
 CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOW_CREDENTIALS = True
 # CORS_ORIGIN_WHITELIST = config("CORS_ORIGIN_WHITELIST").split(",")
@@ -118,9 +119,9 @@ STATIC_ROOT = os.environ.get("DJANGO_STATIC_ROOT")
 MEDIA_ROOT = os.environ.get("DJANGO_MEDIA_ROOT", os.path.join(BASE_DIR, "../", "media"))
 MEDIA_URL = "/user-media/"
 
-
 STRIPE_SECRET_KEY = get_env_value("STRIPE_SECRET_KEY")
 STRIPE_WEBHOOK_SECRET = get_env_value("STRIPE_WEBHOOK_SECRET")
 
 SUCCESS_URL = config("SUCCESS_URL", default="http://localhost:3000/signup/success")
 CANCEL_URL = config("CANCEL_URL", default="http://localhost:3000/signup/cancel")
+
