@@ -1,4 +1,4 @@
-from .base import *
+from .cloud import *
 
 AZURE_ACCOUNT_NAME = "staginggliff"
 AZURE_CONTAINER = "store-staging-media"
