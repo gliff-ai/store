@@ -1,7 +1,19 @@
+from uuid import uuid4
+from datetime import datetime, timezone
+
+from django.core.exceptions import ObjectDoesNotExist
+from django.db import IntegrityError
 from ninja import Router
 
-from myauth.models import UserProfile, Tier, Team
-from .schemas import UserProfileIn, UserProfileOut, Error
+from myauth.models import UserProfile, Tier, Team, Invite
+from .schemas import (
+    UserProfileIn,
+    UserProfileOut,
+    Error,
+    InviteCreated,
+    CreateInvite,
+    InviteOut,
+)
 
 router = Router()
 
@@ -19,8 +31,15 @@ def create_user(request, payload: UserProfileIn):
         tier = Tier.objects.get(name__exact="COMMUNITY")
         team = Team.objects.create(owner_id=user.id, tier_id=tier.id)
     else:
-        # TODO  We need a way to check they have been invited to a team, otherwise you could join any team
-        team = Team.objects.get(id=payload.team_id)
+        try:
+            invite = Invite.objects.get(
+                from_team=payload.team_id, uid=payload.invite_id, email=user.email
+            )
+            invite.accepted_date = datetime.now(tz=timezone.utc)
+            invite.save()
+
+        except ObjectDoesNotExist as e:
+            return 409, {"message": "Invalid invitation"}
 
     user_profile = UserProfile.objects.create(
         user_id=user.id,
@@ -54,3 +73,40 @@ def update_user(request, payload: UserProfileIn):
 
     user.userprofile.id = user.id
     return user.userprofile
+
+
+@router.post("/invite", response={200: InviteCreated, 409: Error, 500: Error})
+def create_invite(request, payload: CreateInvite):
+    try:
+        uid = uuid4()
+        user = request.auth
+        team = Team.objects.get(owner_id=user.id)
+
+        invite = Invite.objects.create(
+            uid=id, email=payload.email, from_team_id=team.id
+        )
+
+        invite.save()
+
+        # TODO email the invite!
+
+        return 200, {"id": uid}
+
+    except IntegrityError as e:
+        return 409, {"message": "user is already invited to a team"}
+
+    except Exception as e:
+        return 500, {"message": "unknown error"}  # 500?
+
+
+@router.get("/invite", auth=None, response={200: InviteOut, 404: None})
+def accept_invite(request, invite_id: str):
+    try:
+        invite = Invite.objects.get(uid=invite_id)
+    except ObjectDoesNotExist as e:
+        return 404, None
+
+    if invite.accepted_date is not None:
+        return 500
+
+    return 200, {"email": invite.email, "team_id": invite.from_team.id}

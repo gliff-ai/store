@@ -4,6 +4,9 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.base_user import BaseUserManager
+from django.core.validators import RegexValidator
+
+UidValidator = RegexValidator(regex=r"^[a-zA-Z0-9\-_]{20,}$", message="Not a valid UID")
 
 
 class UserManager(BaseUserManager):
@@ -96,6 +99,16 @@ class Billing(models.Model):
     renewal_date = models.DateTimeField(blank=True, null=True)
     subscription_id = models.CharField(max_length=255, blank=True)
     cancel_date = models.DateTimeField(blank=True, null=True)
+
+
+class Invite(models.Model):
+    uid = models.CharField(
+        db_index=True, blank=False, null=False, max_length=43, validators=[UidValidator]
+    )
+    from_team = models.OneToOneField(Team, on_delete=models.CASCADE)
+    email = models.EmailField(_("email address"), unique=True)
+    sent_date = models.DateTimeField(auto_now_add=True, blank=False, null=False)
+    accepted_date = models.DateTimeField(blank=True, null=True)
 
 
 UserType = User
