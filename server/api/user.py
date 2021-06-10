@@ -2,10 +2,13 @@ from uuid import uuid4
 from datetime import datetime, timezone
 
 from django.core.exceptions import ObjectDoesNotExist
-from django.db import IntegrityError
+from django.db import IntegrityError, transaction
+from django_etebase.models import Collection, CollectionInvitation
+from etebase_fastapi.routers.invitation import CollectionInvitationIn
+from etebase_fastapi.utils import get_object_or_404, Context
 from ninja import Router
 
-from myauth.models import UserProfile, Tier, Team, Invite
+from myauth.models import UserProfile, Tier, Team, Invite, User
 from .schemas import (
     UserProfileIn,
     UserProfileOut,
@@ -16,6 +19,46 @@ from .schemas import (
 )
 
 router = Router()
+
+
+def create_outgoing_etebase_invite(from_team, to_user):
+    to_user = User.objects.get(id=to_user)
+
+    from_user = User.objects.get(team__id=from_team)
+
+    # TODO invite to ALL collections
+    collection = Collection.objects.all().filter(owner_id=from_user.id)
+
+    # This is what etebase would expect in the request
+    data: CollectionInvitationIn = CollectionInvitationIn(
+        uid=str(uuid4()),
+        version=1,
+        accessLevel=2,  # R/W
+        username=to_user.username,
+        collection=collection[0].id,
+        signedEncryptionKey=(1024).to_bytes(2, byteorder="big"),  # We don't use this!
+    )
+
+    context = Context(from_user, None)
+    data.validate_db(context)
+
+    # We shouldn't need this?
+    # if not is_collection_admin(collection, user):
+    #     raise PermissionDenied(
+    #         "admin_access_required", "User is not an admin of this collection"
+    #     )
+
+    member = collection[0].members.get(user=from_user)
+
+    with transaction.atomic():
+        try:
+            CollectionInvitation.objects.create(
+                **data.dict(exclude={"collection", "username"}),
+                user=to_user,
+                fromMember=member
+            )
+        except IntegrityError:
+            print("invitation_exists")
 
 
 # We create a userprofile, and if a team hasn't been specified, we create them a team
@@ -37,6 +80,12 @@ def create_user(request, payload: UserProfileIn):
             )
             invite.accepted_date = datetime.now(tz=timezone.utc)
             invite.save()
+
+            create_outgoing_etebase_invite(payload.team_id, user.id)
+
+            # TODO accept etebase invites if possible?
+
+            team = invite.from_team
 
         except ObjectDoesNotExist as e:
             return 409, {"message": "Invalid invitation"}
