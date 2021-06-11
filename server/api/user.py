@@ -21,46 +21,6 @@ from .schemas import (
 router = Router()
 
 
-def create_outgoing_etebase_invite(from_team, to_user):
-    to_user = User.objects.get(id=to_user)
-
-    from_user = User.objects.get(team__id=from_team)
-
-    # TODO invite to ALL collections
-    collection = Collection.objects.all().filter(owner_id=from_user.id)
-
-    # This is what etebase would expect in the request
-    data: CollectionInvitationIn = CollectionInvitationIn(
-        uid=str(uuid4()),
-        version=1,
-        accessLevel=2,  # R/W
-        username=to_user.username,
-        collection=collection[0].id,
-        signedEncryptionKey=(1024).to_bytes(2, byteorder="big"),  # We don't use this!
-    )
-
-    context = Context(from_user, None)
-    data.validate_db(context)
-
-    # We shouldn't need this?
-    # if not is_collection_admin(collection, user):
-    #     raise PermissionDenied(
-    #         "admin_access_required", "User is not an admin of this collection"
-    #     )
-
-    member = collection[0].members.get(user=from_user)
-
-    with transaction.atomic():
-        try:
-            CollectionInvitation.objects.create(
-                **data.dict(exclude={"collection", "username"}),
-                user=to_user,
-                fromMember=member
-            )
-        except IntegrityError:
-            print("invitation_exists")
-
-
 # We create a userprofile, and if a team hasn't been specified, we create them a team
 @router.post("/", response={200: UserProfileOut, 409: Error})
 def create_user(request, payload: UserProfileIn):
@@ -80,10 +40,6 @@ def create_user(request, payload: UserProfileIn):
             )
             invite.accepted_date = datetime.now(tz=timezone.utc)
             invite.save()
-
-            create_outgoing_etebase_invite(payload.team_id, user.id)
-
-            # TODO accept etebase invites if possible?
 
             team = invite.from_team
 
@@ -145,7 +101,7 @@ def create_invite(request, payload: CreateInvite):
         return 409, {"message": "user is already invited to a team"}
 
     except Exception as e:
-        return 500, {"message": "unknown error"}  # 500?
+        return 500, {"message": "unknown error"}
 
 
 @router.get("/invite", auth=None, response={200: InviteOut, 404: None})
