@@ -105,7 +105,7 @@ class Invite(models.Model):
     uid = models.CharField(
         db_index=True, blank=False, null=False, max_length=43, validators=[UidValidator]
     )
-    from_team = models.OneToOneField(Team, on_delete=models.CASCADE)
+    from_team = models.ForeignKey(Team, on_delete=models.CASCADE)
     email = models.EmailField(_("email address"), unique=True)
     sent_date = models.DateTimeField(auto_now_add=True, blank=False, null=False)
     accepted_date = models.DateTimeField(blank=True, null=True)
