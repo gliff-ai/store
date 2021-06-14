@@ -13,6 +13,7 @@ class UserProfileIn(Schema):
     name: str
     team_id: int = None
     recovery_key: str = "TEMP"
+    invite_id: str = None
 
 
 class TeamSchema(Schema):
@@ -33,3 +34,16 @@ class CheckoutSessionIn(Schema):
 
 class CheckoutSessionOut(Schema):
     id: str
+
+
+class InviteCreated(Schema):
+    id: str
+
+
+class InviteOut(Schema):
+    email: str
+    team_id: str
+
+
+class CreateInvite(Schema):
+    email: str
