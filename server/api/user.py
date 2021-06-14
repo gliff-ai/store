@@ -5,10 +5,7 @@ from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail
 
 from django.core.exceptions import ObjectDoesNotExist
-from django.db import IntegrityError, transaction
-from django_etebase.models import Collection, CollectionInvitation
-from etebase_fastapi.routers.invitation import CollectionInvitationIn
-from etebase_fastapi.utils import get_object_or_404, Context
+from django.db import IntegrityError
 from ninja import Router
 
 from django.conf import settings
@@ -89,7 +86,16 @@ def create_invite(request, payload: CreateInvite):
     try:
         uid = str(uuid4())
         user = request.auth
+
         team = Team.objects.get(owner_id=user.id)
+
+        try:
+            invitee = User.objects.get(email=payload.email)
+            if invitee is not None:
+                return 409, {"message": "user is already on a team"}
+
+        except ObjectDoesNotExist as e:
+            pass
 
         invite = Invite.objects.create(
             uid=uid, email=payload.email, from_team_id=team.id
