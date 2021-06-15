@@ -1,13 +1,14 @@
 from uuid import uuid4
 from datetime import datetime, timezone
 
+from sendgrid import SendGridAPIClient
+from sendgrid.helpers.mail import Mail
+
 from django.core.exceptions import ObjectDoesNotExist
-from django.db import IntegrityError, transaction
-from django_etebase.models import Collection, CollectionInvitation
-from etebase_fastapi.routers.invitation import CollectionInvitationIn
-from etebase_fastapi.utils import get_object_or_404, Context
+from django.db import IntegrityError
 from ninja import Router
 
+from django.conf import settings
 from myauth.models import UserProfile, Tier, Team, Invite, User
 from .schemas import (
     UserProfileIn,
@@ -83,21 +84,48 @@ def update_user(request, payload: UserProfileIn):
 @router.post("/invite", response={200: InviteCreated, 409: Error, 500: Error})
 def create_invite(request, payload: CreateInvite):
     try:
-        uid = uuid4()
+        uid = str(uuid4())
         user = request.auth
+
         team = Team.objects.get(owner_id=user.id)
 
+        try:
+            invitee = User.objects.get(email=payload.email)
+            if invitee is not None:
+                return 409, {"message": "user is already on a team"}
+
+        except ObjectDoesNotExist as e:
+            pass
+
         invite = Invite.objects.create(
-            uid=id, email=payload.email, from_team_id=team.id
+            uid=uid, email=payload.email, from_team_id=team.id
         )
 
         invite.save()
 
-        # TODO email the invite!
+        print("invite created")
+        try:
+            message = Mail(
+                from_email="support@gliff.app",
+                to_emails=payload.email,
+            )
+            message.dynamic_template_data = {
+                "invite_url": settings.BASE_URL + "/signup?invite_id=" + uid,
+            }
+            message.template_id = "d-4e62eee5c6b84a56b4225a2c3faa4c32"
+
+            sendgrid_client = SendGridAPIClient(settings.SENDGRID_API_KEY)
+            response = sendgrid_client.send(message)
+            print(response.status_code)
+            print(response.body)
+            print(response.headers)
+        except Exception as e:
+            print(e)
 
         return 200, {"id": uid}
 
     except IntegrityError as e:
+        print(e)
         return 409, {"message": "user is already invited to a team"}
 
     except Exception as e:
