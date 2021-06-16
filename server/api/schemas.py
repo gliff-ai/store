@@ -1,5 +1,4 @@
 from typing import List
-
 from ninja import Schema
 from ninja.orm import create_schema
 from myauth.models import User, UserProfile, Tier, Team

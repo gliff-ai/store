@@ -5,7 +5,9 @@ from ninja import Router
 from myauth.models import UserProfile, Tier, Team, User, Invite
 from .schemas import UserProfileOut, InvitedProfileOut, TeamsOut
 
+
 router = Router()
+
 
 
 @router.get(

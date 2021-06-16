@@ -9,6 +9,7 @@ from django.core.validators import RegexValidator
 UidValidator = RegexValidator(regex=r"^[a-zA-Z0-9\-_]{20,}$", message="Not a valid UID")
 
 
+
 class UserManager(BaseUserManager):
     """
     Custom user model manager with email. We also have username to support etebase, BUT we set this to equal the email
@@ -109,7 +110,6 @@ class Invite(models.Model):
     email = models.EmailField(_("email address"), unique=True)
     sent_date = models.DateTimeField(auto_now_add=True, blank=False, null=False)
     accepted_date = models.DateTimeField(blank=True, null=True)
-
 
 UserType = User
 
