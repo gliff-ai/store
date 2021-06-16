@@ -57,6 +57,7 @@ def create_user(request, payload: UserProfileIn):
 
     user.save()
     user_profile.id = user_profile.user_id  # The frontend expects id not user_id
+    user_profile.email = user.email
     return user_profile
 
 
