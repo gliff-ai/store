@@ -1,3 +1,4 @@
+from typing import List
 from ninja import Schema
 from ninja.orm import create_schema
 from myauth.models import User, UserProfile, Tier, Team
@@ -13,6 +14,7 @@ class UserProfileIn(Schema):
     name: str
     team_id: int = None
     recovery_key: str = "TEMP"
+    invite_id: str = None
 
 
 class TeamSchema(Schema):
@@ -24,7 +26,18 @@ class TeamSchema(Schema):
 class UserProfileOut(Schema):
     id: int
     name: str
+    email: str
     team: TeamSchema
+
+
+class InvitedProfileOut(Schema):
+    email: str
+    sent_date: str
+
+
+class TeamsOut(Schema):
+    profiles: List[UserProfileOut]
+    pending_invites: List[InvitedProfileOut]
 
 
 class CheckoutSessionIn(Schema):
@@ -33,3 +46,16 @@ class CheckoutSessionIn(Schema):
 
 class CheckoutSessionOut(Schema):
     id: str
+
+
+class InviteCreated(Schema):
+    id: str
+
+
+class InviteOut(Schema):
+    email: str
+    team_id: str
+
+
+class CreateInvite(Schema):
+    email: str

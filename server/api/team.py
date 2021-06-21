@@ -2,13 +2,18 @@ from typing import List
 
 from ninja import Router
 
-from myauth.models import UserProfile, Tier, Team, User
-from .schemas import UserProfileOut
+from myauth.models import UserProfile, Tier, Team, User, Invite
+from .schemas import UserProfileOut, InvitedProfileOut, TeamsOut
+
 
 router = Router()
 
 
-@router.get("/", response=List[UserProfileOut])
+
+@router.get(
+    "/",
+    response=TeamsOut,
+)
 def get_team(request):
     user = request.auth
 
@@ -18,11 +23,17 @@ def get_team(request):
     if user.team.owner_id is not user.id:
         return 403, {"message": "Only owners can view the team"}
 
-    users = User.objects.filter(team__owner=user.id)
+    users = User.objects.filter(userprofile__team__owner_id=user.id)
 
     profiles = []
-    for user in users:
-        user.userprofile.id = user.id
-        profiles.append(user.userprofile)
+    for u in users:
+        u.userprofile.id = u.id
+        u.userprofile.email = u.email
+        profiles.append(u.userprofile)
 
-    return profiles
+    # Add invited, but not accepted users
+    invites = Invite.objects.filter(
+        from_team_id=user.team.id, accepted_date=None
+    ).values("email", "sent_date")
+
+    return {"profiles": profiles, "pending_invites": list(invites)}
