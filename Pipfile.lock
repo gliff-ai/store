@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "9068e02140c25332936cb7ce143db8dc1e7af39cc97f00ede9e93d4598c81a3c"
+            "sha256": "39f55c026af5da5269b8dabd11ff9b7f0daadb7957647eb34ef1c28f1db0d7fc"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -165,8 +165,8 @@
             "version": "==1.11.1"
         },
         "etebase-server": {
-            "path": "./etebase-server",
-            "version": "==0.1"
+            "editable": true,
+            "path": "./etebase-server"
         },
         "h11": {
             "hashes": [
