@@ -13,23 +13,17 @@ sendgrid = ">=6.7.0"
 stripe = ">=2.56.0"
 uvicorn = ">=0.13.4"
 Django = ">=3.1.4"
-loguru = "*"
+loguru = ">=0.5.3"
+etebase-server = {path = "./etebase-server"}
 
 [dev-packages]
 black = ">=21.5b1"
 flake8 = ">=3.9.2"
 mypy = ">=0.812"
-mypy-extensions = ">=0.4.3"
-pycodestyle = ">=2.7.0"
-pyflakes = ">=2.3.1"
-typed-ast = ">=1.4.3"
-typing-extensions = ">=3.10.0.0"
 
 [scripts]
 lint = "flake8 ."
 format = "black ."
-submodules = "git submodule init; git submodule update; cp -r package_tools/* etebase-server/; python -m pip install ./etebase-server/"
-require = "pipenv lock -r --dev > requirements.txt"
 
 [requires]
 python_version = "3.8"
