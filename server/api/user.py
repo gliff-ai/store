@@ -19,6 +19,7 @@ from .schemas import (
     InviteOut,
 )
 
+from loguru import logger
 
 router = Router()
 
@@ -44,6 +45,7 @@ def create_user(request, payload: UserProfileIn):
             team = invite.from_team
 
         except ObjectDoesNotExist as e:
+            logger.warning(f"Received ObjectDoesNotExist error {e}")
             return 409, {"message": "Invalid invitation"}
 
     user_profile = UserProfile.objects.create(
@@ -95,6 +97,7 @@ def create_invite(request, payload: CreateInvite):
                 return 409, {"message": "user is already on a team"}
 
         except ObjectDoesNotExist as e:
+            logger.info(f"Received ObjectDoesNotExist error {e}")
             pass
 
         invite = Invite.objects.create(uid=uid, email=payload.email, from_team_id=team.id)
@@ -123,10 +126,11 @@ def create_invite(request, payload: CreateInvite):
         return 200, {"id": uid}
 
     except IntegrityError as e:
-        print(e)
+        logger.warning(f"Received IntegrityError {e}")
         return 409, {"message": "user is already invited to a team"}
 
     except Exception as e:
+        logger.warning(f"Received Exception {e}")
         return 500, {"message": "unknown error"}
 
 
@@ -135,6 +139,7 @@ def accept_invite(request, invite_id: str):
     try:
         invite = Invite.objects.get(uid=invite_id)
     except ObjectDoesNotExist as e:
+        logger.info(f"Received ObjectDoesNotExist error {e}")
         return 404, None
 
     if invite.accepted_date is not None:
