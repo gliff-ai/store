@@ -13,6 +13,7 @@ django-ninja = ">=0.12.2"
 django-storages = {version = ">=1.11.1", extras = ["azure"]}
 etebase-server = {path = "./etebase-server"}
 h11 = "==0.11.0"
+loguru = ">=0.5.3"
 psycopg2-binary = ">=2.8.6"
 pydantic = "==1.7.3"
 python-decouple = ">=3.4"
@@ -21,7 +22,7 @@ sendgrid = ">=6.7.0"
 six = "==1.15.0"
 stripe = ">=2.56.0"
 uvicorn = "==0.13.2"
-loguru = ">=0.5.3"
+typing-extensions = "==3.7.4.3"
 
 [dev-packages]
 black = ">=21.5b1"
