@@ -26,7 +26,7 @@ django-ninja==0.13.2
 django-storages[azure]==1.11.1
 django==3.2.4
 flake8==3.9.2
-h11==0.12.0; python_version >= '3.6'
+h11==0.11.0
 idna==2.10; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3'
 loguru==0.5.3
 mccabe==0.6.1
