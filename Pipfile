@@ -4,8 +4,9 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
+cffi = "==1.14.4"
 click = "7.1.2"
-Django = ">=3.1.4"
+Django = "==3.1.4"
 django-cors-headers = ">=3.7.0"
 django-ninja = ">=0.12.2"
 django-storages = {version = ">=1.11.1", extras = ["azure"]}
@@ -15,7 +16,7 @@ pydantic = "==1.7.3"
 python-decouple = ">=3.4"
 sendgrid = ">=6.7.0"
 stripe = ">=2.56.0"
-uvicorn = ">=0.13.4"
+uvicorn = "==0.13.2"
 loguru = ">=0.5.3"
 etebase-server = {path = "./etebase-server"}
 
