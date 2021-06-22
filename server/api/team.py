@@ -9,7 +9,6 @@ from .schemas import UserProfileOut, InvitedProfileOut, TeamsOut
 router = Router()
 
 
-
 @router.get(
     "/",
     response=TeamsOut,
@@ -32,8 +31,6 @@ def get_team(request):
         profiles.append(u.userprofile)
 
     # Add invited, but not accepted users
-    invites = Invite.objects.filter(
-        from_team_id=user.team.id, accepted_date=None
-    ).values("email", "sent_date")
+    invites = Invite.objects.filter(from_team_id=user.team.id, accepted_date=None).values("email", "sent_date")
 
     return {"profiles": profiles, "pending_invites": list(invites)}

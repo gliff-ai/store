@@ -9,7 +9,6 @@ from django.core.validators import RegexValidator
 UidValidator = RegexValidator(regex=r"^[a-zA-Z0-9\-_]{20,}$", message="Not a valid UID")
 
 
-
 class UserManager(BaseUserManager):
     """
     Custom user model manager with email. We also have username to support etebase, BUT we set this to equal the email
@@ -60,15 +59,9 @@ class User(AbstractUser):
 class Tier(models.Model):
     id: int
     name = models.CharField(max_length=50)
-    stripe_flat_price_id = models.CharField(
-        blank=True, max_length=50, null=True, unique=True
-    )
-    stripe_storage_price_id = models.CharField(
-        blank=True, max_length=50, null=True, unique=True
-    )
-    stripe_seat_price_id = models.CharField(
-        blank=True, max_length=50, null=True, unique=True
-    )
+    stripe_flat_price_id = models.CharField(blank=True, max_length=50, null=True, unique=True)
+    stripe_storage_price_id = models.CharField(blank=True, max_length=50, null=True, unique=True)
+    stripe_seat_price_id = models.CharField(blank=True, max_length=50, null=True, unique=True)
 
 
 class Team(models.Model):
@@ -83,9 +76,7 @@ class Team(models.Model):
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
     name = models.CharField(max_length=200)
-    recovery_key = models.BinaryField(
-        editable=True, blank=False, null=False
-    )  #  The users encrypted key
+    recovery_key = models.BinaryField(editable=True, blank=False, null=False)  #  The users encrypted key
     team = models.ForeignKey(Team, on_delete=models.RESTRICT)
 
     def __str__(self):
@@ -103,13 +94,12 @@ class Billing(models.Model):
 
 
 class Invite(models.Model):
-    uid = models.CharField(
-        db_index=True, blank=False, null=False, max_length=43, validators=[UidValidator]
-    )
+    uid = models.CharField(db_index=True, blank=False, null=False, max_length=43, validators=[UidValidator])
     from_team = models.ForeignKey(Team, on_delete=models.CASCADE)
     email = models.EmailField(_("email address"), unique=True)
     sent_date = models.DateTimeField(auto_now_add=True, blank=False, null=False)
     accepted_date = models.DateTimeField(blank=True, null=True)
+
 
 UserType = User
 

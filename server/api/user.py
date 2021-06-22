@@ -37,9 +37,7 @@ def create_user(request, payload: UserProfileIn):
         team = Team.objects.create(owner_id=user.id, tier_id=tier.id)
     else:
         try:
-            invite = Invite.objects.get(
-                from_team=payload.team_id, uid=payload.invite_id, email=user.email
-            )
+            invite = Invite.objects.get(from_team=payload.team_id, uid=payload.invite_id, email=user.email)
             invite.accepted_date = datetime.now(tz=timezone.utc)
             invite.save()
 
@@ -99,9 +97,7 @@ def create_invite(request, payload: CreateInvite):
         except ObjectDoesNotExist as e:
             pass
 
-        invite = Invite.objects.create(
-            uid=uid, email=payload.email, from_team_id=team.id
-        )
+        invite = Invite.objects.create(uid=uid, email=payload.email, from_team_id=team.id)
 
         invite.save()
 

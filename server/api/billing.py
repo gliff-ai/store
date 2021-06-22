@@ -98,12 +98,8 @@ def complete_payment(session):
 
         billing = Billing.objects.create(
             stripe_customer_id=subscription["customer"],
-            start_date=datetime.fromtimestamp(
-                subscription["current_period_start"], timezone.utc
-            ),
-            renewal_date=datetime.fromtimestamp(
-                subscription["current_period_end"], timezone.utc
-            ),
+            start_date=datetime.fromtimestamp(subscription["current_period_start"], timezone.utc),
+            renewal_date=datetime.fromtimestamp(subscription["current_period_end"], timezone.utc),
             team_id=metatdata.team_id,
             subscription_id=subscription["id"],
         )
