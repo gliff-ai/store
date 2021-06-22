@@ -5,6 +5,12 @@ from uvicorn import Config, Server
 from loguru import logger
 from django.conf import settings
 
+from uvicorn import Config, Server
+from loguru import logger
+from decouple import config
+from django.conf import settings
+from django.core.asgi import get_asgi_application
+
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "server.settings.base")
 
 
