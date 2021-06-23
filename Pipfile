@@ -23,6 +23,7 @@ six = "==1.15.0"
 stripe = ">=2.56.0"
 uvicorn = "==0.13.2"
 typing-extensions = "==3.7.4.3"
+sentry-sdk = "*"
 
 [dev-packages]
 black = ">=21.5b1"
