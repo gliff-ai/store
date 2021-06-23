@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "c60c2e9851e05c65921e4452d596fc85ca3558008b3390dd51fa6bfc55cffb03"
+            "sha256": "6cad25baf1033d33513ca8591d02ce7657db88a9a60e7b4e1b421721e1c6d228"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -302,6 +302,10 @@
             "markers": "python_version >= '3.0'",
             "version": "==2.25.1"
         },
+        "sanitized-package": {
+            "editable": true,
+            "path": "./etebase-server"
+        },
         "sendgrid": {
             "hashes": [
                 "sha256:1c1cca97ab968f81af43ddbbe44aade5a689da27e3e4975dc366042499620abe",
@@ -320,11 +324,11 @@
         },
         "six": {
             "hashes": [
-                "sha256:30639c035cdb23534cd4aa2dd52c3bf48f06e5f4a941509c8bafd8ce11080259",
-                "sha256:8b74bedcbbbaca38ff6d7491d76f2b06b3592611af620f8426e82dddb04a5ced"
+                "sha256:1e61c37477a1626458e36f7b1d82aa5c9b094fa4802892072e49de9c60c4c926",
+                "sha256:8abb2f1d86890a2dfb989f9a77cfcfd3e47c2a354b01111771326f8aa26e0254"
             ],
             "index": "pypi",
-            "version": "==1.15.0"
+            "version": "==1.16.0"
         },
         "sqlparse": {
             "hashes": [
