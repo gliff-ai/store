@@ -19,10 +19,6 @@ jobs:
       with:
         submodules: true
 
-    - name: Copy package tools
-      run: |
-        cp -r package_tools/* etebase-server/
-
     - name: Build using AppService-Build
       uses: azure/appservice-build@v2
 

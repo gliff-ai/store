@@ -2,15 +2,14 @@ import os
 import django
 from django.conf import settings
 from django.core.wsgi import get_wsgi_application
-
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "server.settings.base")
-django.setup()
-
-
 from fastapi import FastAPI
 from etebase_fastapi.main import create_application
 from fastapi.middleware.wsgi import WSGIMiddleware
 from starlette.middleware.cors import CORSMiddleware
+
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "server.settings.base")
+django.setup()
+
 
 def get_application() -> FastAPI:
     etebase_app = create_application()

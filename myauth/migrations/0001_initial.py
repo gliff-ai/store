@@ -30,9 +30,7 @@ class Migration(migrations.Migration):
                 ("password", models.CharField(max_length=128, verbose_name="password")),
                 (
                     "last_login",
-                    models.DateTimeField(
-                        blank=True, null=True, verbose_name="last login"
-                    ),
+                    models.DateTimeField(blank=True, null=True, verbose_name="last login"),
                 ),
                 (
                     "is_superuser",
@@ -60,21 +58,15 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "date_joined",
-                    models.DateTimeField(
-                        default=django.utils.timezone.now, verbose_name="date joined"
-                    ),
+                    models.DateTimeField(default=django.utils.timezone.now, verbose_name="date joined"),
                 ),
                 (
                     "email",
-                    models.EmailField(
-                        max_length=254, unique=True, verbose_name="email address"
-                    ),
+                    models.EmailField(max_length=254, unique=True, verbose_name="email address"),
                 ),
                 (
                     "username",
-                    models.CharField(
-                        max_length=150, unique=True, verbose_name="username"
-                    ),
+                    models.CharField(max_length=150, unique=True, verbose_name="username"),
                 ),
                 (
                     "groups",
@@ -153,9 +145,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "tier",
-                    models.ForeignKey(
-                        on_delete=django.db.models.deletion.PROTECT, to="myauth.tier"
-                    ),
+                    models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to="myauth.tier"),
                 ),
                 (
                     "usage",
@@ -182,9 +172,7 @@ class Migration(migrations.Migration):
                 ("cancel_date", models.DateTimeField(blank=True, null=True)),
                 (
                     "team",
-                    models.OneToOneField(
-                        on_delete=django.db.models.deletion.CASCADE, to="myauth.team"
-                    ),
+                    models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, to="myauth.team"),
                 ),
             ],
         ),
@@ -204,9 +192,7 @@ class Migration(migrations.Migration):
                 ("recovery_key", models.BinaryField(editable=True)),
                 (
                     "team",
-                    models.ForeignKey(
-                        on_delete=django.db.models.deletion.RESTRICT, to="myauth.team"
-                    ),
+                    models.ForeignKey(on_delete=django.db.models.deletion.RESTRICT, to="myauth.team"),
                 ),
             ],
         ),

@@ -25,8 +25,13 @@ AUTH_USER_MODEL = "myauth.User"
 
 SECRET_KEY = "VERYVERYVERYVERYVERYVERYSECRETKEY"
 
+# SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
+LOG_LEVEL = "DEBUG"  # used for intercepting uvicorn and django logs, which use Python's own logging
+
 ALLOWED_HOSTS = ["*"]
+
+HOST = "127.0.0.1"
 
 
 CORS_ORIGIN_ALLOW_ALL = True
@@ -36,9 +41,7 @@ CORS_ALLOW_CREDENTIALS = True
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
-        "NAME": os.environ.get(
-            "ETEBASE_DB_PATH", os.path.join(BASE_DIR, "../", "db.sqlite3")
-        ),
+        "NAME": os.environ.get("ETEBASE_DB_PATH", os.path.join(BASE_DIR, "../", "db.sqlite3")),
     }
 }
 

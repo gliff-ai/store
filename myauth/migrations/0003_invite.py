@@ -8,19 +8,30 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('myauth', '0002_auto_20210423_0923'),
+        ("myauth", "0002_auto_20210423_0923"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Invite',
+            name="Invite",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('uid', models.CharField(db_index=True, max_length=43, validators=[django.core.validators.RegexValidator(message='Not a valid UID', regex='^[a-zA-Z0-9\\-_]{20,}$')])),
-                ('email', models.EmailField(max_length=254, unique=True, verbose_name='email address')),
-                ('sent_date', models.DateTimeField(auto_now_add=True)),
-                ('accepted_date', models.DateTimeField(blank=True, null=True)),
-                ('from_team', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, to='myauth.team')),
+                ("id", models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                (
+                    "uid",
+                    models.CharField(
+                        db_index=True,
+                        max_length=43,
+                        validators=[
+                            django.core.validators.RegexValidator(
+                                message="Not a valid UID", regex="^[a-zA-Z0-9\\-_]{20,}$"
+                            )
+                        ],
+                    ),
+                ),
+                ("email", models.EmailField(max_length=254, unique=True, verbose_name="email address")),
+                ("sent_date", models.DateTimeField(auto_now_add=True)),
+                ("accepted_date", models.DateTimeField(blank=True, null=True)),
+                ("from_team", models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, to="myauth.team")),
             ],
         ),
     ]

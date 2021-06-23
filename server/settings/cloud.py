@@ -9,6 +9,8 @@ CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOW_CREDENTIALS = True
 # CORS_ORIGIN_WHITELIST = config("CORS_ORIGIN_WHITELIST").split(",")
 
+HOST = "0.0.0.0"
+
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
@@ -27,3 +29,45 @@ DEFAULT_FILE_STORAGE = "storages.backends.azure_storage.AzureStorage"
 
 AZURE_ACCOUNT_KEY = get_env_value("AZURE_ACCOUNT_KEY")
 AZURE_URL_EXPIRATION_SECS = 300
+
+## Logging settings
+# Set-up sentry connection
+sentry_sdk.init(
+    # should this be a secret?
+    dsn="https://95bd2160e76b4046b112eb551e89f4e4@o651808.ingest.sentry.io/5828719",
+    # integrate with Django (just in case) but disable Python Logging integration (as we use loguru)
+    integrations=[
+        DjangoIntegration(),
+        LoggingIntegration(level=None, event_level=None),
+    ],
+    release="store@1.0.0",
+    # Set traces_sample_rate to 1.0 to capture 100%
+    # of transactions for performance monitoring.
+    # We recommend adjusting this value in production.
+    traces_sample_rate=1.0,
+    # If you wish to associate users to errors (assuming you are using
+    # django.contrib.auth) you may enable sending PII data.
+    send_default_pii=True,
+    # flag for filtering
+    environment="staging",  # set to "production" for production
+    debug=True,  # set to False for production
+)
+
+# sentry breadcrumbs are sent only when an 'event' is captured and provide extra info
+logger.add(
+    BreadcrumbHandler(level="DEBUG"),
+    format="{time:YYYY-MM-DD HH:mm:ss.SSS} | {level: <8} | {name}:{function}:{line} - {message}",
+    diagnose=True,  # set to False for production
+    level="DEBUG",
+)
+
+# sentry events are the errors and exceptions that we want to catch
+logger.add(
+    EventHandler(level="ERROR"),
+    format="{time:YYYY-MM-DD HH:mm:ss.SSS} | {level: <8} | {name}:{function}:{line} - {message}",
+    diagnose=True,  # set to False for production
+    level="ERROR",
+)
+
+
+LOG_LEVEL = "DEBUG"  # used for intercepting uvicorn and django logs, which use Python's own logging
