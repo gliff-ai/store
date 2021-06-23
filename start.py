@@ -1,11 +1,8 @@
 import os
 import logging
-import sys
 import django
-
 from uvicorn import Config, Server
 from loguru import logger
-from decouple import config
 from django.conf import settings
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "server.settings.base")
