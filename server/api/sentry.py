@@ -9,7 +9,7 @@ router = Router()
 
 
 # Submit a Sentry event
-@router.post("/", response={200: Error, 409: Error})
+@router.post("/", response={200: None, 409: Error}, auth=None)
 def post_event(request):
     logger.info("POST request on Sentry tunnel endpoint")
     logger.debug(request.body.decode("utf-8").split("\n"))
