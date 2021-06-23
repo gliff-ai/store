@@ -1,11 +1,8 @@
 import os
 import logging
-import sys
 import django
-
 from uvicorn import Config, Server
 from loguru import logger
-from decouple import config
 from django.conf import settings
 from django.core.asgi import get_asgi_application
 
