@@ -6,6 +6,7 @@ from sentry_sdk.integrations.logging import (
     BreadcrumbHandler,
     EventHandler,
 )
+from loguru import logger
 
 DEBUG = False
 
