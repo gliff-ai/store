@@ -8,6 +8,8 @@ from server.api.tier import router as tiers_router
 from server.api.team import router as teams_router
 from server.api.billing import router as billing_router
 
+from loguru import logger
+
 
 class ApiKey(APIKeyHeader):
     param_name = "Authorization"
@@ -20,6 +22,7 @@ class ApiKey(APIKeyHeader):
             user = get_authenticated_user(key)  # Validate with Etebase
             return user
         except Exception as e:
+            logger.warning(f"Received Exception {e}")
             return False
 
 

@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 from django.conf import settings
-
+from loguru import logger
 from ninja import Router
 import stripe
 
@@ -25,7 +25,7 @@ def create_checkout_session(request, payload: CheckoutSessionIn):
 
         # This is a free plan, no need to bill them
         if tier.stripe_flat_price_id is None:
-            print("we shouldn't create_checkout_session for a free plan?!")
+            logger.error("we shouldn't create_checkout_session for a free plan?!")
             return 409, {"message": "Can't pay for a free tier"}
 
         # By default, just charge the flat rate
@@ -70,11 +70,14 @@ def stripe_webhook(request):
         event = stripe.Webhook.construct_event(payload, sig_header, endpoint_secret)
     except ValueError as e:
         # Invalid payload
+        logger.warning(f"Received ValueError {e}")
         return 400, {"message": "Invalid Payload"}
     except KeyError as e:
+        logger.warning(f"Received KeyError {e}")
         return 400, {"message": "No Signature"}
     except stripe.error.SignatureVerificationError as e:
         # Invalid signature
+        logger.warning(f"Received VerificationError {e}")
         return 400, {"message": "Invalid Signature"}
 
     # Handle them completing checkout. Add the billling info and update the tier
@@ -98,12 +101,8 @@ def complete_payment(session):
 
         billing = Billing.objects.create(
             stripe_customer_id=subscription["customer"],
-            start_date=datetime.fromtimestamp(
-                subscription["current_period_start"], timezone.utc
-            ),
-            renewal_date=datetime.fromtimestamp(
-                subscription["current_period_end"], timezone.utc
-            ),
+            start_date=datetime.fromtimestamp(subscription["current_period_start"], timezone.utc),
+            renewal_date=datetime.fromtimestamp(subscription["current_period_end"], timezone.utc),
             team_id=metatdata.team_id,
             subscription_id=subscription["id"],
         )

@@ -19,6 +19,7 @@ from .schemas import (
     InviteOut,
 )
 
+from loguru import logger
 
 router = Router()
 
@@ -37,15 +38,14 @@ def create_user(request, payload: UserProfileIn):
         team = Team.objects.create(owner_id=user.id, tier_id=tier.id)
     else:
         try:
-            invite = Invite.objects.get(
-                from_team=payload.team_id, uid=payload.invite_id, email=user.email
-            )
+            invite = Invite.objects.get(from_team=payload.team_id, uid=payload.invite_id, email=user.email)
             invite.accepted_date = datetime.now(tz=timezone.utc)
             invite.save()
 
             team = invite.from_team
 
         except ObjectDoesNotExist as e:
+            logger.warning(f"Received ObjectDoesNotExist error {e}")
             return 409, {"message": "Invalid invitation"}
 
     user_profile = UserProfile.objects.create(
@@ -97,11 +97,10 @@ def create_invite(request, payload: CreateInvite):
                 return 409, {"message": "user is already on a team"}
 
         except ObjectDoesNotExist as e:
+            logger.info(f"Received ObjectDoesNotExist error {e}")
             pass
 
-        invite = Invite.objects.create(
-            uid=uid, email=payload.email, from_team_id=team.id
-        )
+        invite = Invite.objects.create(uid=uid, email=payload.email, from_team_id=team.id)
 
         invite.save()
 
@@ -127,10 +126,11 @@ def create_invite(request, payload: CreateInvite):
         return 200, {"id": uid}
 
     except IntegrityError as e:
-        print(e)
+        logger.warning(f"Received IntegrityError {e}")
         return 409, {"message": "user is already invited to a team"}
 
     except Exception as e:
+        logger.warning(f"Received Exception {e}")
         return 500, {"message": "unknown error"}
 
 
@@ -139,6 +139,7 @@ def accept_invite(request, invite_id: str):
     try:
         invite = Invite.objects.get(uid=invite_id)
     except ObjectDoesNotExist as e:
+        logger.info(f"Received ObjectDoesNotExist error {e}")
         return 404, None
 
     if invite.accepted_date is not None:

@@ -1,0 +1,40 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+asgiref = "==3.3.1"
+cffi = "==1.14.4"
+click = "7.1.2"
+Django = "==3.1.4"
+django-cors-headers = ">=3.7.0"
+django-ninja = ">=0.12.2"
+django-storages = {version = ">=1.11.1", extras = ["azure"]}
+etebase-server = {editable = true, path = "./etebase-server"}
+h11 = "==0.11.0"
+loguru = ">=0.5.3"
+psycopg2-binary = ">=2.8.6"
+pydantic = "==1.7.3"
+python-decouple = ">=3.4"
+pytz = "==2020.4"
+sendgrid = ">=6.7.0"
+six = "==1.15.0"
+stripe = ">=2.56.0"
+uvicorn = "==0.13.2"
+typing-extensions = "==3.7.4.3"
+
+[dev-packages]
+black = ">=21.5b1"
+flake8 = ">=3.9.2"
+mypy = ">=0.812"
+
+[scripts]
+lint = "flake8 ."
+format = "black ."
+
+[requires]
+python_version = "3.8"
+
+[pipenv]
+allow_prereleases = true
