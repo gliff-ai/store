@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "c60c2e9851e05c65921e4452d596fc85ca3558008b3390dd51fa6bfc55cffb03"
+            "sha256": "8bd17b6134bb70bcdaa1b6de9e0a1c63ea1bd5b56801f192ffd4038cab512fcc"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -288,11 +288,11 @@
         },
         "pytz": {
             "hashes": [
-                "sha256:3e6b7dd2d1e0a59084bcee14a17af60c5c562cdc16d828e8eba2e683d3a7e268",
-                "sha256:5c55e189b682d420be27c6995ba6edce0c0a77dd67bfbe2ae6607134d5851ffd"
+                "sha256:83a4a90894bf38e243cf052c8b58f381bfe9a7a483f6a9cab140bc7f702ac4da",
+                "sha256:eb10ce3e7736052ed3623d49975ce333bcd712c7bb19a58b9e2089d4057d0798"
             ],
             "index": "pypi",
-            "version": "==2020.4"
+            "version": "==2021.1"
         },
         "requests": {
             "hashes": [
@@ -301,6 +301,10 @@
             ],
             "markers": "python_version >= '3.0'",
             "version": "==2.25.1"
+        },
+        "sanitized-package": {
+            "editable": true,
+            "path": "./etebase-server"
         },
         "sendgrid": {
             "hashes": [
