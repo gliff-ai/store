@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "c60c2e9851e05c65921e4452d596fc85ca3558008b3390dd51fa6bfc55cffb03"
+            "sha256": "673e1f80a0a98607e98f6e92b0e02f0b43c5e4c3a9c07794ce2fc57b14284c44"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -131,11 +131,11 @@
         },
         "django": {
             "hashes": [
-                "sha256:5c866205f15e7a7123f1eec6ab939d22d5bde1416635cab259684af66d8e48a2",
-                "sha256:edb10b5c45e7e9c0fb1dc00b76ec7449aca258a39ffd613dbd078c51d19c9f03"
+                "sha256:a523d62b7ab2908f551dabc32b99017a86aa7784e32b761708e52be3dce6d35d",
+                "sha256:dc41bf07357f1f4810c1c555b685cb51f780b41e37892d6cc92b89789f2847e1"
             ],
             "index": "pypi",
-            "version": "==3.1.4"
+            "version": "==3.1.12"
         },
         "django-cors-headers": {
             "hashes": [
@@ -301,6 +301,10 @@
             ],
             "markers": "python_version >= '3.0'",
             "version": "==2.25.1"
+        },
+        "sanitized-package": {
+            "editable": true,
+            "path": "./etebase-server"
         },
         "sendgrid": {
             "hashes": [
