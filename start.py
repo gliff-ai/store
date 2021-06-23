@@ -24,7 +24,7 @@ class InterceptHandler(logging.Handler):
         # find caller from where originated the logged message
         # TODO is the while loop needed at all?
         frame, depth = logging.currentframe(), 2
-        while depth < 2+5:  # frame.f_code.co_filename == logging.__file__:
+        while depth < 2 + 5:  # frame.f_code.co_filename == logging.__file__:
             frame = frame.f_back
             depth += 1
 
