@@ -1,11 +1,8 @@
 import os
 import logging
-import sys
 import django
-
 from uvicorn import Config, Server
 from loguru import logger
-from decouple import config
 from django.conf import settings
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "server.settings.base")
@@ -25,8 +22,9 @@ class InterceptHandler(logging.Handler):
             level = record.levelno
 
         # find caller from where originated the logged message
+        # TODO is the while loop needed at all?
         frame, depth = logging.currentframe(), 2
-        while frame.f_code.co_filename == logging.__file__:
+        while depth < 2 + 5:  # frame.f_code.co_filename == logging.__file__:
             frame = frame.f_back
             depth += 1
 
