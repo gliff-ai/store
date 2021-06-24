@@ -78,7 +78,7 @@ class Team(models.Model):
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
     name = models.CharField(max_length=200)
-    recovery_key = models.BinaryField(editable=True, blank=False, null=False)  # The users encrypted key
+    recovery_key = models.TextField()
     team = models.ForeignKey(Team, on_delete=models.RESTRICT)
 
     def __str__(self):
