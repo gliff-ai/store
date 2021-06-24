@@ -52,7 +52,7 @@ def create_user(request, payload: UserProfileIn):
         user_id=user.id,
         team_id=team.id,
         name=payload.name,
-        recovery_key=payload.recovery_key.encode(),
+        recovery_key=payload.recovery_key,
     )
 
     user.save()

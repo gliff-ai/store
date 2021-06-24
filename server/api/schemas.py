@@ -13,7 +13,7 @@ class Error(Schema):
 class UserProfileIn(Schema):
     name: str
     team_id: int = None
-    recovery_key: str = "TEMP"
+    recovery_key: str
     invite_id: str = None
 
 
