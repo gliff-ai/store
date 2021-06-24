@@ -105,7 +105,7 @@ def create_invite(request, payload: CreateInvite):
 
         invite.save()
 
-        print("invite created")
+        logger.info("invite created")
         try:
             message = Mail(
                 from_email="support@gliff.app",
@@ -117,12 +117,9 @@ def create_invite(request, payload: CreateInvite):
             message.template_id = "d-4e62eee5c6b84a56b4225a2c3faa4c32"
 
             sendgrid_client = SendGridAPIClient(settings.SENDGRID_API_KEY)
-            response = sendgrid_client.send(message)
-            print(response.status_code)
-            print(response.body)
-            print(response.headers)
+            sendgrid_client.send(message)
         except Exception as e:
-            print(e)
+            logger.error(f"sending invite email {e}")
 
         return 200, {"id": uid}
 
@@ -154,11 +151,11 @@ def create_recovery(request, payload: CreateInvite):
     try:
         user = User.objects.get(email=payload.email)
         if user is None:
-            print("Recovering none existent account")
+            logger.info("trying to recover an account that doesn't exist")
             return 201  # Not a user, but don't tell anyone that!
 
-    except ObjectDoesNotExist as e:
-        print("Recovering none existent account")
+    except ObjectDoesNotExist:
+        logger.info("trying to recover an account that doesn't exist")
         return 201  # Not a user, but don't tell anyone that!
 
     try:
@@ -169,7 +166,7 @@ def create_recovery(request, payload: CreateInvite):
 
         recovery.save()
 
-        print("recovery created")
+        logger.info("recovery key created")
         try:
             message = Mail(
                 from_email="support@gliff.app",
@@ -181,9 +178,9 @@ def create_recovery(request, payload: CreateInvite):
             message.template_id = "d-88b2e30576724d459416ea5dbd932ac7"
 
             sendgrid_client = SendGridAPIClient(settings.SENDGRID_API_KEY)
-            response = sendgrid_client.send(message)
+            sendgrid_client.send(message)
         except Exception as e:
-            print(e)
+            logger.error(e)
 
         return 201
 
