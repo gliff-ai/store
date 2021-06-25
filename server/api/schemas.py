@@ -59,3 +59,11 @@ class InviteOut(Schema):
 
 class CreateInvite(Schema):
     email: str
+
+
+class AccountRecovery(Schema):
+    email: str
+
+
+class AccountRecoveryOut(Schema):
+    recovery_key: str
