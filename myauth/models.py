@@ -101,6 +101,14 @@ class Invite(models.Model):
     accepted_date = models.DateTimeField(blank=True, null=True)
 
 
+class Recovery(models.Model):
+    uid = models.CharField(
+        db_index=True, blank=False, null=False, max_length=43, validators=[UidValidator], primary_key=True
+    )
+    user_profile = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
+    expiry_date = models.DateTimeField(blank=False, null=False)
+
+
 UserType = User
 
 

@@ -1,6 +1,7 @@
 from uuid import uuid4
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 
+from django.shortcuts import get_object_or_404
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail
 
@@ -9,7 +10,7 @@ from django.db import IntegrityError
 from ninja import Router
 
 from django.conf import settings
-from myauth.models import UserProfile, Tier, Team, Invite, User
+from myauth.models import UserProfile, Tier, Team, Invite, User, Recovery
 from .schemas import (
     UserProfileIn,
     UserProfileOut,
@@ -17,6 +18,7 @@ from .schemas import (
     InviteCreated,
     CreateInvite,
     InviteOut,
+    AccountRecoveryOut,
 )
 
 from loguru import logger
@@ -73,9 +75,8 @@ def get_user(request):
 def update_user(request, payload: UserProfileIn):
     user = request.auth
 
-    # You can only actually change name for now...
-    user.userprofile.first_name = payload.first_name
-    user.userprofile.last_name = payload.last_name
+    # You can only actually change a recovery key
+    user.userprofile.recovery_key = payload.recovery_key
 
     user.userprofile.save()
 
@@ -104,7 +105,7 @@ def create_invite(request, payload: CreateInvite):
 
         invite.save()
 
-        print("invite created")
+        logger.info("invite created")
         try:
             message = Mail(
                 from_email="support@gliff.app",
@@ -116,12 +117,9 @@ def create_invite(request, payload: CreateInvite):
             message.template_id = "d-4e62eee5c6b84a56b4225a2c3faa4c32"
 
             sendgrid_client = SendGridAPIClient(settings.SENDGRID_API_KEY)
-            response = sendgrid_client.send(message)
-            print(response.status_code)
-            print(response.body)
-            print(response.headers)
+            sendgrid_client.send(message)
         except Exception as e:
-            print(e)
+            logger.error(f"sending invite email {e}")
 
         return 200, {"id": uid}
 
@@ -146,3 +144,62 @@ def accept_invite(request, invite_id: str):
         return 500
 
     return 200, {"email": invite.email, "team_id": invite.from_team.id}
+
+
+@router.post("/recover", auth=None, response=None)
+def create_recovery(request, payload: CreateInvite):
+    try:
+        user = User.objects.get(email=payload.email)
+        if user is None:
+            logger.info("trying to recover an account that doesn't exist")
+            return 201  # Not a user, but don't tell anyone that!
+
+    except ObjectDoesNotExist:
+        logger.info("trying to recover an account that doesn't exist")
+        return 201  # Not a user, but don't tell anyone that!
+
+    try:
+        uid = str(uuid4())
+        now = datetime.now(tz=timezone.utc)
+        now_plus_10 = now + timedelta(minutes=10)
+        recovery = Recovery.objects.create(uid=uid, user_profile=user.userprofile, expiry_date=now_plus_10)
+
+        recovery.save()
+
+        logger.info("recovery key created")
+        try:
+            message = Mail(
+                from_email="support@gliff.app",
+                to_emails=payload.email,
+            )
+            message.dynamic_template_data = {
+                "recovery_url": settings.BASE_URL + "/recover?uid=" + uid,
+            }
+            message.template_id = "d-88b2e30576724d459416ea5dbd932ac7"
+
+            sendgrid_client = SendGridAPIClient(settings.SENDGRID_API_KEY)
+            sendgrid_client.send(message)
+        except Exception as e:
+            logger.error(e)
+
+        return 201
+
+    except Exception as e:
+        logger.warning(f"Received Exception {e}")
+        return 201
+
+
+@router.get("/recover/{recovery_id}", auth=None, response={200: AccountRecoveryOut, 404: None})
+def get_recovery(request, recovery_id: str):
+    try:
+        recovery = get_object_or_404(Recovery, uid=recovery_id)
+
+        recovery_key = UserProfile.objects.filter(
+            user_id=recovery.user_profile_id, recovery__expiry_date__gte=datetime.now(tz=timezone.utc)
+        ).values("recovery_key")[0]
+
+        return recovery_key
+
+    except Exception as e:
+        logger.warning(f"Received Exception {e}, Invitation Expired")
+        return 404, None
