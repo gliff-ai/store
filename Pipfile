@@ -37,7 +37,7 @@ six = "==1.15.0"
 sqlparse = "==0.4.1"
 starlette = "==0.13.6"
 stripe = "==2.58.0"
-typing-extensions = "==3.7.4.3"
+typing-extensions = "==3.10.0.0"
 uvicorn = {version = "==0.13.2", extras = ["standard"]}
 uvloop = "==0.14.0"
 watchgod = "==0.6"
