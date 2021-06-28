@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "c584eba9543a8a0cb3b6b6343789ba174a853fae740282c25b8e5a8680a86bf0"
+            "sha256": "bfcdf7206a44fbdf48f9c453c314206d2a0c4faad44d4fef42d5e8bc5e4705da"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -209,7 +209,7 @@
         },
         "etebase-server": {
             "editable": true,
-            "file": "file:///home/chas/gliff/store/etebase-server"
+            "file": "./etebase-server"
         },
         "fastapi": {
             "hashes": [
@@ -515,11 +515,11 @@
         },
         "python-dotenv": {
             "hashes": [
-                "sha256:0c8d1b80d1a1e91717ea7d526178e3882732420b03f08afea0406db6402e220e",
-                "sha256:587825ed60b1711daea4832cf37524dfd404325b7db5e25ebe88c495c9f807a0"
+                "sha256:dd8fe852847f4fbfadabf6183ddd4c824a9651f02d51714fa075c95561959c7d",
+                "sha256:effaac3c1e58d89b3ccb4d04a40dc7ad6e0275fda25fd75ae9d323e2465e202d"
             ],
             "index": "pypi",
-            "version": "==0.15.0"
+            "version": "==0.18.0"
         },
         "python-http-client": {
             "hashes": [
@@ -609,6 +609,10 @@
             "markers": "python_version >= '3.0'",
             "version": "==2.25.1"
         },
+        "sanitized-package": {
+            "editable": true,
+            "file": "file:///home/dependabot/dependabot-updater/tmp/dependabot_20210628-7-1hx7yoa/etebase-server"
+        },
         "sendgrid": {
             "hashes": [
                 "sha256:1c1cca97ab968f81af43ddbbe44aade5a689da27e3e4975dc366042499620abe",
@@ -682,11 +686,11 @@
         },
         "urllib3": {
             "hashes": [
-                "sha256:753a0374df26658f99d826cfe40394a686d05985786d946fbe4165b5148f5a7c",
-                "sha256:a7acd0977125325f516bda9735fa7142b909a8d01e8b2e4c8108d0984e6e0098"
+                "sha256:39fb8672126159acb139a7718dd10806104dec1e2f0f6c88aab05d17df10c8d4",
+                "sha256:f57b4c16c62fa2760b7e3d97c35b255512fb6b59a259730f36ba32ce9f8e342f"
             ],
             "markers": "python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4' and python_version < '4'",
-            "version": "==1.26.5"
+            "version": "==1.26.6"
         },
         "uvicorn": {
             "extras": [
