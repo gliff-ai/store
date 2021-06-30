@@ -1,3 +1,4 @@
+# Models (at least, User ones) should be here so Etebase can find them
 import typing as t
 
 from django.contrib.auth.models import AbstractUser

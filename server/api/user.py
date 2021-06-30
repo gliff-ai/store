@@ -1,6 +1,6 @@
 from uuid import uuid4
 from datetime import datetime, timezone, timedelta
-
+from loguru import logger
 from django.shortcuts import get_object_or_404
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail
@@ -20,8 +20,8 @@ from .schemas import (
     InviteOut,
     AccountRecoveryOut,
 )
+import server.emails as email_template
 
-from loguru import logger
 
 router = Router()
 
@@ -114,7 +114,7 @@ def create_invite(request, payload: CreateInvite):
             message.dynamic_template_data = {
                 "invite_url": settings.BASE_URL + "/signup?invite_id=" + uid,
             }
-            message.template_id = "d-4e62eee5c6b84a56b4225a2c3faa4c32"
+            message.template_id = email_template.id["invite_to_team"]
 
             sendgrid_client = SendGridAPIClient(settings.SENDGRID_API_KEY)
             sendgrid_client.send(message)
@@ -175,7 +175,7 @@ def create_recovery(request, payload: CreateInvite):
             message.dynamic_template_data = {
                 "recovery_url": settings.BASE_URL + "/recover?uid=" + uid,
             }
-            message.template_id = "d-88b2e30576724d459416ea5dbd932ac7"
+            message.template_id = email_template.id["recover_account"]
 
             sendgrid_client = SendGridAPIClient(settings.SENDGRID_API_KEY)
             sendgrid_client.send(message)
