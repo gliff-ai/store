@@ -9,6 +9,7 @@ from sendgrid.helpers.mail import Mail
 
 from myauth.models import UserProfile, Tier, Team, User, Invite
 from .schemas import UserProfileOut, InvitedProfileOut, TeamsOut, Error, CreateInvite
+import server.emails as email_template
 
 router = Router()
 
@@ -27,11 +28,11 @@ def email_collab(request, payload: CreateInvite):
     try:
         # User exists, so just tell them they have an invite
         User.objects.get(email=payload.email)
-        message.template_id = "d-fc9bedae856e45a585a3d9c0950143ee"
+        message.template_id = email_template.id["collaborate_existing_user"]
 
     except ObjectDoesNotExist as e:
         # User doesn't exist so send them a slightly different email
-        message.template_id = "d-d8dbf68c17904ae9b8089d319c796d11"
+        message.template_id = email_template.id["collaborate_new_user"]
 
         logger.info(f"Received ObjectDoesNotExist error {e}")
 
