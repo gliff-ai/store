@@ -1,6 +1,8 @@
-from typing import List
+from typing import List, Optional
 from ninja import Schema
 from ninja.orm import create_schema
+from pydantic import validator, typing
+
 from myauth.models import User, UserProfile, Tier, Team
 
 TierSchema = create_schema(Tier)
@@ -24,10 +26,14 @@ class TeamSchema(Schema):
 
 
 class UserProfileOut(Schema):
+    @validator("email_verified")
+    def cast_verified_date_to_bool(cls, verified_date):
+        return verified_date is not None
+
     id: int
     name: str
     email: str
-    email_verified: bool = False
+    email_verified: typing.Any  # we cast this to a bool
     team: TeamSchema
 
 
