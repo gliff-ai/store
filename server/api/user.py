@@ -10,7 +10,7 @@ from django.db import IntegrityError
 from ninja import Router
 
 from django.conf import settings
-from myauth.models import UserProfile, Tier, Team, Invite, User, Recovery
+from myauth.models import UserProfile, Tier, Team, Invite, User, Recovery, EmailVerification
 from .schemas import (
     UserProfileIn,
     UserProfileOut,
@@ -60,6 +60,31 @@ def create_user(request, payload: UserProfileIn):
     user.save()
     user_profile.id = user_profile.user_id  # The frontend expects id not user_id
     user_profile.email = user.email
+
+    # Send verification email
+    uid = str(uuid4())
+    now = datetime.now(tz=timezone.utc)
+    now_plus_24h = now + timedelta(hours=24)
+
+    validation = EmailVerification.objects.create(uid=uid, user_profile=user.userprofile, expiry_date=now_plus_24h)
+    validation.save()
+
+    logger.info("email verification request created")
+    try:
+        message = Mail(
+            from_email="support@gliff.app",
+            to_emails=user.email,
+        )
+        message.dynamic_template_data = {
+            "verify_url": settings.BASE_URL + "/verify?uid=" + uid,
+        }
+        message.template_id = email_template.id["verify_email"]
+
+        sendgrid_client = SendGridAPIClient(settings.SENDGRID_API_KEY)
+        sendgrid_client.send(message)
+    except Exception as e:
+        logger.error(e)
+
     return user_profile
 
 
@@ -107,6 +132,7 @@ def create_invite(request, payload: CreateInvite):
 
         logger.info("invite created")
         try:
+            # TODO email sending should be a function
             message = Mail(
                 from_email="support@gliff.app",
                 to_emails=payload.email,
@@ -132,6 +158,42 @@ def create_invite(request, payload: CreateInvite):
         return 500, {"message": "unknown error"}
 
 
+@router.post("/verify_email", response={201: None, 409: Error})
+def request_validation_email(request):
+    try:
+        user = request.auth
+
+        uid = str(uuid4())
+        now = datetime.now(tz=timezone.utc)
+        now_plus_24h = now + timedelta(hours=24)
+
+        validation = EmailVerification.objects.create(uid=uid, user_profile=user.userprofile, expiry_date=now_plus_24h)
+        validation.save()
+
+        logger.info("email verification request created")
+        try:
+            message = Mail(
+                from_email="support@gliff.app",
+                to_emails=user.email,
+            )
+            message.dynamic_template_data = {
+                "verify_url": settings.BASE_URL + "/verify?uid=" + uid,
+            }
+            message.template_id = email_template.id["verify_email"]
+
+            sendgrid_client = SendGridAPIClient(settings.SENDGRID_API_KEY)
+            sendgrid_client.send(message)
+        except Exception as e:
+            logger.error(e)
+
+        return 201, None
+
+    except Exception as e:
+        logger.warning(f"Received Exception {e}, Invalid Email Verification")
+        return 409, None
+
+
+### These routes have no auth as user either won't have an account or won't be logged in when they are used
 @router.get("/invite", auth=None, response={200: InviteOut, 404: None})
 def accept_invite(request, invite_id: str):
     try:
@@ -203,3 +265,37 @@ def get_recovery(request, recovery_id: str):
     except Exception as e:
         logger.warning(f"Received Exception {e}, Invitation Expired")
         return 404, None
+
+
+@router.get("/verify_email/{verification_id}", auth=None, response={200: None, 403: None})
+def verify_email(request, verification_id: str):
+    try:
+        validation = get_object_or_404(
+            EmailVerification, uid=verification_id, expiry_date__gte=datetime.now(tz=timezone.utc)
+        )
+
+        profile = UserProfile.objects.get(user_id=validation.user_profile_id)
+
+        profile.email_verified = datetime.now(tz=timezone.utc)
+
+        profile.save()
+
+        # Send welcome email
+        try:
+            message = Mail(
+                from_email="support@gliff.app",
+                to_emails=profile.user.email,
+            )
+
+            message.template_id = email_template.id["welcome"]
+
+            sendgrid_client = SendGridAPIClient(settings.SENDGRID_API_KEY)
+            sendgrid_client.send(message)
+        except Exception as e:
+            logger.error(e)
+
+        return 200, None
+
+    except Exception as e:
+        logger.warning(f"Received Exception {e}, Invalid Email Verification")
+        return 403, None

@@ -79,6 +79,7 @@ class UserProfile(models.Model):
     name = models.CharField(max_length=200)
     recovery_key = models.TextField()
     team = models.ForeignKey(Team, on_delete=models.RESTRICT)
+    email_verified = models.DateTimeField(blank=True, null=True)
 
     def __str__(self):
         return self.user.email
@@ -103,6 +104,14 @@ class Invite(models.Model):
 
 
 class Recovery(models.Model):
+    uid = models.CharField(
+        db_index=True, blank=False, null=False, max_length=43, validators=[UidValidator], primary_key=True
+    )
+    user_profile = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
+    expiry_date = models.DateTimeField(blank=False, null=False)
+
+
+class EmailVerification(models.Model):
     uid = models.CharField(
         db_index=True, blank=False, null=False, max_length=43, validators=[UidValidator], primary_key=True
     )
