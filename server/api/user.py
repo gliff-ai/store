@@ -57,6 +57,8 @@ def create_user(request, payload: UserProfileIn):
         recovery_key=payload.recovery_key,
     )
 
+    user.is_active = False
+
     user.save()
     user_profile.id = user_profile.user_id  # The frontend expects id not user_id
     user_profile.email = user.email
@@ -285,6 +287,11 @@ def verify_email(request, verification_id: str):
         profile.email_verified = datetime.now(tz=timezone.utc)
 
         profile.save()
+
+        user = get_object_or_404(User, id=validation.user_profile_id)
+        user.is_active = True
+
+        user.save()
 
         # Send welcome email
         try:
