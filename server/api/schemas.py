@@ -27,6 +27,7 @@ class UserProfileOut(Schema):
     id: int
     name: str
     email: str
+    email_verified: bool = False
     team: TeamSchema
 
 
