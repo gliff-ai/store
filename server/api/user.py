@@ -56,8 +56,10 @@ def create_user(request, payload: UserProfileIn):
         name=payload.name,
         recovery_key=payload.recovery_key,
     )
+    user_profile.save()
 
     user.is_active = False
+    user.userprofile = user_profile
 
     user.save()
     user_profile.id = user_profile.user_id  # The frontend expects id not user_id
