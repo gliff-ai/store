@@ -80,7 +80,7 @@ def create_user(request, payload: UserProfileIn):
             to_emails=user.email,
         )
         message.dynamic_template_data = {
-            "verify_url": settings.BASE_URL + "/verify?uid=" + uid,
+            "verify_url": settings.BASE_URL + "/verify_email/" + uid,
         }
         message.template_id = email_template.id["verify_email"]
 
