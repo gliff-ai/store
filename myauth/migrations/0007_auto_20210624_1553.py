@@ -7,13 +7,13 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('myauth', '0006_recovery'),
+        ("myauth", "0006_recovery"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='recovery',
-            name='user_profile',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='myauth.userprofile'),
+            model_name="recovery",
+            name="user_profile",
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="myauth.userprofile"),
         ),
     ]
