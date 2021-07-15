@@ -165,8 +165,18 @@ def create_invite(request, payload: CreateInvite):
         return 500, {"message": "unknown error"}
 
 
-@router.post("/verify_email", response={201: None, 409: Error})
-def request_validation_email(request):
+@router.post("/verify_email", auth=None, response={201: None, 409: Error})
+def request_validation_email(request, payload: CreateInvite):
+    try:
+        user = User.objects.get(email=payload.email)
+        if user is None:
+            logger.info("trying to recover an account that doesn't exist")
+            return 201  # Not a user, but don't tell anyone that!
+
+    except ObjectDoesNotExist:
+        logger.info("trying to recover an account that doesn't exist")
+        return 201  # Not a user, but don't tell anyone that!
+
     try:
         user = request.auth
 
@@ -306,8 +316,8 @@ def verify_email(request, verification_id: str):
         except Exception as e:
             logger.error(e)
 
-        return 200, None
+        return 200, True
 
     except Exception as e:
         logger.warning(f"Received Exception {e}, Invalid Email Verification")
-        return 403, None
+        return 403, False
