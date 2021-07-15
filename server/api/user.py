@@ -56,15 +56,15 @@ def create_user(request, payload: UserProfileIn):
         name=payload.name,
         recovery_key=payload.recovery_key,
     )
+    user_profile.id = user_profile.user_id  # The frontend expects id not user_id
+    user_profile.email = user.email
     user_profile.save()
 
     user.is_active = False
     user.userprofile = user_profile
 
     user.save()
-    user_profile.id = user_profile.user_id  # The frontend expects id not user_id
-    user_profile.email = user.email
-
+    
     # Send verification email
     uid = str(uuid4())
     now = datetime.now(tz=timezone.utc)
