@@ -64,7 +64,7 @@ def create_user(request, payload: UserProfileIn):
     user.userprofile = user_profile
 
     user.save()
-    
+
     # Send verification email
     uid = str(uuid4())
     now = datetime.now(tz=timezone.utc)
