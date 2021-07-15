@@ -209,7 +209,7 @@
         },
         "etebase-server": {
             "editable": true,
-            "file": "file:///home/chas/gliff/store/etebase-server"
+            "file": "./etebase-server"
         },
         "fastapi": {
             "hashes": [
