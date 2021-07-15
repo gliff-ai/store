@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "c584eba9543a8a0cb3b6b6343789ba174a853fae740282c25b8e5a8680a86bf0"
+            "sha256": "456fa966b83ee406e3a01bde5dec33e3b4970cdaf17a71409f84974da2e291ba"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -609,6 +609,10 @@
             "markers": "python_version >= '3.0'",
             "version": "==2.26.0"
         },
+        "sanitized-package": {
+            "editable": true,
+            "file": "file:///home/dependabot/dependabot-updater/tmp/dependabot_20210715-7-c93ovf/etebase-server"
+        },
         "sendgrid": {
             "hashes": [
                 "sha256:1c1cca97ab968f81af43ddbbe44aade5a689da27e3e4975dc366042499620abe",
@@ -657,11 +661,11 @@
         },
         "stripe": {
             "hashes": [
-                "sha256:15a2068dce84e9cc68a41b006286dc58ebe55a7999cdbd8bb1b1e5d2c4594c7f",
-                "sha256:34829b528e652ffc919d40eff2ba78021149818bab76e33c07801382921cf6d5"
+                "sha256:0050763cb67df6745973bd9757f7a765bed1b82b5d5261fb8908cfc6ec9e5200",
+                "sha256:8966b7793014380f60c6f121ba333d6f333a55818edaf79c8d70464ce0a7a808"
             ],
             "index": "pypi",
-            "version": "==2.58.0"
+            "version": "==2.60.0"
         },
         "toml": {
             "hashes": [
