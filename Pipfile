@@ -46,7 +46,7 @@ etebase-server = {editable = true, file = "./etebase-server"}
 appdirs = "==1.4.4"
 Django = "==3.1.4"
 PyNaCl = "==1.4.0"
-PyYAML = "==5.3.1"
+PyYAML = "==5.4"
 psycopg2 = "*"
 
 [dev-packages]
