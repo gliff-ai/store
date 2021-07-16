@@ -74,3 +74,7 @@ class AccountRecovery(Schema):
 
 class AccountRecoveryOut(Schema):
     recovery_key: str
+
+
+class VerifyEmailOut(Schema):
+    success: bool

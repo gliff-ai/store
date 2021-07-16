@@ -19,6 +19,7 @@ from .schemas import (
     CreateInvite,
     InviteOut,
     AccountRecoveryOut,
+    VerifyEmailOut
 )
 import server.emails as email_template
 
@@ -274,7 +275,7 @@ def get_recovery(request, recovery_id: str):
         return 404, None
 
 
-@router.get("/verify_email/{verification_id}", auth=None, response={200: None, 403: None})
+@router.get("/verify_email/{verification_id}", auth=None, response={200: VerifyEmailOut, 403: VerifyEmailOut})
 def verify_email(request, verification_id: str):
     try:
         validation = get_object_or_404(
@@ -306,8 +307,9 @@ def verify_email(request, verification_id: str):
         except Exception as e:
             logger.error(e)
 
-        return 200, None
+        logger.warning("got here")
+        return 200, {"success": True}
 
     except Exception as e:
         logger.warning(f"Received Exception {e}, Invalid Email Verification")
-        return 403, None
+        return 403, {"success": False}
