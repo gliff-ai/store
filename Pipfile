@@ -53,8 +53,10 @@ django-apscheduler = "*"
 [dev-packages]
 
 [scripts]
-lint = "flake8 ."
 format = "black ."
+lint = "flake8 ."
+migrate = "python manage.py migrate"
+serve = "python start.py"
 
 [requires]
 python_version = "3.8"
