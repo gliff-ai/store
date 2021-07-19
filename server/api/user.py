@@ -164,6 +164,7 @@ def create_invite(request, payload: CreateInvite):
         logger.warning(f"Received Exception {e}")
         return 500, {"message": "unknown error"}
 
+
 ### These routes have no auth as user either won't have an account or won't be logged in when they are used
 @router.post("/verify_email", auth=None, response={201: None, 409: Error})
 def request_validation_email(request, payload: CreateInvite):
