@@ -48,6 +48,7 @@ Django = "==3.1.4"
 PyNaCl = "==1.4.0"
 PyYAML = "==5.3.1"
 psycopg2 = "*"
+django-apscheduler = "*"
 
 [dev-packages]
 
