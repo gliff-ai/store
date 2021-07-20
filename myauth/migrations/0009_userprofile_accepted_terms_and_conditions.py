@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('myauth', '0008_auto_20210709_1319'),
+        ("myauth", "0008_auto_20210709_1319"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='userprofile',
-            name='accepted_terms_and_conditions',
+            model_name="userprofile",
+            name="accepted_terms_and_conditions",
             field=models.DateTimeField(blank=True, null=True),
         ),
     ]
