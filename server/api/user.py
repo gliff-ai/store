@@ -165,11 +165,20 @@ def create_invite(request, payload: CreateInvite):
         return 500, {"message": "unknown error"}
 
 
-@router.post("/verify_email", response={201: None, 409: Error})
-def request_validation_email(request):
+### These routes have no auth as user either won't have an account or won't be logged in when they are used
+@router.post("/verify_email", auth=None, response={201: None, 409: Error})
+def request_validation_email(request, payload: CreateInvite):
     try:
-        user = request.auth
+        user = User.objects.get(email=payload.email)
+        if user is None:
+            logger.info("trying to recover an account that doesn't exist")
+            return 201, None  # Not a user, but don't tell anyone that!
 
+    except ObjectDoesNotExist:
+        logger.info("trying to recover an account that doesn't exist")
+        return 201, None  # Not a user, but don't tell anyone that!
+
+    try:
         uid = str(uuid4())
         now = datetime.now(tz=timezone.utc)
         now_plus_24h = now + timedelta(hours=24)
@@ -184,7 +193,7 @@ def request_validation_email(request):
                 to_emails=user.email,
             )
             message.dynamic_template_data = {
-                "verify_url": settings.BASE_URL + "/verify?uid=" + uid,
+                "verify_url": settings.BASE_URL + "/verify_email/" + uid,
             }
             message.template_id = email_template.id["verify_email"]
 
@@ -200,7 +209,6 @@ def request_validation_email(request):
         return 409, None
 
 
-### These routes have no auth as user either won't have an account or won't be logged in when they are used
 @router.get("/invite", auth=None, response={200: InviteOut, 404: None})
 def accept_invite(request, invite_id: str):
     try:
