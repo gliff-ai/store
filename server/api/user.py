@@ -34,6 +34,10 @@ def create_user(request, payload: UserProfileIn):
     if hasattr(user, "userprofile"):
         return 409, {"message": "User Exists"}
 
+    if not payload.accepted_terms_and_conditions:
+        logger.warning(f"Terms and conditions not accepted in payload ({payload.accepted_terms_and_conditions})")
+        return 409, {"message": "Terms and conditions not accepted"}
+
     if payload.team_id is None:
         # Create a team for this user. All teams are on the basic plan until we have processed payment
         tier = Tier.objects.get(name__exact="COMMUNITY")
@@ -55,6 +59,7 @@ def create_user(request, payload: UserProfileIn):
         team_id=team.id,
         name=payload.name,
         recovery_key=payload.recovery_key,
+        accepted_terms_and_conditions=datetime.now(tz=timezone.utc),
     )
     user_profile.id = user_profile.user_id  # The frontend expects id not user_id
     user_profile.email = user.email
