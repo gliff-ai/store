@@ -82,6 +82,7 @@ class UserProfile(models.Model):
     recovery_key = models.TextField()
     team = models.ForeignKey(Team, on_delete=models.RESTRICT)
     email_verified = models.DateTimeField(blank=True, null=True)
+    accepted_terms_and_conditions = models.DateTimeField(blank=True, null=True)
 
     def __str__(self):
         return self.user.email
