@@ -69,6 +69,7 @@ INSTALLED_APPS = [
     "myauth.apps.GliffAuthConfig",
     "django_etebase.apps.DjangoEtebaseConfig",
     "django_etebase.token_auth.apps.TokenAuthConfig",
+    "django_apscheduler",
 ]
 
 MIDDLEWARE = [
@@ -143,3 +144,6 @@ BASE_URL = config("BASE_URL", default="http://localhost:3000")
 
 SUCCESS_URL = config("SUCCESS_URL", default="http://localhost:3000/signup/success")
 CANCEL_URL = config("CANCEL_URL", default="http://localhost:3000/signup/cancel")
+
+# vars used in background tasks
+RUN_TASK_UPDATE_STORAGE = False
