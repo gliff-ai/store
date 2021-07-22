@@ -55,6 +55,7 @@ django-apscheduler = "==0.6.0"
 [scripts]
 format = "black ."
 lint = "flake8 ."
+makemigrations = "python manage.py makemigrations"
 migrate = "python manage.py migrate"
 serve = "python start.py"
 

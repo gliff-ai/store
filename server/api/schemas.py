@@ -17,6 +17,7 @@ class UserProfileIn(Schema):
     team_id: int = None
     recovery_key: str
     invite_id: str = None
+    accepted_terms_and_conditions: bool = False
 
 
 class TeamSchema(Schema):

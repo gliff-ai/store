@@ -34,6 +34,10 @@ def create_user(request, payload: UserProfileIn):
     if hasattr(user, "userprofile"):
         return 409, {"message": "User Exists"}
 
+    if not payload.accepted_terms_and_conditions:
+        logger.warning(f"Terms and conditions not accepted in payload ({payload.accepted_terms_and_conditions})")
+        return 409, {"message": "Terms and conditions not accepted"}
+
     if payload.team_id is None:
         # Create a team for this user. All teams are on the basic plan until we have processed payment
         tier = Tier.objects.get(name__exact="COMMUNITY")
@@ -55,6 +59,7 @@ def create_user(request, payload: UserProfileIn):
         team_id=team.id,
         name=payload.name,
         recovery_key=payload.recovery_key,
+        accepted_terms_and_conditions=datetime.now(tz=timezone.utc),
     )
     user_profile.id = user_profile.user_id  # The frontend expects id not user_id
     user_profile.email = user.email
@@ -165,11 +170,20 @@ def create_invite(request, payload: CreateInvite):
         return 500, {"message": "unknown error"}
 
 
-@router.post("/verify_email", response={201: None, 409: Error})
-def request_validation_email(request):
+### These routes have no auth as user either won't have an account or won't be logged in when they are used
+@router.post("/verify_email", auth=None, response={201: None, 409: Error})
+def request_validation_email(request, payload: CreateInvite):
     try:
-        user = request.auth
+        user = User.objects.get(email=payload.email)
+        if user is None:
+            logger.info("trying to recover an account that doesn't exist")
+            return 201, None  # Not a user, but don't tell anyone that!
 
+    except ObjectDoesNotExist:
+        logger.info("trying to recover an account that doesn't exist")
+        return 201, None  # Not a user, but don't tell anyone that!
+
+    try:
         uid = str(uuid4())
         now = datetime.now(tz=timezone.utc)
         now_plus_24h = now + timedelta(hours=24)
@@ -184,7 +198,7 @@ def request_validation_email(request):
                 to_emails=user.email,
             )
             message.dynamic_template_data = {
-                "verify_url": settings.BASE_URL + "/verify?uid=" + uid,
+                "verify_url": settings.BASE_URL + "/verify_email/" + uid,
             }
             message.template_id = email_template.id["verify_email"]
 
@@ -200,7 +214,6 @@ def request_validation_email(request):
         return 409, None
 
 
-### These routes have no auth as user either won't have an account or won't be logged in when they are used
 @router.get("/invite", auth=None, response={200: InviteOut, 404: None})
 def accept_invite(request, invite_id: str):
     try:
