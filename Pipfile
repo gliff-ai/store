@@ -35,7 +35,7 @@ starlette = "==0.13.6"
 stripe = ">=2.58.0"
 typing-extensions = "==3.7.4.3"
 uvicorn = {version = "==0.13.2", extras = ["standard"]}
-uvloop = "==0.14.0"
+uvloop = "==0.15.3"
 watchgod = "==0.6"
 websockets = "==8.1"
 etebase-server = {editable = true, file = "./etebase-server"}
