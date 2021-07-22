@@ -79,3 +79,8 @@ logger.add(
 
 
 LOG_LEVEL = "DEBUG"  # used for intercepting uvicorn and django logs, which use Python's own logging
+
+# vars used in background tasks
+RUN_TASK_UPDATE_STORAGE = get_env_value("RUN_TASK_UPDATE_STORAGE")
+TASK_UPDATE_STORAGE_HOUR = get_env_value("TASK_UPDATE_STORAGE_HOUR")
+TASK_UPDATE_STORAGE_MINUTE = get_env_value("TASK_UPDATE_STORAGE_MINUTE")

@@ -8,7 +8,7 @@ from django.core.management.base import BaseCommand
 def get_container_client():
     from azure.storage.blob import ContainerClient
 
-    connection_string = f"DefaultEndpointsProtocol=https;AccountName={settings.AZURE_ACCOUNT_NAME};AccountKey={settings.get_env_value('AZURE_ACCOUNT_KEY')}"
+    connection_string = f"DefaultEndpointsProtocol=https;AccountName={settings.AZURE_ACCOUNT_NAME};AccountKey={settings.AZURE_ACCOUNT_KEY}"
     return ContainerClient.from_connection_string(conn_str=connection_string, container_name=settings.AZURE_CONTAINER)
 
 
@@ -61,12 +61,12 @@ class Command(BaseCommand):
         # the default database for job store is PostgresSQL (called SQLAlchemyJobStore)
         scheduler.add_jobstore(DjangoJobStore(), "default")
 
-        # schedule jobs to run every day at 12 a.m. UTC
+        # schedule jobs to run every day at hour:minute UTC
         scheduler.add_job(
             update_team_storage_usage,
             "cron",
-            hour="00",
-            minute="00",
+            hour=settings.TASK_UPDATE_STORAGE_HOUR,
+            minute=settings.TASK_UPDATE_STORAGE_MINUTE,
             id="update_team_storage_usage",
             replace_existing=True,
         )

@@ -66,8 +66,9 @@ if __name__ == "__main__":
     # (they shouldn't, but it happens)
     setup_logging()
 
-    # run background task for updating all team's storage usage
-    management.call_command("update_team_storage_usage")
+    if settings.RUN_TASK_UPDATE_STORAGE:
+        # run background task for updating all team's storage usage
+        management.call_command("update_team_storage_usage")
 
     # run the thing
     server.run()
