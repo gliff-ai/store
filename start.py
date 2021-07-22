@@ -4,6 +4,7 @@ import django
 from uvicorn import Config, Server
 from loguru import logger
 from django.conf import settings
+from django.core import management
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "server.settings.base")
 
@@ -64,6 +65,10 @@ if __name__ == "__main__":
     # setup logging last, to make sure no library overwrites it
     # (they shouldn't, but it happens)
     setup_logging()
+
+    if settings.RUN_TASK_UPDATE_STORAGE:
+        # run background task for updating all team's storage usage
+        management.call_command("update_team_storage_usage")
 
     # run the thing
     server.run()

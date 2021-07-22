@@ -48,7 +48,7 @@ sentry_sdk.init(
         DjangoIntegration(),
         LoggingIntegration(level=None, event_level=None),
     ],
-    release="store@1.3.0",
+    release="store@1.4.0",
     # Set traces_sample_rate to 1.0 to capture 100%
     # of transactions for performance monitoring.
     # We recommend adjusting this value in production.
@@ -79,3 +79,8 @@ logger.add(
 
 
 LOG_LEVEL = "DEBUG"  # used for intercepting uvicorn and django logs, which use Python's own logging
+
+# vars used in background tasks
+RUN_TASK_UPDATE_STORAGE = get_env_value("RUN_TASK_UPDATE_STORAGE")
+TASK_UPDATE_STORAGE_HOUR = get_env_value("TASK_UPDATE_STORAGE_HOUR")
+TASK_UPDATE_STORAGE_MINUTE = get_env_value("TASK_UPDATE_STORAGE_MINUTE")

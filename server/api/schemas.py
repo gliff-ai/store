@@ -24,6 +24,7 @@ class TeamSchema(Schema):
     id: int
     owner_id: int
     tier: TierSchema
+    usage: int
 
 
 class UserProfileOut(Schema):
