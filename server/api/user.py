@@ -97,13 +97,16 @@ def create_user(request, payload: UserProfileIn):
     return user_profile
 
 
-@router.get("/", response=UserProfileOut)
+@router.get("/", response={200: UserProfileOut, 204: None})
 def get_user(request):
-    user = request.auth
-    user.userprofile.id = user.id
-    user.userprofile.email = user.email
+    try:
+        user = request.auth
+        user.userprofile.id = user.id
+        user.userprofile.email = user.email
 
-    return user.userprofile
+        return user.userprofile
+    except UserProfile.DoesNotExist:
+        return 204, None
 
 
 @router.put("/", response=UserProfileOut)  # Update a user profile
