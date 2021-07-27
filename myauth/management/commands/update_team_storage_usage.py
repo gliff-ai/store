@@ -59,7 +59,7 @@ class Command(BaseCommand):
         scheduler = BackgroundScheduler(job_defaults=job_defaults, timezone="UTC")
 
         # the default database for job store is PostgresSQL (called SQLAlchemyJobStore)
-        scheduler.add_jobstore(DjangoJobStore(), "default")
+        # scheduler.add_jobstore(DjangoJobStore(), "default")
 
         # schedule jobs to run every day at hour:minute UTC
         scheduler.add_job(
