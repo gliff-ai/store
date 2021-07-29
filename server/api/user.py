@@ -103,6 +103,7 @@ def get_user(request):
         user = request.auth
         user.userprofile.id = user.id
         user.userprofile.email = user.email
+        user.userprofile.team = user.team
 
         return user.userprofile
     except UserProfile.DoesNotExist:
