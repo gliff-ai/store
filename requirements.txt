@@ -10,7 +10,6 @@
 
 -i https://pypi.org/simple
 -e ./etebase-server
--e git+https://github.com/pjsier/django-storages.git@fb519de50b136dbdff37d72e8c564099c0aa088e#egg=django-storages
 aiofiles==0.6.0
 aioredis==1.3.1
 appdirs==1.4.4
@@ -33,6 +32,7 @@ django-ninja==0.13.2
 django==3.1.4
 fastapi==0.63.0
 flake8==3.9.2
+git+https://github.com/pjsier/django-storages.git@fb519de50b136dbdff37d72e8c564099c0aa088e#egg=django-storages
 h11==0.11.0
 hiredis==1.1.0
 httptools==0.1.1

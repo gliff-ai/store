@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "ba1012b027d8b6842a2d694c453cd6d651ca53591388cba4fdf1968407ef2668"
+            "sha256": "61916fa77ad577b59e4c2be9e4793b49678ff4f0170119e4e3902dc8a7e75c95"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -212,7 +212,6 @@
             "version": "==0.13.2"
         },
         "django-storages": {
-            "editable": true,
             "git": "https://github.com/pjsier/django-storages.git",
             "ref": "fb519de50b136dbdff37d72e8c564099c0aa088e"
         },
