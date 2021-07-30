@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "e565dd74c1472803dcdd1af033454b75945b7e5a13dae13f9683ae4cfc695d62"
+            "sha256": "61916fa77ad577b59e4c2be9e4793b49678ff4f0170119e4e3902dc8a7e75c95"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -72,13 +72,20 @@
             "index": "pypi",
             "version": "==1.1.27"
         },
+        "azure-core": {
+            "hashes": [
+                "sha256:83ef981ca4ad167c1df7b1ec5c4bda74999fcd21cacc048e83cf8ce51c61d5c2",
+                "sha256:b1c7d2e01846074f258c8b2e592239aef836a2b1c27d8d0e8491a2c7e2906ef4"
+            ],
+            "version": "==1.16.0"
+        },
         "azure-storage-blob": {
             "hashes": [
-                "sha256:a8e91a51d4f62d11127c7fd8ba0077385c5b11022f0269f8a2a71b9fc36bef31",
-                "sha256:b90323aad60f207f9f90a0c4cf94c10acc313c20b39403398dfba51f25f7b454"
+                "sha256:e74c2c49fd04b80225f5b9734f1dbd417d89f280abfedccced3ac21509e1659d",
+                "sha256:eb37b50ddfb6e558b29f6c8c03b0666514e55d6170bf4624e7261a3af93c6401"
             ],
             "index": "pypi",
-            "version": "==2.1.0"
+            "version": "==12.8.1"
         },
         "azure-storage-common": {
             "hashes": [
@@ -205,15 +212,8 @@
             "version": "==0.13.2"
         },
         "django-storages": {
-            "extras": [
-                "azure"
-            ],
-            "hashes": [
-                "sha256:c823dbf56c9e35b0999a13d7e05062b837bae36c518a40255d522fbe3750fbb4",
-                "sha256:f28765826d507a0309cfaa849bd084894bc71d81bf0d09479168d44785396f80"
-            ],
-            "index": "pypi",
-            "version": "==1.11.1"
+            "git": "https://github.com/pjsier/django-storages.git",
+            "ref": "fb519de50b136dbdff37d72e8c564099c0aa088e"
         },
         "etebase-server": {
             "editable": true,
@@ -313,6 +313,13 @@
             "markers": "python_version >= '3.0'",
             "version": "==3.2"
         },
+        "isodate": {
+            "hashes": [
+                "sha256:2e364a3d5759479cdb2d37cce6b9376ea504db2ff90252a2e5b7cc89cc9ff2d8",
+                "sha256:aa4d33c06640f5352aca96e4b81afd8ab3b47337cc12089822d6f322ac772c81"
+            ],
+            "version": "==0.6.0"
+        },
         "loguru": {
             "hashes": [
                 "sha256:b28e72ac7a98be3d28ad28570299a393dfcd32e5e3f6a353dec94675767b6319",
@@ -354,6 +361,21 @@
             ],
             "index": "pypi",
             "version": "==1.0.2"
+        },
+        "msrest": {
+            "hashes": [
+                "sha256:72661bc7bedc2dc2040e8f170b6e9ef226ee6d3892e01affd4d26b06474d68d8",
+                "sha256:c840511c845330e96886011a236440fafc2c9aff7b2df9c0a92041ee2dee3782"
+            ],
+            "version": "==0.6.21"
+        },
+        "oauthlib": {
+            "hashes": [
+                "sha256:42bf6354c2ed8c6acb54d971fce6f88193d97297e18602a3a886603f9d7730cc",
+                "sha256:8f0215fcc533dd8dd1bee6f4c412d4f0cd7297307d43ac61666389e3bc3198a3"
+            ],
+            "markers": "python_version >= '3.6'",
+            "version": "==3.1.1"
         },
         "psycopg2-binary": {
             "hashes": [
@@ -516,6 +538,14 @@
             "markers": "python_version >= '3.0'",
             "version": "==2.26.0"
         },
+        "requests-oauthlib": {
+            "hashes": [
+                "sha256:7f71572defaecd16372f9006f33c2ec8c077c3cfa6f5911a9a90202beb513f3d",
+                "sha256:b4261601a71fd721a8bd6d7aa1cc1d6a8a93b4a9f5e96626f8e4d91e8beeaa6a",
+                "sha256:fa6c47b933f01060936d87ae9327fead68768b69c6c9ea2109c48be30f2d4dbc"
+            ],
+            "version": "==1.3.0"
+        },
         "sendgrid": {
             "hashes": [
                 "sha256:1c1cca97ab968f81af43ddbbe44aade5a689da27e3e4975dc366042499620abe",
@@ -526,11 +556,11 @@
         },
         "sentry-sdk": {
             "hashes": [
-                "sha256:5210a712dd57d88d225c1fc3fe3a3626fee493637bcd54e204826cf04b8d769c",
-                "sha256:6864dcb6f7dec692635e5518c2a5c80010adf673c70340817f1a1b713d65bb41"
+                "sha256:ebe99144fa9618d4b0e7617e7929b75acd905d258c3c779edcd34c0adfffe26c",
+                "sha256:f33d34c886d0ba24c75ea8885a8b3a172358853c7cbde05979fc99c29ef7bc52"
             ],
             "index": "pypi",
-            "version": "==1.3.0"
+            "version": "==1.3.1"
         },
         "six": {
             "hashes": [
