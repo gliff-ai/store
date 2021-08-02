@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "61916fa77ad577b59e4c2be9e4793b49678ff4f0170119e4e3902dc8a7e75c95"
+            "sha256": "8e5b81745b4f795348c5723b078dd4755d840d48dc6075582a323ae4432193fd"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -26,11 +26,11 @@
         },
         "aioredis": {
             "hashes": [
-                "sha256:15f8af30b044c771aee6787e5ec24694c048184c7b9e54c3b60c750a4b93273a",
-                "sha256:b61808d7e97b7cd5a92ed574937a079c9387fdadd22bfbfa7ad2fd319ecc26e3"
+                "sha256:3a2de4b614e6a5f8e104238924294dc4e811aefbe17ddf52c04a93cbf06e67db",
+                "sha256:9921d68a3df5c5cdb0d5b49ad4fc88a4cfdd60c108325df4f0066e8410c55ffb"
             ],
             "index": "pypi",
-            "version": "==1.3.1"
+            "version": "==2.0.0"
         },
         "appdirs": {
             "hashes": [
@@ -147,11 +147,11 @@
         },
         "charset-normalizer": {
             "hashes": [
-                "sha256:88fce3fa5b1a84fdcb3f603d889f723d1dd89b26059d0123ca435570e848d5e1",
-                "sha256:c46c3ace2d744cfbdebceaa3c19ae691f53ae621b39fd7570f59d14fb7f2fd12"
+                "sha256:0c8911edd15d19223366a194a513099a302055a962bca2cec0f54b8b63175d8b",
+                "sha256:f23667ebe1084be45f6ae0538e4a5a865206544097e4e8bbcacf42cd02a348f3"
             ],
             "markers": "python_version >= '3.0'",
-            "version": "==2.0.3"
+            "version": "==2.0.4"
         },
         "click": {
             "hashes": [
@@ -545,6 +545,10 @@
                 "sha256:fa6c47b933f01060936d87ae9327fead68768b69c6c9ea2109c48be30f2d4dbc"
             ],
             "version": "==1.3.0"
+        },
+        "sanitized-package": {
+            "editable": true,
+            "file": "file:///home/dependabot/dependabot-updater/tmp/dependabot_20210802-7-1iltr4s/etebase-server"
         },
         "sendgrid": {
             "hashes": [
