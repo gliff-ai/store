@@ -30,21 +30,13 @@ def calculatePlanTotal(base, addons):
         return base + addons
 
 
-@router.get(
-    "/plan",
-    response={200: CurrentPlanOut, 500: Error},
-)
-def get_plan_limits(request):
-    user = request.auth
-    team = Team.objects.get(owner_id=user.id)
-
-    if user.team.owner_id is not user.id:
-        return 403, {"message": "Only owners can view plan details"}  # is this true?
-
+def calculate_limits(team):
     # Add Usage
-    team_members = UserProfile.objects.filter(team__owner_id=user.id).values_list("user_id", flat=True)
-    users = User.objects.filter(userprofile__team__owner_id=user.id, userprofile__is_collaborator=False).count()
-    collaborators = User.objects.filter(userprofile__team__owner_id=user.id, userprofile__is_collaborator=True).count()
+    team_members = UserProfile.objects.filter(team__owner_id=team.owner).values_list("user_id", flat=True)
+    users = User.objects.filter(userprofile__team__owner_id=team.owner, userprofile__is_collaborator=False).count()
+    collaborators = User.objects.filter(
+        userprofile__team__owner_id=team.owner, userprofile__is_collaborator=True
+    ).count()
     storage = Team.objects.filter(id=team.id).values("usage")[0]
     projects = Collection.objects.filter(owner__in=team_members).count()
 
@@ -80,6 +72,20 @@ def get_plan_limits(request):
     plan["collaborators_limit"] = calculatePlanTotal(team.tier.base_collaborator_limit, addons["collaborators"])
 
     return plan
+
+
+@router.get(
+    "/plan",
+    response={200: CurrentPlanOut, 500: Error},
+)
+def get_plan_limits(request):
+    user = request.auth
+    team = Team.objects.get(owner_id=user.id)
+
+    if user.team.owner_id is not user.id:
+        return 403, {"message": "Only owners can view plan details"}  # is this true?
+
+    return calculate_limits(team)
 
 
 @router.post(
