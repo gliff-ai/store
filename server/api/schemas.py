@@ -88,6 +88,10 @@ class CurrentPlanOut(Schema):
     has_billing: bool
     tier_name: str
     tier_id: int
+    users_limit: Optional[conint(ge=0)] = 0
+    projects_limit: Optional[conint(ge=0)] = 0
+    collaborators_limit: Optional[conint(ge=0)] = 0
     users: Optional[conint(ge=0)] = 0
     projects: Optional[conint(ge=0)] = 0
     collaborators: Optional[conint(ge=0)] = 0
+    storage: Optional[conint(ge=0)] = 0

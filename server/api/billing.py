@@ -5,7 +5,7 @@ from loguru import logger
 from ninja import Router
 import stripe
 
-from myauth.models import Tier, Team, Billing, TierAddons
+from myauth.models import Tier, Team, Billing, TierAddons, User
 from server.api.schemas import CheckoutSessionIn, CheckoutSessionOut, Error, AddonIn, CurrentPlanOut
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
@@ -40,14 +40,21 @@ def get_plan_limits(request):
     if user.team.owner_id is not user.id:
         return 403, {"message": "Only owners can view plan details"}  # is this true?
 
-    plan = dict(tier_name=team.tier.name, tier_id=team.tier.id)
+    # Add Usage
+    # Some of these will be collaborators!
+    # TODO add projects
+    users = User.objects.filter(userprofile__team__owner_id=user.id).count()
+    storage = Team.objects.filter(id=team.id).values("usage")[0]
 
+    plan = dict(tier_name=team.tier.name, tier_id=team.tier.id, users=users, storage=storage["usage"])
+
+    # Add limits
     if not hasattr(team, "billing"):
         # Team is on the free plan so it's whatever those limits are
         plan["has_billing"] = False
-        plan["projects"] = team.tier.base_project_limit
-        plan["users"] = team.tier.base_user_limit
-        plan["collaborators"] = team.tier.base_collaborator_limit
+        plan["projects_limit"] = team.tier.base_project_limit
+        plan["users_limit"] = team.tier.base_user_limit
+        plan["collaborators_limit"] = team.tier.base_collaborator_limit
         return plan
 
     plan["has_billing"] = True
@@ -59,9 +66,9 @@ def get_plan_limits(request):
     )
 
     # None is "unlimited"
-    plan["projects"] = calculatePlanTotal(team.tier.base_project_limit, addons["projects"])
-    plan["users"] = calculatePlanTotal(team.tier.base_user_limit, addons["users"])
-    plan["collaborators"] = calculatePlanTotal(team.tier.base_collaborator_limit, addons["collaborators"])
+    plan["projects_limit"] = calculatePlanTotal(team.tier.base_project_limit, addons["projects"])
+    plan["users_limit"] = calculatePlanTotal(team.tier.base_user_limit, addons["users"])
+    plan["collaborators_limit"] = calculatePlanTotal(team.tier.base_collaborator_limit, addons["collaborators"])
 
     return plan
 
