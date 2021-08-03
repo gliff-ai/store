@@ -24,7 +24,7 @@ def get_team_limits(key):
     return calculate_limits(user.team)
 
 
-class TempMiddleware:
+class EnforcePlanLimitsMiddleware:
     def __init__(self, app: ASGIApp) -> None:
         self.app = app
 
@@ -63,7 +63,7 @@ class TempMiddleware:
 
 
 def get_application() -> FastAPI:
-    etebase_app = create_application(middlewares=[TempMiddleware])
+    etebase_app = create_application(middlewares=[EnforcePlanLimitsMiddleware])
 
     app = FastAPI(title="STORE", debug=settings.DEBUG)
     app.add_middleware(
@@ -73,7 +73,7 @@ def get_application() -> FastAPI:
         allow_methods=["*"],
         allow_headers=["*"],
     )
-    app.add_middleware(TempMiddleware)
+    app.add_middleware(EnforcePlanLimitsMiddleware)
 
     # We mount Django (and the API, via urls.py) under /django
     app.mount("/django", WSGIMiddleware(get_wsgi_application()))
