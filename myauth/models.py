@@ -99,6 +99,7 @@ class UserProfile(models.Model):
     team = models.ForeignKey(Team, on_delete=models.RESTRICT)
     email_verified = models.DateTimeField(blank=True, null=True)
     accepted_terms_and_conditions = models.DateTimeField(blank=True, null=True)
+    is_collaborator = models.BooleanField(null=False, default=False)
 
     def __str__(self):
         return self.user.email

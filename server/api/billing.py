@@ -41,12 +41,18 @@ def get_plan_limits(request):
         return 403, {"message": "Only owners can view plan details"}  # is this true?
 
     # Add Usage
-    # Some of these will be collaborators!
     # TODO add projects
-    users = User.objects.filter(userprofile__team__owner_id=user.id).count()
+    users = User.objects.filter(userprofile__team__owner_id=user.id, userprofile__is_collaborator=False).count()
+    collaborators = User.objects.filter(userprofile__team__owner_id=user.id, userprofile__is_collaborator=True).count()
     storage = Team.objects.filter(id=team.id).values("usage")[0]
 
-    plan = dict(tier_name=team.tier.name, tier_id=team.tier.id, users=users, storage=storage["usage"])
+    plan = dict(
+        tier_name=team.tier.name,
+        tier_id=team.tier.id,
+        users=users,
+        storage=storage["usage"],
+        collaborators=collaborators,
+    )
 
     # Add limits
     if not hasattr(team, "billing"):
