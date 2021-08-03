@@ -130,7 +130,7 @@ def addon(request, payload: AddonIn):
             )
 
         # Update Stripe
-        res = stripe.Subscription.modify(team.billing.subscription_id, items=items)
+        stripe.Subscription.modify(team.billing.subscription_id, items=items)
 
         # Update DB
         addons_row = TierAddons.objects.create(
