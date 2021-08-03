@@ -63,7 +63,7 @@ class Tier(models.Model):
     stripe_storage_price_id = models.CharField(blank=True, max_length=50, null=True, unique=True)
     stripe_user_price_id = models.CharField(blank=True, max_length=50, null=True, unique=True)
     stripe_collaborator_price_id = models.CharField(blank=True, max_length=50, null=True, unique=True)
-    stripe_collaborator_project_id = models.CharField(blank=True, max_length=50, null=True, unique=True)
+    stripe_project_price_id = models.CharField(blank=True, max_length=50, null=True, unique=True)
 
     base_user_limit = models.IntegerField(null=False)
     base_project_limit = models.IntegerField(null=False)

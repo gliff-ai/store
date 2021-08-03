@@ -1,16 +1,100 @@
 from datetime import datetime, timezone
 from django.conf import settings
+from django.db.models import Sum
 from loguru import logger
 from ninja import Router
 import stripe
 
-from myauth.models import Tier, Team, Billing
-from server.api.schemas import CheckoutSessionIn, CheckoutSessionOut, Error
+from myauth.models import Tier, Team, Billing, TierAddons
+from server.api.schemas import CheckoutSessionIn, CheckoutSessionOut, Error, AddonIn
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
 endpoint_secret = settings.STRIPE_WEBHOOK_SECRET
 
 router = Router()
+
+
+# Filter a stripe subscription to get the IDs of prices already applied (so we can update them)
+def get_user_price_id(price_id, subscription):
+    return next(
+        (item.id for item in subscription["items"]["data"] if item.price["id"] == price_id),
+        None,
+    )
+
+
+@router.post(
+    "/addon",
+    response={201: None, 422: Error, 402: Error, 500: Error},
+)
+def addon(request, payload: AddonIn):
+    try:
+        user = request.auth
+        team = Team.objects.get(owner_id=user.id)
+
+        if user.team.owner_id is not user.id:
+            return 403, {"message": "Only owners can upgrade plans"}
+
+        if not hasattr(team, "billing"):
+            return 422, {"message": "No valid subscription to upgrade. Try changing your plan"}
+
+        items = []
+
+        addons = TierAddons.objects.filter(team=team).aggregate(
+            users=Sum("additional_user_count"),
+            projects=Sum("additional_project_count"),
+            collaborators=Sum("additional_collaborator_count"),
+        )
+
+        subscription = stripe.Subscription.retrieve(team.billing.subscription_id)
+
+        if team.tier.base_project_limit != -1 and payload.projects > 0:
+            # the user doesn't have unlimited projects
+            projects = addons["projects"] + payload.projects
+            items.append(
+                {
+                    "price": team.tier.stripe_project_price_id,
+                    "quantity": projects,
+                    "id": get_user_price_id(team.tier.stripe_project_price_id, subscription),
+                }
+            )
+
+        if payload.collaborators > 0:
+            collaborators = addons["collaborators"] + payload.collaborators
+            items.append(
+                {
+                    "price": team.tier.stripe_collaborator_price_id,
+                    "quantity": collaborators,
+                    "id": get_user_price_id(team.tier.stripe_collaborator_price_id, subscription),
+                }
+            )
+
+        if payload.users > 0:
+            users = addons["users"] + payload.users
+            items.append(
+                {
+                    "price": team.tier.stripe_user_price_id,
+                    "quantity": users,
+                    "id": get_user_price_id(team.tier.stripe_user_price_id, subscription),
+                }
+            )
+
+        # Update Stripe
+        res = stripe.Subscription.modify(team.billing.subscription_id, items=items)
+
+        # Update DB
+        addons_row = TierAddons.objects.create(
+            team_id=team.id,
+            additional_user_count=payload.users,
+            additional_project_count=payload.projects,
+            additional_collaborator_count=payload.collaborators,
+        )
+        addons_row.save()
+
+        return 201, None
+
+    except Exception as e:
+        logger.error(f"Unknown addon error {e}")
+        return 500, {"message": "Unknown Error"}
 
 
 @router.post(
@@ -30,14 +114,6 @@ def create_checkout_session(request, payload: CheckoutSessionIn):
 
         # By default, just charge the flat rate
         line_items = [{"price": tier.stripe_flat_price_id, "quantity": 1}]
-
-        # We can also add a Storage price
-        if tier.stripe_storage_price_id is not None:
-            line_items.append({"price": tier.stripe_storage_price_id})
-
-        # And seats
-        if tier.stripe_seat_price_id is not None:
-            line_items.append({"price": tier.stripe_seat_price_id})
 
         checkout_session = stripe.checkout.Session.create(
             payment_method_types=["card"],

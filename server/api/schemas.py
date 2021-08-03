@@ -1,7 +1,7 @@
 from typing import List, Optional
 from ninja import Schema
 from ninja.orm import create_schema
-from pydantic import validator, typing
+from pydantic import validator, typing, conint
 
 from myauth.models import User, UserProfile, Tier, Team
 
@@ -76,3 +76,9 @@ class AccountRecovery(Schema):
 
 class AccountRecoveryOut(Schema):
     recovery_key: str
+
+
+class AddonIn(Schema):
+    users: conint(ge=0) = 0
+    projects: conint(ge=0) = 0
+    collaborators: conint(ge=0) = 0
