@@ -82,3 +82,10 @@ class AddonIn(Schema):
     users: conint(ge=0) = 0
     projects: conint(ge=0) = 0
     collaborators: conint(ge=0) = 0
+
+
+class CurrentPlanOut(Schema):
+    billing: bool
+    users: Optional[conint(ge=0)] = 0
+    projects: Optional[conint(ge=0)] = 0
+    collaborators: Optional[conint(ge=0)] = 0

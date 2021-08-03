@@ -6,7 +6,7 @@ from ninja import Router
 import stripe
 
 from myauth.models import Tier, Team, Billing, TierAddons
-from server.api.schemas import CheckoutSessionIn, CheckoutSessionOut, Error, AddonIn
+from server.api.schemas import CheckoutSessionIn, CheckoutSessionOut, Error, AddonIn, CurrentPlanOut
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
 endpoint_secret = settings.STRIPE_WEBHOOK_SECRET
@@ -20,6 +20,50 @@ def get_user_price_id(price_id, subscription):
         (item.id for item in subscription["items"]["data"] if item.price["id"] == price_id),
         None,
     )
+
+
+def calculatePlanTotal(base, addons):
+    if base is None:
+        return base
+    else:
+        return base + addons
+
+
+@router.get(
+    "/plan",
+    response={200: CurrentPlanOut, 500: Error},
+)
+def get_plan_limits(request):
+    user = request.auth
+    team = Team.objects.get(owner_id=user.id)
+
+    if user.team.owner_id is not user.id:
+        return 403, {"message": "Only owners can view plan details"}  # is this true?
+
+    plan = dict()
+
+    if not hasattr(team, "billing"):
+        # Team is on the free plan so it's whatever those limits are
+        plan["billing"] = False
+        plan["projects"] = team.tier.base_project_limit
+        plan["users"] = team.tier.base_user_limit
+        plan["collaborators"] = team.tier.base_collaborator_limit
+        return plan
+
+    plan["billing"] = True
+
+    addons = TierAddons.objects.filter(team=team).aggregate(
+        users=Sum("additional_user_count"),
+        projects=Sum("additional_project_count"),
+        collaborators=Sum("additional_collaborator_count"),
+    )
+
+    # None is "unlimited"
+    plan["projects"] = calculatePlanTotal(team.tier.base_project_limit, addons["projects"])
+    plan["users"] = calculatePlanTotal(team.tier.base_user_limit, addons["users"])
+    plan["collaborators"] = calculatePlanTotal(team.tier.base_collaborator_limit, addons["collaborators"])
+
+    return plan
 
 
 @router.post(
@@ -47,7 +91,7 @@ def addon(request, payload: AddonIn):
 
         subscription = stripe.Subscription.retrieve(team.billing.subscription_id)
 
-        if team.tier.base_project_limit != -1 and payload.projects > 0:
+        if team.tier.base_project_limit is not None and payload.projects > 0:
             # the user doesn't have unlimited projects
             projects = addons["projects"] + payload.projects
             items.append(

@@ -56,6 +56,7 @@ class User(AbstractUser):
         return self.email
 
 
+# For the limits, Null is unlimited
 class Tier(models.Model):
     id: int
     name = models.CharField(max_length=50)
@@ -65,10 +66,10 @@ class Tier(models.Model):
     stripe_collaborator_price_id = models.CharField(blank=True, max_length=50, null=True, unique=True)
     stripe_project_price_id = models.CharField(blank=True, max_length=50, null=True, unique=True)
 
-    base_user_limit = models.IntegerField(null=False)
-    base_project_limit = models.IntegerField(null=False)
-    base_collaborator_limit = models.IntegerField(null=False)
-    base_storage_limit = models.IntegerField(null=False)
+    base_user_limit = models.IntegerField(null=True)
+    base_project_limit = models.IntegerField(null=True)
+    base_collaborator_limit = models.IntegerField(null=True)
+    base_storage_limit = models.IntegerField(null=True)
 
 
 class Team(models.Model):
