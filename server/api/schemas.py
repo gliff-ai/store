@@ -85,7 +85,9 @@ class AddonIn(Schema):
 
 
 class CurrentPlanOut(Schema):
-    billing: bool
+    has_billing: bool
+    tier_name: str
+    tier_id: int
     users: Optional[conint(ge=0)] = 0
     projects: Optional[conint(ge=0)] = 0
     collaborators: Optional[conint(ge=0)] = 0

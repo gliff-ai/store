@@ -40,17 +40,17 @@ def get_plan_limits(request):
     if user.team.owner_id is not user.id:
         return 403, {"message": "Only owners can view plan details"}  # is this true?
 
-    plan = dict()
+    plan = dict(tier_name=team.tier.name, tier_id=team.tier.id)
 
     if not hasattr(team, "billing"):
         # Team is on the free plan so it's whatever those limits are
-        plan["billing"] = False
+        plan["has_billing"] = False
         plan["projects"] = team.tier.base_project_limit
         plan["users"] = team.tier.base_user_limit
         plan["collaborators"] = team.tier.base_collaborator_limit
         return plan
 
-    plan["billing"] = True
+    plan["has_billing"] = True
 
     addons = TierAddons.objects.filter(team=team).aggregate(
         users=Sum("additional_user_count"),
