@@ -1,11 +1,12 @@
 from datetime import datetime, timezone
 from django.conf import settings
 from django.db.models import Sum
+from django_etebase.models import Collection
 from loguru import logger
 from ninja import Router
 import stripe
 
-from myauth.models import Tier, Team, Billing, TierAddons, User
+from myauth.models import Tier, Team, Billing, TierAddons, User, UserProfile
 from server.api.schemas import CheckoutSessionIn, CheckoutSessionOut, Error, AddonIn, CurrentPlanOut
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
@@ -41,10 +42,11 @@ def get_plan_limits(request):
         return 403, {"message": "Only owners can view plan details"}  # is this true?
 
     # Add Usage
-    # TODO add projects
+    team_members = UserProfile.objects.filter(team__owner_id=user.id).values_list("user_id", flat=True)
     users = User.objects.filter(userprofile__team__owner_id=user.id, userprofile__is_collaborator=False).count()
     collaborators = User.objects.filter(userprofile__team__owner_id=user.id, userprofile__is_collaborator=True).count()
     storage = Team.objects.filter(id=team.id).values("usage")[0]
+    projects = Collection.objects.filter(owner__in=team_members).count()
 
     plan = dict(
         tier_name=team.tier.name,
@@ -52,6 +54,7 @@ def get_plan_limits(request):
         users=users,
         storage=storage["usage"],
         collaborators=collaborators,
+        projects=projects,
     )
 
     # Add limits
