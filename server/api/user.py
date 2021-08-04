@@ -38,6 +38,8 @@ def create_user(request, payload: UserProfileIn):
         logger.warning(f"Terms and conditions not accepted in payload ({payload.accepted_terms_and_conditions})")
         return 409, {"message": "Terms and conditions not accepted"}
 
+    is_collaborator = False
+
     if payload.team_id is None:
         # Create a team for this user. All teams are on the basic plan until we have processed payment
         tier = Tier.objects.get(name__exact="COMMUNITY")
@@ -47,6 +49,8 @@ def create_user(request, payload: UserProfileIn):
             invite = Invite.objects.get(from_team=payload.team_id, uid=payload.invite_id, email=user.email)
             invite.accepted_date = datetime.now(tz=timezone.utc)
             invite.save()
+
+            is_collaborator = invite.is_collaborator
 
             team = invite.from_team
 
@@ -60,6 +64,7 @@ def create_user(request, payload: UserProfileIn):
         name=payload.name,
         recovery_key=payload.recovery_key,
         accepted_terms_and_conditions=datetime.now(tz=timezone.utc),
+        is_collaborator=is_collaborator,
     )
     user_profile.id = user_profile.user_id  # The frontend expects id not user_id
     user_profile.email = user.email
@@ -103,7 +108,6 @@ def get_user(request):
         user = request.auth
         user.userprofile.id = user.id
         user.userprofile.email = user.email
-        user.userprofile.team = user.team
 
         return user.userprofile
     except UserProfile.DoesNotExist:
@@ -125,8 +129,19 @@ def update_user(request, payload: UserProfileIn):
     return user.userprofile
 
 
-@router.post("/invite", response={200: InviteCreated, 409: Error, 500: Error})
-def create_invite(request, payload: CreateInvite):
+@router.post("/invite/", response={200: InviteCreated, 409: Error, 500: Error})
+def create_invite_user(request, payload: CreateInvite):
+    payload.is_collaborator = False
+    return create_invite(request, payload)
+
+
+@router.post("/invite/collaborator", response={200: InviteCreated, 409: Error, 500: Error})
+def create_invite_collaborator(request, payload: CreateInvite):
+    payload.is_collaborator = True
+    return create_invite(request, payload)
+
+
+def create_invite(request, payload):
     try:
         uid = str(uuid4())
         user = request.auth
@@ -142,13 +157,17 @@ def create_invite(request, payload: CreateInvite):
             logger.info(f"Received ObjectDoesNotExist error {e}")
             pass
 
-        invite = Invite.objects.create(uid=uid, email=payload.email, from_team_id=team.id)
+        invite = Invite.objects.create(
+            uid=uid, email=payload.email, from_team_id=team.id, is_collaborator=payload.is_collaborator
+        )
 
         invite.save()
 
         logger.info("invite created")
         try:
             # TODO email sending should be a function
+
+            # TODO slightly different email for a collaborator?
             message = Mail(
                 from_email="support@gliff.app",
                 to_emails=payload.email,
