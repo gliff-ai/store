@@ -51,7 +51,8 @@ class EnforcePlanLimitsMiddleware:
 
         # Users & Collabs
         if scope["path"] == "/django/api/invite/" and team_limits["users_limit"] is not None:
-            # TODO are they adding a user or a collaborator
+            # TODO are they adding a user or a collaborator]
+
             if team_limits["users_limit"] >= team_limits["users"]:
                 logger.info("Can't invite a new user")
                 response = JSONResponse({"message": "Can't invite a new user"}, status_code=401)
