@@ -76,7 +76,7 @@ def calculate_limits(team):
 
 @router.get(
     "/plan",
-    response={200: CurrentPlanOut, 500: Error},
+    response={200: CurrentPlanOut, 403: Error, 500: Error},
 )
 def get_plan_limits(request):
     user = request.auth
@@ -90,7 +90,7 @@ def get_plan_limits(request):
 
 @router.post(
     "/addon",
-    response={201: None, 422: Error, 402: Error, 500: Error},
+    response={201: None, 422: Error, 403: Error, 500: Error},
 )
 def addon(request, payload: AddonIn):
     try:

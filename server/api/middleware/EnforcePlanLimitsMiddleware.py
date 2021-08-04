@@ -9,7 +9,7 @@ class EnforcePlanLimitsMiddleware:
     def __init__(self, app: ASGIApp) -> None:
         self.app = app
 
-    async def __call__(self, scope: Scope, receive: Receive, send: Send, *args) -> None:
+    async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
         routes = ["/api/v1/collection/", "/django/api/invite/"]
 
         # Do we care about this route?
