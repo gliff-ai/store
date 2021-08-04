@@ -36,12 +36,13 @@ class UserProfileOut(Schema):
     name: str
     email: str
     email_verified: typing.Any  # we cast this to a bool
+    is_collaborator: bool
     team: TeamSchema
 
 
 class InvitedProfileOut(Schema):
     email: str
-    sent_date: str
+    sent_date: typing.Any  # Date?!
 
 
 class TeamsOut(Schema):
@@ -68,6 +69,7 @@ class InviteOut(Schema):
 
 class CreateInvite(Schema):
     email: str
+    is_collaborator: bool = False
 
 
 class AccountRecovery(Schema):
