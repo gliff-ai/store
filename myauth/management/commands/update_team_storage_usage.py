@@ -3,6 +3,7 @@ from django.conf import settings
 from apscheduler.schedulers.background import BackgroundScheduler
 from django_apscheduler.jobstores import DjangoJobStore
 from django.core.management.base import BaseCommand
+from myauth.models import Team
 
 
 def get_container_client():
@@ -10,6 +11,11 @@ def get_container_client():
 
     connection_string = f"DefaultEndpointsProtocol=https;AccountName={settings.AZURE_ACCOUNT_NAME};AccountKey={settings.AZURE_ACCOUNT_KEY}"
     return ContainerClient.from_connection_string(conn_str=connection_string, container_name=settings.AZURE_CONTAINER)
+
+
+def update_stripe_usage(customer_id, usage):
+
+    return
 
 
 def update_team_storage_usage():
@@ -39,7 +45,6 @@ def update_team_storage_usage():
             logger.error(f"Key {key}: Unexpected format.")
 
     user_ids = data_select.keys()
-    from myauth.models import Team
 
     for team in Team.objects.all():
 
@@ -54,7 +59,7 @@ def update_team_storage_usage():
 class Command(BaseCommand):
     def handle(self, *args, **options):
 
-        # add scheduler that runs in the brackground within the application.
+        # add scheduler that runs in the background within the application.
         job_defaults = {"coalesce": True, "max_instances": 1}
         scheduler = BackgroundScheduler(job_defaults=job_defaults, timezone="UTC")
 
