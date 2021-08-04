@@ -1,7 +1,7 @@
 from typing import List, Optional
 from ninja import Schema
 from ninja.orm import create_schema
-from pydantic import validator, typing
+from pydantic import validator, typing, conint
 
 from myauth.models import User, UserProfile, Tier, Team
 
@@ -36,12 +36,14 @@ class UserProfileOut(Schema):
     name: str
     email: str
     email_verified: typing.Any  # we cast this to a bool
+    is_collaborator: bool
     team: TeamSchema
 
 
 class InvitedProfileOut(Schema):
     email: str
-    sent_date: str
+    sent_date: typing.Any  # Date?!
+    is_collaborator: bool
 
 
 class TeamsOut(Schema):
@@ -68,6 +70,7 @@ class InviteOut(Schema):
 
 class CreateInvite(Schema):
     email: str
+    is_collaborator: bool = False
 
 
 class AccountRecovery(Schema):
@@ -76,3 +79,22 @@ class AccountRecovery(Schema):
 
 class AccountRecoveryOut(Schema):
     recovery_key: str
+
+
+class AddonIn(Schema):
+    users: conint(ge=0) = 0
+    projects: conint(ge=0) = 0
+    collaborators: conint(ge=0) = 0
+
+
+class CurrentPlanOut(Schema):
+    has_billing: bool
+    tier_name: str
+    tier_id: int
+    users_limit: Optional[conint(ge=0)] = 0
+    projects_limit: Optional[conint(ge=0)] = 0
+    collaborators_limit: Optional[conint(ge=0)] = 0
+    users: Optional[conint(ge=0)] = 0
+    projects: Optional[conint(ge=0)] = 0
+    collaborators: Optional[conint(ge=0)] = 0
+    storage: Optional[conint(ge=0)] = 0

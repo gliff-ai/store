@@ -1,16 +1,166 @@
 from datetime import datetime, timezone
 from django.conf import settings
+from django.db.models import Sum
+from django_etebase.models import Collection
 from loguru import logger
 from ninja import Router
 import stripe
 
-from myauth.models import Tier, Team, Billing
-from server.api.schemas import CheckoutSessionIn, CheckoutSessionOut, Error
+from myauth.models import Tier, Team, Billing, TierAddons, User, UserProfile
+from server.api.schemas import CheckoutSessionIn, CheckoutSessionOut, Error, AddonIn, CurrentPlanOut
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
 endpoint_secret = settings.STRIPE_WEBHOOK_SECRET
 
 router = Router()
+
+
+# Filter a stripe subscription to get the IDs of prices already applied (so we can update them)
+def get_user_price_id(price_id, subscription):
+    return next(
+        (item.id for item in subscription["items"]["data"] if item.price["id"] == price_id),
+        None,
+    )
+
+
+def calculatePlanTotal(base, addons):
+    if base is None:
+        return base
+    else:
+        return base + addons
+
+
+def calculate_limits(team):
+    # Add Usage
+    team_members = UserProfile.objects.filter(team__owner_id=team.owner).values_list("user_id", flat=True)
+    users = User.objects.filter(userprofile__team__owner_id=team.owner, userprofile__is_collaborator=False).count()
+    collaborators = User.objects.filter(
+        userprofile__team__owner_id=team.owner, userprofile__is_collaborator=True
+    ).count()
+    storage = Team.objects.filter(id=team.id).values("usage")[0]
+    projects = Collection.objects.filter(owner__in=team_members).count()
+
+    plan = dict(
+        tier_name=team.tier.name,
+        tier_id=team.tier.id,
+        users=users,
+        storage=storage["usage"],
+        collaborators=collaborators,
+        projects=projects,
+    )
+
+    # Add limits
+    if not hasattr(team, "billing"):
+        # Team is on the free plan so it's whatever those limits are
+        plan["has_billing"] = False
+        plan["projects_limit"] = team.tier.base_project_limit
+        plan["users_limit"] = team.tier.base_user_limit
+        plan["collaborators_limit"] = team.tier.base_collaborator_limit
+        return plan
+
+    plan["has_billing"] = True
+
+    addons = TierAddons.objects.filter(team=team).aggregate(
+        users=Sum("additional_user_count"),
+        projects=Sum("additional_project_count"),
+        collaborators=Sum("additional_collaborator_count"),
+    )
+
+    # None is "unlimited"
+    plan["projects_limit"] = calculatePlanTotal(team.tier.base_project_limit, addons["projects"])
+    plan["users_limit"] = calculatePlanTotal(team.tier.base_user_limit, addons["users"])
+    plan["collaborators_limit"] = calculatePlanTotal(team.tier.base_collaborator_limit, addons["collaborators"])
+
+    return plan
+
+
+@router.get(
+    "/plan",
+    response={200: CurrentPlanOut, 403: Error, 500: Error},
+)
+def get_plan_limits(request):
+    user = request.auth
+    team = Team.objects.get(owner_id=user.id)
+
+    if user.team.owner_id is not user.id:
+        return 403, {"message": "Only owners can view plan details"}  # is this true?
+
+    return calculate_limits(team)
+
+
+@router.post(
+    "/addon",
+    response={201: None, 422: Error, 403: Error, 500: Error},
+)
+def addon(request, payload: AddonIn):
+    try:
+        user = request.auth
+        team = Team.objects.get(owner_id=user.id)
+
+        if user.team.owner_id is not user.id:
+            return 403, {"message": "Only owners can upgrade plans"}
+
+        if not hasattr(team, "billing"):
+            return 422, {"message": "No valid subscription to upgrade. Try changing your plan"}
+
+        items = []
+
+        addons = TierAddons.objects.filter(team=team).aggregate(
+            users=Sum("additional_user_count"),
+            projects=Sum("additional_project_count"),
+            collaborators=Sum("additional_collaborator_count"),
+        )
+
+        subscription = stripe.Subscription.retrieve(team.billing.subscription_id)
+
+        if team.tier.base_project_limit is not None and payload.projects > 0:
+            # the user doesn't have unlimited projects
+            projects = addons["projects"] + payload.projects
+            items.append(
+                {
+                    "price": team.tier.stripe_project_price_id,
+                    "quantity": projects,
+                    "id": get_user_price_id(team.tier.stripe_project_price_id, subscription),
+                }
+            )
+
+        if payload.collaborators > 0:
+            collaborators = addons["collaborators"] + payload.collaborators
+            items.append(
+                {
+                    "price": team.tier.stripe_collaborator_price_id,
+                    "quantity": collaborators,
+                    "id": get_user_price_id(team.tier.stripe_collaborator_price_id, subscription),
+                }
+            )
+
+        if payload.users > 0:
+            users = addons["users"] + payload.users
+            items.append(
+                {
+                    "price": team.tier.stripe_user_price_id,
+                    "quantity": users,
+                    "id": get_user_price_id(team.tier.stripe_user_price_id, subscription),
+                }
+            )
+
+        # Update Stripe
+        stripe.Subscription.modify(team.billing.subscription_id, items=items)
+
+        # Update DB
+        addons_row = TierAddons.objects.create(
+            team_id=team.id,
+            additional_user_count=payload.users,
+            additional_project_count=payload.projects,
+            additional_collaborator_count=payload.collaborators,
+        )
+        addons_row.save()
+
+        return 201, None
+
+    except Exception as e:
+        logger.error(f"Unknown addon error {e}")
+        return 500, {"message": "Unknown Error"}
 
 
 @router.post(
@@ -30,14 +180,6 @@ def create_checkout_session(request, payload: CheckoutSessionIn):
 
         # By default, just charge the flat rate
         line_items = [{"price": tier.stripe_flat_price_id, "quantity": 1}]
-
-        # We can also add a Storage price
-        if tier.stripe_storage_price_id is not None:
-            line_items.append({"price": tier.stripe_storage_price_id})
-
-        # And seats
-        if tier.stripe_seat_price_id is not None:
-            line_items.append({"price": tier.stripe_seat_price_id})
 
         checkout_session = stripe.checkout.Session.create(
             payment_method_types=["card"],

@@ -30,13 +30,17 @@ class InterceptHandler(logging.Handler):
             depth += 1
 
         # send loguru statement, making sure we raise an exception where we should
-        logger.opt(depth=depth, exception=record.exc_info).log(level, record.getMessage())
+        logger.opt(
+            depth=depth,
+            exception=record.exc_info,
+        ).log(level, record.getMessage())
 
 
 def setup_logging():
     # intercept everything at the root logger at level as per the settings files
     logging.root.handlers = [InterceptHandler()]
     logging.root.setLevel(settings.LOG_LEVEL)
+
     # remove every other logger's handlers
     # and propagate them to the root logger
     for name in logging.root.manager.loggerDict.keys():
