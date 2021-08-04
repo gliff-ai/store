@@ -43,6 +43,7 @@ class UserProfileOut(Schema):
 class InvitedProfileOut(Schema):
     email: str
     sent_date: typing.Any  # Date?!
+    is_collaborator: bool
 
 
 class TeamsOut(Schema):

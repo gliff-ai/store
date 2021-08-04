@@ -29,7 +29,7 @@ def get_team(request):
 
     # Add invited, but not accepted users
     invites = Invite.objects.filter(from_team_id=user.userprofile.team.id, accepted_date=None).values(
-        "email", "sent_date"
+        "email", "sent_date", "is_collaborator"
     )
 
     return {"profiles": profiles, "pending_invites": list(invites)}
