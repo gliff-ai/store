@@ -129,8 +129,19 @@ def update_user(request, payload: UserProfileIn):
     return user.userprofile
 
 
-@router.post("/invite", response={200: InviteCreated, 409: Error, 500: Error})
-def create_invite(request, payload: CreateInvite):
+@router.post("/invite/", response={200: InviteCreated, 409: Error, 500: Error})
+def create_invite_user(request, payload: CreateInvite):
+    payload.is_collaborator = False
+    return create_invite(request, payload)
+
+
+@router.post("/invite/collaborator", response={200: InviteCreated, 409: Error, 500: Error})
+def create_invite_collaborator(request, payload: CreateInvite):
+    payload.is_collaborator = True
+    return create_invite(request, payload)
+
+
+def create_invite(request, payload):
     try:
         uid = str(uuid4())
         user = request.auth

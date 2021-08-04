@@ -24,24 +24,26 @@ class EnforcePlanLimitsMiddleware:
 
         # Projects
         if scope["path"].startswith("/api/v1/collection") and team_limits["projects_limit"] is not None:
-            if team_limits["projects_limit"] >= team_limits["projects"]:
-                logger.info("Can't create a new project")
-                response = JSONResponse({"message": "Can't create a new project"}, status_code=401)
+            if team_limits["projects"] >= team_limits["projects_limit"]:
+                logger.info("Can't create a new project, limit is reached")
+                response = JSONResponse({"message": "Can't create a new project, limit is reached"}, status_code=401)
 
         # Users
         if scope["path"].startswith("/django/api/user/invite") and team_limits["users_limit"] is not None:
-            if team_limits["users_limit"] >= team_limits["users"]:
-                logger.info("Can't invite a new user")
-                response = JSONResponse({"message": "Can't invite a new user"}, status_code=401)
+            if team_limits["users"] >= team_limits["users_limit"]:
+                logger.info("Can't invite a new user, limit is reached")
+                response = JSONResponse({"message": "Can't invite a new user, limit is reached"}, status_code=401)
 
         # Collabs
         if (
             scope["path"].startswith("/django/api/user/invite/collaborator")
             and team_limits["collaborators_limit"] is not None
         ):
-            if team_limits["collaborators_limit"] >= team_limits["collaborators"]:
-                logger.info("Can't invite a new collaborator")
-                response = JSONResponse({"message": "Can't invite a new collaborator"}, status_code=401)
+            if team_limits["collaborators"] >= team_limits["collaborators_limit"]:
+                logger.info("Can't invite a new collaborator, limit is reached")
+                response = JSONResponse(
+                    {"message": "Can't invite a new collaborator, limit is reached"}, status_code=401
+                )
 
         if response is not None:
             await response(scope, receive, send)
