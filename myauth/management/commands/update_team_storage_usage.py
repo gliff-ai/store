@@ -18,24 +18,35 @@ def get_container_client():
     return ContainerClient.from_connection_string(conn_str=connection_string, container_name=settings.AZURE_CONTAINER)
 
 
-def update_stripe_usage(subscription_id, storage_price_ids, usage):
+def update_stripe_usage(subscription_id, storage_price_ids, usage, team_id):
     # Get the storage price id
-    subscription = stripe.Subscription.retrieve(subscription_id)
+    subscription = stripe.Subscription.retrieve(subscription_id, expand=["items.data.price.tiers"])
 
-    price_id = next(
-        (item.id for item in subscription["items"]["data"] if item.price["id"] in storage_price_ids),
+    user_price_id, stripe_price_id, tiers = next(
+        (
+            (item.id, item.price["id"], item.price["tiers"])
+            for item in subscription["items"]["data"]
+            if item.price["id"] in storage_price_ids
+        ),
         None,
     )
 
-    if price_id:
+    if user_price_id:
         stripe.SubscriptionItem.create_usage_record(
-            price_id,
+            user_price_id,
             quantity=usage,
             timestamp=datetime.now(),
         )
     else:
-        logger.warning(f"User doesn't have a valid storage price set - {subscription_id}")
+        logger.warning(f"Team {team_id} doesn't have a valid storage price set")
 
+    limit = tiers[0].up_to
+
+    # We probably don't want to alert this _every_ night
+    if usage / limit > 0.9:
+        logger.warning(f"Subscription exceeds 90% of free usage for team {team_id},  (Using {usage/1000}Gb)")
+    else:
+        logger.debug(f"Subscription storage is at {(usage / limit) * 100}% for team {team_id}")
     return
 
 
@@ -74,7 +85,7 @@ def update_team_storage_usage():
         user_id = str(user.id)
         if user_id in user_ids:
             # Add this users usage to their team usage
-            usage = data_select[user_id] * 10 ** -6
+            usage = round(data_select[user_id] * 10 ** -6)
             teams[user.team.id] = teams.get(user.team.id, 0) + usage
             logger.info(f"Updated team {user.team.id} with {user_id}: new usage = {teams[user.team.id]}")
 
@@ -85,8 +96,15 @@ def update_team_storage_usage():
         team = Team.objects.get(id=key)
         team.usage = teams[key]
         team.save()
-        update_stripe_usage(team.billing.subscription_id, price_ids, team.usage)
-        # TODO check their limits?
+        try:
+            update_stripe_usage(team.billing.subscription_id, price_ids, team.usage, team.id)
+        except Exception as e:
+            print(e)
+            if team.usage < 9000:
+                logger.info(f"Team {team.id} doesn't have billing. Their usage is {team.usage}")
+            else:
+                logger.warning(f"Team {team.id} doesn't have billing. Their usage is {team.usage}")
+            # TODO check their limits?
 
 
 class Command(BaseCommand):
