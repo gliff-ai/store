@@ -7,6 +7,10 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from django_apscheduler.jobstores import DjangoJobStore
 from django.core.management.base import BaseCommand
 from myauth.models import Team, User, Billing, Tier
+from sendgrid import SendGridAPIClient
+from sendgrid.helpers.mail import Mail
+
+import server.emails as email_template
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
@@ -50,6 +54,37 @@ def update_stripe_usage(subscription_id, storage_price_ids, usage, team_id):
     return
 
 
+def suspend_trial_account(team_id):
+    try:
+        users = User.objects.filter(team=team_id)
+        team = Team.objects.get(id=team_id)
+        owner_email = team.owner.email
+
+        # Are they already suspended?
+        if team.owner.is_active is not True:
+            return
+
+        logger.warning(f"Suspending free account {team_id}")
+        # We want to use our own (non-etebase) flag for this at some point and use some middleware to handle this
+        # For now tho, this is crude and effective
+        users.update(is_active=False)
+
+        try:
+            message = Mail(
+                from_email="support@gliff.app",
+                to_emails=owner_email,
+            )
+
+            message.template_id = email_template.id["free_exceeded_limit"]
+
+            sendgrid_client = SendGridAPIClient(settings.SENDGRID_API_KEY)
+            sendgrid_client.send(message)
+        except Exception as e:
+            logger.error(e)
+    except Exception as e:
+        logger.error(e)
+
+
 def update_team_storage_usage():
     try:
         # get container client
@@ -78,8 +113,6 @@ def update_team_storage_usage():
         except AttributeError:
             logger.error(f"Key {key}: Unexpected format.")
 
-    user_ids = data_select.keys()
-
     teams = dict()
     for user in User.objects.all():
         user_id = str(user.id)
@@ -96,13 +129,16 @@ def update_team_storage_usage():
         team = Team.objects.get(id=key)
         team.usage = teams[key]
         team.save()
+
         try:
-            update_stripe_usage(team.billing.subscription_id, price_ids, team.usage, team.id)
-        except Exception as e:
+            subscription_id = team.billing.subscription_id
+            update_stripe_usage(subscription_id, price_ids, team.usage, team.id)
+        except Billing.DoesNotExist:
             if team.usage < 9000:
                 logger.info(f"Team {team.id} doesn't have billing. Their usage is {team.usage}")
             else:
                 logger.warning(f"Team {team.id} doesn't have billing. Their usage is {team.usage}")
+                suspend_trial_account(team.id)
 
 
 class Command(BaseCommand):
