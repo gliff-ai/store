@@ -23,7 +23,7 @@ class EnforcePlanLimitsMiddleware:
         response = None
 
         # Projects
-        if scope["path"].startswith("/api/v1/collection") and not "list_multi" in scope["path"] and team_limits["projects_limit"] is not None:
+        if scope["path"].startswith("/api/v1/collection") and "list_multi" not in scope["path"] and team_limits["projects_limit"] is not None:
             if team_limits["projects"] >= team_limits["projects_limit"]:
                 logger.info("Can't create a new project, limit is reached")
                 response = JSONResponse({"message": "Can't create a new project, limit is reached"}, status_code=401)
