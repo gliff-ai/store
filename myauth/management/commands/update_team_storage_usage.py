@@ -113,6 +113,8 @@ def update_team_storage_usage():
         except AttributeError:
             logger.error(f"Key {key}: Unexpected format.")
 
+    user_ids = data_select.keys()
+
     teams = dict()
     for user in User.objects.all():
         user_id = str(user.id)
