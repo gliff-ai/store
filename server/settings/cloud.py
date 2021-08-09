@@ -40,8 +40,8 @@ AZURE_ACCOUNT_NAME = get_env_value("AZURE_ACCOUNT_NAME")
 AZURE_CONTAINER = get_env_value("AZURE_CONTAINER")
 AZURE_URL_EXPIRATION_SECS = 300
 
-# ## Logging settings
-# # Set-up sentry connection
+## Logging settings
+# Set-up sentry connection
 sentry_sdk.init(
     # should this be a secret?
     dsn="https://95bd2160e76b4046b112eb551e89f4e4@o651808.ingest.sentry.io/5828719",

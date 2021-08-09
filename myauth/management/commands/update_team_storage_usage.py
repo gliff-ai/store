@@ -99,12 +99,10 @@ def update_team_storage_usage():
         try:
             update_stripe_usage(team.billing.subscription_id, price_ids, team.usage, team.id)
         except Exception as e:
-            print(e)
             if team.usage < 9000:
                 logger.info(f"Team {team.id} doesn't have billing. Their usage is {team.usage}")
             else:
                 logger.warning(f"Team {team.id} doesn't have billing. Their usage is {team.usage}")
-            # TODO check their limits?
 
 
 class Command(BaseCommand):
