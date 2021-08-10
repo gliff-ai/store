@@ -39,13 +39,13 @@ def update_stripe_usage(subscription_id, storage_price_ids, usage, team_id):
         stripe.SubscriptionItem.create_usage_record(
             user_price_id,
             action="set",
-            quantity=usage * 1000,  # Stripe is set in Gb
+            quantity=usage / 1000,  # Stripe is set in Gb
             timestamp=datetime.now(),
         )
     else:
         logger.warning(f"Team {team_id} doesn't have a valid storage price set")
 
-    limit = tiers[0].up_to
+    limit = tiers[0].up_to * 1000
 
     # We probably don't want to alert this _every_ night
     if usage / limit > 0.9:
