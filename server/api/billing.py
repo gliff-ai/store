@@ -2,9 +2,11 @@ from datetime import datetime, timezone
 from django.conf import settings
 from django.db.models import Sum
 from django_etebase.models import Collection
+from etebase_fastapi.dependencies import get_authenticated_user
 from loguru import logger
 from ninja import Router
 import stripe
+from ninja.security import APIKeyHeader
 from pydantic import typing
 
 from myauth.models import Tier, Team, Billing, TierAddons, User, UserProfile
@@ -186,13 +188,10 @@ def addon(request, payload: AddonIn):
         return 500, {"message": "Unknown Error"}
 
 
-@router.post(
-    "/create-checkout-session",
-    response={200: CheckoutSessionOut, 403: Error, 409: Error},
-)
+@router.post("/create-checkout-session", response={200: CheckoutSessionOut, 403: Error, 409: Error}, auth=None)
 def create_checkout_session(request, payload: CheckoutSessionIn):
     try:
-        user = request.auth
+        user = User.objects.get(id__exact=payload.user_id)
         tier = Tier.objects.get(id__exact=payload.tier_id)
         team = Team.objects.get(owner_id=user.id)
 
@@ -207,8 +206,8 @@ def create_checkout_session(request, payload: CheckoutSessionIn):
         checkout_session = stripe.checkout.Session.create(
             payment_method_types=["card"],
             client_reference_id=user.id,
-            # We may want different billing emails later, but this is fine for now
-            customer_email=user.email,
+            # This doesn't HAVE to be the user account email
+            customer_email=payload.user_email,
             line_items=line_items,
             mode="subscription",
             success_url=settings.SUCCESS_URL,
@@ -217,7 +216,7 @@ def create_checkout_session(request, payload: CheckoutSessionIn):
         )
         return {"id": checkout_session.id}
     except Exception as e:
-        print(e)
+        logger.error(str(e))
         return 403, {"message": str(e)}
 
 

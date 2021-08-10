@@ -16,4 +16,8 @@ def get_team_limits(key):
 
 
 def get_key_from_headers(headers):
-    return [v[1].decode("utf-8") for i, v in enumerate(headers) if v[0] == b"authorization"].pop()
+    auth_list = [v[1].decode("utf-8") for i, v in enumerate(headers) if v[0] == b"authorization"]
+    if len(auth_list):
+        return auth_list.pop()
+    else:
+        return None
