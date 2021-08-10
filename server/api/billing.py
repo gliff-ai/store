@@ -2,12 +2,10 @@ from datetime import datetime, timezone
 from django.conf import settings
 from django.db.models import Sum
 from django_etebase.models import Collection
-from etebase_fastapi.dependencies import get_authenticated_user
 from loguru import logger
 from ninja import Router
 import stripe
-from ninja.security import APIKeyHeader
-from pydantic import typing
+
 
 from myauth.models import Tier, Team, Billing, TierAddons, User, UserProfile
 from server.api.schemas import CheckoutSessionIn, CheckoutSessionOut, Error, AddonIn, CurrentPlanOut, InvoicesOut
