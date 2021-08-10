@@ -27,7 +27,7 @@ def get_user_price_id(price_id, subscription):
 
 
 def calculatePlanTotal(base, addons):
-    if base is None:
+    if base is None or addons is None:
         return base
     else:
         return base + addons
@@ -200,8 +200,11 @@ def create_checkout_session(request, payload: CheckoutSessionIn):
             logger.error("we shouldn't create_checkout_session for a free plan?!")
             return 409, {"message": "Can't pay for a free tier"}
 
-        # By default, just charge the flat rate
-        line_items = [{"price": tier.stripe_flat_price_id, "quantity": 1}]
+        # Charge the flat rate and add storage, which is updated daily
+        line_items = [
+            {"price": tier.stripe_flat_price_id, "quantity": 1},
+            {"price": tier.stripe_storage_price_id},
+        ]
 
         checkout_session = stripe.checkout.Session.create(
             payment_method_types=["card"],

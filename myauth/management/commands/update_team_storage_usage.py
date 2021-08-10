@@ -38,7 +38,8 @@ def update_stripe_usage(subscription_id, storage_price_ids, usage, team_id):
     if user_price_id:
         stripe.SubscriptionItem.create_usage_record(
             user_price_id,
-            quantity=usage,
+            action="set",
+            quantity=usage * 1000,  # Stripe is set in Gb
             timestamp=datetime.now(),
         )
     else:
