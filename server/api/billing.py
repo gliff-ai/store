@@ -5,9 +5,10 @@ from django_etebase.models import Collection
 from loguru import logger
 from ninja import Router
 import stripe
+from pydantic import typing
 
 from myauth.models import Tier, Team, Billing, TierAddons, User, UserProfile
-from server.api.schemas import CheckoutSessionIn, CheckoutSessionOut, Error, AddonIn, CurrentPlanOut
+from server.api.schemas import CheckoutSessionIn, CheckoutSessionOut, Error, AddonIn, CurrentPlanOut, InvoicesOut
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
 endpoint_secret = settings.STRIPE_WEBHOOK_SECRET
@@ -72,6 +73,28 @@ def calculate_limits(team):
     plan["collaborators_limit"] = calculatePlanTotal(team.tier.base_collaborator_limit, addons["collaborators"])
 
     return plan
+
+
+@router.get(
+    "/invoices",
+    response={200: InvoicesOut, 403: Error, 500: Error},
+)
+def get_invoices(request):
+    try:
+        user = request.auth
+        team = Team.objects.get(owner_id=user.id)
+
+        if user.team.owner_id is not user.id:
+            return 403, {"message": "Only owners can view invoices"}
+
+        invoices = stripe.Invoice.list(customer=team.billing.stripe_customer_id)
+        if invoices:
+            return {"invoices": invoices.data}
+        else:
+            return {"invoices": list()}
+    except Exception as e:
+        logger.error(f"Error getting invoices for user {user.id} - {e}")
+        return {"message": "There was an error retrieving your invoices"}
 
 
 @router.get(

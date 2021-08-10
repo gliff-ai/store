@@ -98,3 +98,18 @@ class CurrentPlanOut(Schema):
     projects: Optional[conint(ge=0)] = 0
     collaborators: Optional[conint(ge=0)] = 0
     storage: Optional[conint(ge=0)] = 0
+
+
+class Invoice(Schema):
+    id: str
+    amount_due: int
+    amount_paid: int
+    created: int
+    invoice_pdf: str
+    number: str
+    paid: bool
+    status: str
+
+
+class InvoicesOut(Schema):
+    invoices: List[Invoice]
