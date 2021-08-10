@@ -26,6 +26,11 @@ class EnforceCollabMiddleware:
             await self.app(scope, receive, send)
             return
 
+        # Allow CORS requests
+        if scope["method"] == "OPTIONS":
+            await self.app(scope, receive, send)
+            return
+
         for (method, path) in routes:
             if (method == scope["method"] or method == "*") and scope["path"].startswith(path):
                 # This runs before our regular auth, so we have to check here
