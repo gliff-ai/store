@@ -5,7 +5,7 @@ from django_etebase.models import Collection
 from loguru import logger
 from ninja import Router
 import stripe
-from pydantic import typing
+
 
 from myauth.models import Tier, Team, Billing, TierAddons, User, UserProfile
 from server.api.schemas import CheckoutSessionIn, CheckoutSessionOut, Error, AddonIn, CurrentPlanOut, InvoicesOut
@@ -25,7 +25,7 @@ def get_user_price_id(price_id, subscription):
 
 
 def calculatePlanTotal(base, addons):
-    if base is None:
+    if base is None or addons is None:
         return base
     else:
         return base + addons
@@ -186,13 +186,10 @@ def addon(request, payload: AddonIn):
         return 500, {"message": "Unknown Error"}
 
 
-@router.post(
-    "/create-checkout-session",
-    response={200: CheckoutSessionOut, 403: Error, 409: Error},
-)
+@router.post("/create-checkout-session", response={200: CheckoutSessionOut, 403: Error, 409: Error}, auth=None)
 def create_checkout_session(request, payload: CheckoutSessionIn):
     try:
-        user = request.auth
+        user = User.objects.get(id__exact=payload.user_id)
         tier = Tier.objects.get(id__exact=payload.tier_id)
         team = Team.objects.get(owner_id=user.id)
 
@@ -201,14 +198,17 @@ def create_checkout_session(request, payload: CheckoutSessionIn):
             logger.error("we shouldn't create_checkout_session for a free plan?!")
             return 409, {"message": "Can't pay for a free tier"}
 
-        # By default, just charge the flat rate
-        line_items = [{"price": tier.stripe_flat_price_id, "quantity": 1}]
+        # Charge the flat rate and add storage, which is updated daily
+        line_items = [
+            {"price": tier.stripe_flat_price_id, "quantity": 1},
+            {"price": tier.stripe_storage_price_id},
+        ]
 
         checkout_session = stripe.checkout.Session.create(
             payment_method_types=["card"],
             client_reference_id=user.id,
-            # We may want different billing emails later, but this is fine for now
-            customer_email=user.email,
+            # This doesn't HAVE to be the user account email
+            customer_email=payload.user_email,
             line_items=line_items,
             mode="subscription",
             success_url=settings.SUCCESS_URL,
@@ -217,7 +217,7 @@ def create_checkout_session(request, payload: CheckoutSessionIn):
         )
         return {"id": checkout_session.id}
     except Exception as e:
-        print(e)
+        logger.error(str(e))
         return 403, {"message": str(e)}
 
 

@@ -53,6 +53,8 @@ class TeamsOut(Schema):
 
 class CheckoutSessionIn(Schema):
     tier_id: int
+    user_id: int
+    user_email: str
 
 
 class CheckoutSessionOut(Schema):
