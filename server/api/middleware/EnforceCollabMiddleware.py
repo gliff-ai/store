@@ -21,6 +21,11 @@ class EnforceCollabMiddleware:
             ("*", "/django/api/billing"),  # Any billing routes
         ]
 
+        # Explicit Allow
+        if scope["path"].startswith("/django/api/billing/create-checkout-session"):
+            await self.app(scope, receive, send)
+            return
+
         for (method, path) in routes:
             if (method == scope["method"] or method == "*") and scope["path"].startswith(path):
                 # This runs before our regular auth, so we have to check here

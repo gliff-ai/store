@@ -22,6 +22,15 @@ def get_container_client():
     return ContainerClient.from_connection_string(conn_str=connection_string, container_name=settings.AZURE_CONTAINER)
 
 
+# We use Mb they use Gb
+def stripe_to_gliff_usage(usage):
+    return usage * 1000
+
+
+def gliff_to_stripe_usage(usage):
+    return usage / 1000
+
+
 def update_stripe_usage(subscription_id, storage_price_ids, usage, team_id):
     # Get the storage price id
     subscription = stripe.Subscription.retrieve(subscription_id, expand=["items.data.price.tiers"])
@@ -38,17 +47,20 @@ def update_stripe_usage(subscription_id, storage_price_ids, usage, team_id):
     if user_price_id:
         stripe.SubscriptionItem.create_usage_record(
             user_price_id,
-            quantity=usage,
+            action="set",
+            quantity=gliff_to_stripe_usage(usage),
             timestamp=datetime.now(),
         )
     else:
         logger.warning(f"Team {team_id} doesn't have a valid storage price set")
 
-    limit = tiers[0].up_to
+    limit = stripe_to_gliff_usage(tiers[0].up_to)
 
     # We probably don't want to alert this _every_ night
     if usage / limit > 0.9:
-        logger.warning(f"Subscription exceeds 90% of free usage for team {team_id},  (Using {usage/1000}Gb)")
+        logger.warning(
+            f"Subscription exceeds 90% of free usage for team {team_id},  (Using {gliff_to_stripe_usage(usage)}Gb)"
+        )
     else:
         logger.debug(f"Subscription storage is at {(usage / limit) * 100}% for team {team_id}")
     return
