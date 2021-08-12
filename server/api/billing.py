@@ -32,6 +32,15 @@ def get_user_price_id(price_id, subscription):
     )
 
 
+# We use Mb they use Gb
+def stripe_to_gliff_usage(usage):
+    return usage * 1000
+
+
+def gliff_to_stripe_usage(usage):
+    return usage / 1000
+
+
 def calculate_plan_total(base, addons):
     if base is None or addons is None:
         return base
@@ -79,13 +88,13 @@ def calculate_plan(team):
         )
 
     if len(storage):
-        billed_usage = int(team.usage or 0) - (storage[0].price.tiers[0].up_to * 1000)
+        billed_usage = int(team.usage or 0) - (stripe_to_gliff_usage(storage[0].price.tiers[0].up_to))
         if billed_usage >= 0:
             plan["billed_usage"] = billed_usage
         else:
             plan["billed_usage"] = 0
 
-        plan["billed_usage_price"] = storage[0].price.tiers[0].unit_amount
+        plan["billed_usage_gb_price"] = storage[0].price.tiers[1].unit_amount
 
     return plan
 

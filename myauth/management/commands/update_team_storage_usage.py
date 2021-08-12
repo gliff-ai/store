@@ -11,6 +11,7 @@ from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail
 
 import server.emails as email_template
+from server.api.billing import gliff_to_stripe_usage, stripe_to_gliff_usage
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
@@ -20,15 +21,6 @@ def get_container_client():
 
     connection_string = f"DefaultEndpointsProtocol=https;AccountName={settings.AZURE_ACCOUNT_NAME};AccountKey={settings.AZURE_ACCOUNT_KEY}"
     return ContainerClient.from_connection_string(conn_str=connection_string, container_name=settings.AZURE_CONTAINER)
-
-
-# We use Mb they use Gb
-def stripe_to_gliff_usage(usage):
-    return usage * 1000
-
-
-def gliff_to_stripe_usage(usage):
-    return usage / 1000
 
 
 def update_stripe_usage(subscription_id, storage_price_ids, usage, team_id):

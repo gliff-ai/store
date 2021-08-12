@@ -109,8 +109,7 @@ class CurrentPlanOut(Schema):
     base_price: int
     addons: Addons
     billed_usage: int
-    billed_usage_price: int
-    # Storage?
+    billed_usage_gb_price: int
 
 
 class CurrentLimitsOut(Schema):
