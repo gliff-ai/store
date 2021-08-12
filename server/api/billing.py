@@ -8,7 +8,15 @@ import stripe
 
 
 from myauth.models import Tier, Team, Billing, TierAddons, User, UserProfile
-from server.api.schemas import CheckoutSessionIn, CheckoutSessionOut, Error, AddonIn, CurrentPlanOut, InvoicesOut
+from server.api.schemas import (
+    CheckoutSessionIn,
+    CheckoutSessionOut,
+    Error,
+    AddonIn,
+    InvoicesOut,
+    CurrentLimitsOut,
+    CurrentPlanOut,
+)
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
 endpoint_secret = settings.STRIPE_WEBHOOK_SECRET
@@ -24,15 +32,74 @@ def get_user_price_id(price_id, subscription):
     )
 
 
-def calculatePlanTotal(base, addons):
+# We use Mb they use Gb
+def stripe_to_gliff_usage(usage):
+    return usage * 1000
+
+
+def gliff_to_stripe_usage(usage):
+    return usage / 1000
+
+
+def calculate_plan_total(base, addons):
     if base is None or addons is None:
         return base
     else:
         return base + addons
 
 
+def calculate_plan(team):
+    plan = dict(tier_name=team.tier.name, tier_id=team.tier.id)
+
+    subscription = stripe.Subscription.retrieve(team.billing.subscription_id)
+
+    plan["current_period_end"] = subscription.current_period_end
+    plan["current_period_start"] = subscription.current_period_start
+
+    items = stripe.SubscriptionItem.list(subscription=team.billing.subscription_id, expand=["data.price.tiers"])
+
+    storage = [item for item in items if item.price["id"] == team.tier.stripe_storage_price_id]
+    project = [item for item in items if item.price["id"] == team.tier.stripe_project_price_id]
+    base = [item for item in items if item.price["id"] == team.tier.stripe_flat_price_id]
+    user = [item for item in items if item.price["id"] == team.tier.stripe_user_price_id]
+    collaborator = [item for item in items if item.price["id"] == team.tier.stripe_collaborator_price_id]
+
+    plan["addons"] = dict()
+
+    if len(base):
+        plan["base_price"] = base[0].price["unit_amount"]
+
+    if len(project):
+        # this assumes tiers[0] is the included amount and tiers[1] is the ONLY charged graduation in Stripe
+        # (this is for all addons)
+        price_per_unit = project[0].price.tiers[1].unit_amount
+        plan["addons"]["project"] = dict(
+            quantity=project[0]["quantity"], name="Projects", price_per_unit=price_per_unit
+        )
+
+    if len(user):
+        price_per_unit = user[0].price.tiers[1].unit_amount
+        plan["addons"]["user"] = dict(quantity=user[0]["quantity"], name="Users", price_per_unit=price_per_unit)
+
+    if len(collaborator):
+        price_per_unit = collaborator[0].price.tiers[1].unit_amount
+        plan["addons"]["collaborator"] = dict(
+            quantity=collaborator[0]["quantity"], name="Collaborator", price_per_unit=price_per_unit
+        )
+
+    if len(storage):
+        billed_usage = int(team.usage or 0) - (stripe_to_gliff_usage(storage[0].price.tiers[0].up_to))
+        if billed_usage >= 0:
+            plan["billed_usage"] = billed_usage
+        else:
+            plan["billed_usage"] = 0
+
+        plan["billed_usage_gb_price"] = storage[0].price.tiers[1].unit_amount
+
+    return plan
+
+
 def calculate_limits(team):
-    # Add Usage
     team_members = UserProfile.objects.filter(team__owner_id=team.owner).values_list("user_id", flat=True)
     users = User.objects.filter(userprofile__team__owner_id=team.owner, userprofile__is_collaborator=False).count()
     collaborators = User.objects.filter(
@@ -49,6 +116,8 @@ def calculate_limits(team):
         collaborators=collaborators,
         projects=projects,
     )
+
+    plan["storage_included_limit"] = team.tier.base_storage_limit
 
     # Add limits
     if not hasattr(team, "billing"):
@@ -68,9 +137,9 @@ def calculate_limits(team):
     )
 
     # None is "unlimited"
-    plan["projects_limit"] = calculatePlanTotal(team.tier.base_project_limit, addons["projects"])
-    plan["users_limit"] = calculatePlanTotal(team.tier.base_user_limit, addons["users"])
-    plan["collaborators_limit"] = calculatePlanTotal(team.tier.base_collaborator_limit, addons["collaborators"])
+    plan["projects_limit"] = calculate_plan_total(team.tier.base_project_limit, addons["projects"])
+    plan["users_limit"] = calculate_plan_total(team.tier.base_user_limit, addons["users"])
+    plan["collaborators_limit"] = calculate_plan_total(team.tier.base_collaborator_limit, addons["collaborators"])
 
     return plan
 
@@ -98,17 +167,28 @@ def get_invoices(request):
 
 
 @router.get(
-    "/plan",
-    response={200: CurrentPlanOut, 403: Error, 500: Error},
+    "/limits",
+    response={200: CurrentLimitsOut, 403: Error, 500: Error},
 )
 def get_plan_limits(request):
     user = request.auth
     team = Team.objects.get(owner_id=user.id)
 
-    if user.team.owner_id is not user.id:
-        return 403, {"message": "Only owners can view plan details"}  # is this true?
-
     return calculate_limits(team)
+
+
+@router.get(
+    "/plan",
+    response={200: CurrentPlanOut, 403: Error, 500: Error},
+)
+def get_plan(request):
+    user = request.auth
+    team = Team.objects.get(owner_id=user.id)
+
+    if user.team.owner_id is not user.id:
+        return 403, {"message": "Only owners can view plan details"}
+
+    return calculate_plan(team)
 
 
 @router.post(

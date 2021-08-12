@@ -89,7 +89,30 @@ class AddonIn(Schema):
     collaborators: conint(ge=0) = 0
 
 
+class Addon(Schema):
+    quantity: int
+    name: str
+    price_per_unit: int
+
+
+class Addons(Schema):
+    project: Addon = None
+    user: Addon = None
+    collaborator: Addon = None
+
+
 class CurrentPlanOut(Schema):
+    tier_name: str
+    tier_id: int
+    current_period_end: int
+    current_period_start: int
+    base_price: int
+    addons: Addons
+    billed_usage: int
+    billed_usage_gb_price: int
+
+
+class CurrentLimitsOut(Schema):
     has_billing: bool
     tier_name: str
     tier_id: int
@@ -100,6 +123,7 @@ class CurrentPlanOut(Schema):
     projects: Optional[conint(ge=0)] = 0
     collaborators: Optional[conint(ge=0)] = 0
     storage: Optional[conint(ge=0)] = 0
+    storage_included_limit: Optional[conint(ge=0)] = 0
 
 
 class Invoice(Schema):
