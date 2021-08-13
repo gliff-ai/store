@@ -18,6 +18,7 @@ from server.api.schemas import (
     CurrentPlanOut,
     Addons,
     AddonPrices,
+    PaymentOut,
 )
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
@@ -144,6 +145,26 @@ def calculate_limits(team):
     plan["collaborators_limit"] = calculate_plan_total(team.tier.base_collaborator_limit, addons["collaborators"])
 
     return plan
+
+
+@router.get(
+    "/payment-method",
+    response={200: PaymentOut, 403: Error, 500: Error},
+)
+def get_payments(request):
+    user = request.auth
+    team = Team.objects.get(owner_id=user.id)
+
+    subscription = stripe.Subscription.retrieve(team.billing.subscription_id)
+    payment_method = stripe.PaymentMethod.retrieve(subscription["default_payment_method"])
+
+    payment = dict(
+        number=f"**** **** **** **** {payment_method.card.last4}",
+        expiry=f"{payment_method.card.exp_month}/{payment_method.card.exp_year}",
+        brand=payment_method.card.brand,
+        name=payment_method.billing_details.name,
+    )
+    return payment
 
 
 @router.get(

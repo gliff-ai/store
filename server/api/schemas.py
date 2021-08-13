@@ -145,3 +145,10 @@ class Invoice(Schema):
 
 class InvoicesOut(Schema):
     invoices: List[Invoice]
+
+
+class PaymentOut(Schema):
+    number: str
+    expiry: str
+    brand: str
+    name: str
