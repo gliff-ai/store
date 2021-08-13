@@ -140,6 +140,12 @@ class EmailVerification(models.Model):
     expiry_date = models.DateTimeField(blank=False, null=False)
 
 
+class TrustedService(models.Model):
+    id: int
+    name = models.CharField(blank=False, null=False, max_length=50)
+    base_url = models.URLField(blank=False, null=False, max_length=200)
+
+
 UserType = User
 
 
