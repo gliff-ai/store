@@ -32,5 +32,5 @@ jobs:
       with:
         app-name: store-staging-gliff
         slot-name: Production
-        publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_3FF9842FDB624FBDAB1D28DC28D9AC0A }}
+        publish-profile: ${{ secrets.AzureAppService_PublishProfile_b58befcb77d44482b30f143064f6885a }}
 
