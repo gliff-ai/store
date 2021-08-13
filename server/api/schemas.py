@@ -90,8 +90,8 @@ class AddonIn(Schema):
 
 
 class Addon(Schema):
-    quantity: int
-    name: str
+    quantity: int = 0
+    name: str = None
     price_per_unit: int
 
 
@@ -99,6 +99,12 @@ class Addons(Schema):
     project: Addon = None
     user: Addon = None
     collaborator: Addon = None
+
+
+class AddonPrices(Schema):
+    project: int = None
+    user: int = None
+    collaborator: int = None
 
 
 class CurrentPlanOut(Schema):

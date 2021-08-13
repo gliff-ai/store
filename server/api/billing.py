@@ -16,6 +16,8 @@ from server.api.schemas import (
     InvoicesOut,
     CurrentLimitsOut,
     CurrentPlanOut,
+    Addons,
+    AddonPrices,
 )
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
@@ -189,6 +191,37 @@ def get_plan(request):
         return 403, {"message": "Only owners can view plan details"}
 
     return calculate_plan(team)
+
+
+@router.get(
+    "/addon-prices",
+    response={200: AddonPrices, 422: Error, 403: Error, 500: Error},
+)
+def addonPrice(request):
+    user = request.auth
+    team = Team.objects.get(owner_id=user.id)
+
+    if user.team.owner_id is not user.id:
+        return 403, {"message": "Only owners can upgrade plans"}
+
+    if not hasattr(team, "billing"):
+        return 422, {"message": "No valid subscription to upgrade. Try changing your plan"}
+
+    prices = dict(project=None, user=None, collaborator=None)
+    if team.tier.stripe_project_price_id:
+        project = stripe.Price.retrieve(team.tier.stripe_project_price_id, expand=["tiers"])
+        prices["project"] = project.tiers[1].unit_amount
+    if team.tier.stripe_user_price_id:
+        user = stripe.Price.retrieve(team.tier.stripe_user_price_id, expand=["tiers"])
+        prices["user"] = user.tiers[1].unit_amount
+
+    if team.tier.stripe_collaborator_price_id:
+        collaborator = stripe.Price.retrieve(team.tier.stripe_collaborator_price_id, expand=["tiers"])
+        prices["collaborator"] = collaborator.tiers[1].unit_amount
+
+    print(user)
+
+    return prices
 
 
 @router.post(
