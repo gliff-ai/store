@@ -4,7 +4,11 @@ import django
 from uvicorn import Config, Server
 from loguru import logger
 from django.conf import settings
+<<<<<<< HEAD
 from django.core.asgi import get_asgi_application
+=======
+from django.core import management
+>>>>>>> 5f137b05ed765a8295ea9ab8204e1a974f670a87
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "server.settings.base")
 
@@ -49,11 +53,13 @@ def setup_logging():
 
 
 if __name__ == "__main__":
-    # set-up djando, loads settings etc.
+    # set-up django, loads settings etc.
     django.setup()
 
+    from server.asgi import get_application  # requires django to be set up
+
     # start the asynchronous web app server
-    app = get_asgi_application()
+    app = get_application()
 
     # initialise uvicorn server
     server = Server(

@@ -10,8 +10,6 @@ from django.core.validators import RegexValidator
 UidValidator = RegexValidator(regex=r"^[a-zA-Z0-9\-_]{20,}$", message="Not a valid UID")
 
 
-        user = self.model(email=self.normalize_email(email), username=email)
-
 class UserManager(BaseUserManager):
     """
     Custom user model manager with email. We also have username to support etebase, BUT we set this to equal the email
