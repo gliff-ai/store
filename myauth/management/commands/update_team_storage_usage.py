@@ -75,7 +75,7 @@ def suspend_trial_account(team_id):
 
         try:
             message = Mail(
-                from_email="support@gliff.app",
+                from_email="contact@gliff.ai",
                 to_emails=owner_email,
             )
 
