@@ -54,6 +54,9 @@ def calculate_plan_total(base, addons):
 def calculate_plan(team):
     plan = dict(tier_name=team.tier.name, tier_id=team.tier.id)
 
+    if not hasattr(team, "billing"):
+        return plan
+
     subscription = stripe.Subscription.retrieve(team.billing.subscription_id)
 
     plan["current_period_end"] = subscription.current_period_end
