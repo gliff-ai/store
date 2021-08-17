@@ -86,7 +86,7 @@ def create_user(request, payload: UserProfileIn):
     logger.info("email verification request created")
     try:
         message = Mail(
-            from_email="support@gliff.app",
+            from_email="contact@gliff.ai",
             to_emails=user.email,
         )
         message.dynamic_template_data = {
@@ -169,7 +169,7 @@ def create_invite(request, payload):
 
             # TODO slightly different email for a collaborator?
             message = Mail(
-                from_email="support@gliff.app",
+                from_email="contact@gliff.ai",
                 to_emails=payload.email,
             )
             message.dynamic_template_data = {
@@ -217,7 +217,7 @@ def request_validation_email(request, payload: CreateInvite):
         logger.info("email verification request created")
         try:
             message = Mail(
-                from_email="support@gliff.app",
+                from_email="contact@gliff.ai",
                 to_emails=user.email,
             )
             message.dynamic_template_data = {
@@ -274,7 +274,7 @@ def create_recovery(request, payload: CreateInvite):
         logger.info("recovery key created")
         try:
             message = Mail(
-                from_email="support@gliff.app",
+                from_email="contact@gliff.ai",
                 to_emails=payload.email,
             )
             message.dynamic_template_data = {
@@ -331,7 +331,7 @@ def verify_email(request, verification_id: str):
         # Send welcome email
         try:
             message = Mail(
-                from_email="support@gliff.app",
+                from_email="contact@gliff.ai",
                 to_emails=profile.user.email,
             )
 
