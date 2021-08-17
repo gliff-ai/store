@@ -354,7 +354,7 @@ def addon(request, payload: AddonIn):
 
 
 @router.post("/create-authd-checkout-session", response={200: CheckoutSessionOut, 422: Error, 403: Error})
-def create_checkout_session(request):
+def create_auth_checkout_session(request):
     try:
         user = request.auth
         team = Team.objects.get(owner_id=user.id)
