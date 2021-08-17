@@ -246,6 +246,39 @@ def addonPrice(request):
 
 
 @router.post(
+    "/cancel",
+    response={200: None, 422: Error, 403: Error, 500: Error},
+)
+def cancel(request):
+    try:
+        user = request.auth
+        team = Team.objects.get(owner_id=user.id)
+
+        if user.team.owner_id is not user.id:
+            return 403, {"message": "Only owners can upgrade plans"}
+
+        if not hasattr(team, "billing"):
+            return 422, {"message": "No valid subscription to upgrade. Try changing your plan"}
+
+        res = stripe.Subscription.delete(team.billing.subscription_id)
+
+        if res.status != "cancelled":
+            return 500, {"message": "There was an error cancelling, contact us at contact@gliff.ai"}
+
+        team.billing.cancel_date = res.cancelled_at
+        team.save()
+
+        users = User.objects.filter(team=team.id)
+        users.update(is_active=False)
+
+        return 200
+
+    except Exception as e:
+        logger.error(e)
+        return 500, {"message": "There was an error cancelling, contact us at contact@gliff.ai"}
+
+
+@router.post(
     "/addon",
     response={201: None, 422: Error, 403: Error, 500: Error},
 )
@@ -318,6 +351,37 @@ def addon(request, payload: AddonIn):
     except Exception as e:
         logger.error(f"Unknown addon error {e}")
         return 500, {"message": "Unknown Error"}
+
+
+@router.post("/create-authd-checkout-session", response={200: CheckoutSessionOut, 422: Error, 403: Error})
+def create_checkout_session(request):
+    try:
+        user = request.auth
+        team = Team.objects.get(owner_id=user.id)
+
+        if user.team.owner_id is not user.id:
+            return 403, {"message": "Only owners can upgrade plans"}
+
+        if not hasattr(team, "billing"):
+            return 422, {"message": "No valid subscription to upgrade. Try changing your plan"}
+
+        session = stripe.checkout.Session.create(
+            payment_method_types=["card"],
+            mode="setup",
+            customer=team.billing.stripe_customer_id,
+            setup_intent_data={
+                "metadata": {
+                    "subscription_id": team.billing.subscription_id,
+                },
+            },
+            success_url=settings.BASE_URL + "/billing/success",
+            cancel_url=settings.BASE_URL + "/billing/error",
+        )
+
+        return {"id": session.id}
+    except Exception as e:
+        logger.error(str(e))
+        return 403, {"message": str(e)}
 
 
 @router.post("/create-checkout-session", response={200: CheckoutSessionOut, 403: Error, 409: Error}, auth=None)
