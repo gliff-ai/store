@@ -1,3 +1,4 @@
+# Models (at least, User ones) should be here so Etebase can find them
 import typing as t
 
 from django.contrib.auth.models import AbstractUser
@@ -7,7 +8,6 @@ from django.contrib.auth.base_user import BaseUserManager
 from django.core.validators import RegexValidator
 
 UidValidator = RegexValidator(regex=r"^[a-zA-Z0-9\-_]{20,}$", message="Not a valid UID")
-
 
 
 class UserManager(BaseUserManager):
@@ -56,19 +56,20 @@ class User(AbstractUser):
         return self.email
 
 
-# Having this as a model lets us easily add and change tiers
+# For the limits, Null is unlimited
 class Tier(models.Model):
     id: int
     name = models.CharField(max_length=50)
-    stripe_flat_price_id = models.CharField(
-        blank=True, max_length=50, null=True, unique=True
-    )
-    stripe_storage_price_id = models.CharField(
-        blank=True, max_length=50, null=True, unique=True
-    )
-    stripe_seat_price_id = models.CharField(
-        blank=True, max_length=50, null=True, unique=True
-    )
+    stripe_flat_price_id = models.CharField(blank=True, max_length=50, null=True, unique=True)
+    stripe_storage_price_id = models.CharField(blank=True, max_length=50, null=True, unique=True)
+    stripe_user_price_id = models.CharField(blank=True, max_length=50, null=True, unique=True)
+    stripe_collaborator_price_id = models.CharField(blank=True, max_length=50, null=True, unique=True)
+    stripe_project_price_id = models.CharField(blank=True, max_length=50, null=True, unique=True)
+
+    base_user_limit = models.IntegerField(null=True)
+    base_project_limit = models.IntegerField(null=True)
+    base_collaborator_limit = models.IntegerField(null=True)
+    base_storage_limit = models.IntegerField(null=True)
 
 
 class Team(models.Model):
@@ -80,13 +81,25 @@ class Team(models.Model):
     usage = models.IntegerField(verbose_name="Storage usage in MB", null=True)
 
 
+# These are any addons that a user has purchased, the pricing is determined by their tier
+# We generate their usage limits from their tier + any values here
+class TierAddons(models.Model):
+    team = models.ForeignKey(Team, on_delete=models.RESTRICT)
+    additional_user_count = models.IntegerField(null=True)
+    additional_project_count = models.IntegerField(null=True)
+    additional_collaborator_count = models.IntegerField(null=True)
+    # You can't buy more storage, it's just billed
+    created_date = models.DateTimeField(auto_now_add=True, blank=False, null=False)
+
+
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
     name = models.CharField(max_length=200)
-    recovery_key = models.BinaryField(
-        editable=True, blank=False, null=False
-    )  #  The users encrypted key
+    recovery_key = models.TextField()
     team = models.ForeignKey(Team, on_delete=models.RESTRICT)
+    email_verified = models.DateTimeField(blank=True, null=True)
+    accepted_terms_and_conditions = models.DateTimeField(blank=True, null=True)
+    is_collaborator = models.BooleanField(null=False, default=False)
 
     def __str__(self):
         return self.user.email
@@ -103,13 +116,29 @@ class Billing(models.Model):
 
 
 class Invite(models.Model):
-    uid = models.CharField(
-        db_index=True, blank=False, null=False, max_length=43, validators=[UidValidator]
-    )
+    uid = models.CharField(db_index=True, blank=False, null=False, max_length=43, validators=[UidValidator])
     from_team = models.ForeignKey(Team, on_delete=models.CASCADE)
     email = models.EmailField(_("email address"), unique=True)
+    is_collaborator = models.BooleanField(null=False, default=False)
     sent_date = models.DateTimeField(auto_now_add=True, blank=False, null=False)
     accepted_date = models.DateTimeField(blank=True, null=True)
+
+
+class Recovery(models.Model):
+    uid = models.CharField(
+        db_index=True, blank=False, null=False, max_length=43, validators=[UidValidator], primary_key=True
+    )
+    user_profile = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
+    expiry_date = models.DateTimeField(blank=False, null=False)
+
+
+class EmailVerification(models.Model):
+    uid = models.CharField(
+        db_index=True, blank=False, null=False, max_length=43, validators=[UidValidator], primary_key=True
+    )
+    user_profile = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
+    expiry_date = models.DateTimeField(blank=False, null=False)
+
 
 UserType = User
 

@@ -7,17 +7,39 @@ This is a Django app consisting of 3 parts:
 `/django/(/admin)` the django application 
 
 
-## Setup
+## Setup (development)
 
 ```bash
 git submodule init
 git submodule update
-cp -r package_tools/* etebase-server/
-pip install -r requirements.txt
 rm -r etebase-server/myauth # we use our copy of this one level up
+pipenv sync --dev
 ```
 
-## Running
+## Setup (deployment)
+
+```bash
+git submodule init
+git submodule update
+rm -r etebase-server/myauth # we use our copy of this one level up
+pip install -r requirements.txt
+```
+
+## Adding `new-package`
+
+```bash
+pipenv install new-package
+pipenv lock -r --dev > requirements.txt
+```
+
+### Adding `new-dev-package`
+
+```bash
+pipenv install --dev new-dev-package
+pipenv lock -r --dev > requirements.txt
+```
+
+## Running (with `pipenv run` if development)
 
 ```bash
 python manage.py makemigrations
@@ -26,10 +48,6 @@ python manage.py migrate
 
 then
 
-```bash
-uvicorn server.asgi:app --host 0.0.0.0 --port 8000 --log-level trace --reload
-```
-or
 ```bash
 python start.py
 ```

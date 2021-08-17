@@ -25,8 +25,13 @@ AUTH_USER_MODEL = "myauth.User"
 
 SECRET_KEY = "VERYVERYVERYVERYVERYVERYSECRETKEY"
 
+# SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
+LOG_LEVEL = "DEBUG"  # used for intercepting uvicorn and django logs, which use Python's own logging
+
 ALLOWED_HOSTS = ["*"]
+
+HOST = "127.0.0.1"
 
 
 CORS_ORIGIN_ALLOW_ALL = True
@@ -36,9 +41,7 @@ CORS_ALLOW_CREDENTIALS = True
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
-        "NAME": os.environ.get(
-            "ETEBASE_DB_PATH", os.path.join(BASE_DIR, "../", "db.sqlite3")
-        ),
+        "NAME": os.environ.get("ETEBASE_DB_PATH", os.path.join(BASE_DIR, "../", "db.sqlite3")),
     }
 }
 
@@ -54,6 +57,7 @@ INSTALLED_APPS = [
     "myauth.apps.GliffAuthConfig",
     "django_etebase.apps.DjangoEtebaseConfig",
     "django_etebase.token_auth.apps.TokenAuthConfig",
+    "django_apscheduler",
 ]
 
 MIDDLEWARE = [
@@ -128,3 +132,6 @@ BASE_URL = config("BASE_URL", default="http://localhost:3000")
 
 SUCCESS_URL = config("SUCCESS_URL", default="http://localhost:3000/signup/success")
 CANCEL_URL = config("CANCEL_URL", default="http://localhost:3000/signup/cancel")
+
+# vars used in background tasks
+RUN_TASK_UPDATE_STORAGE = False

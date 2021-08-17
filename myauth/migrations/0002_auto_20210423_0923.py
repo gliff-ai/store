@@ -2,19 +2,19 @@
 
 from django.db import migrations
 
+
 def add_tiers(apps, schema_editor):
-    Tier = apps.get_model('myauth', 'Tier')
+    Tier = apps.get_model("myauth", "Tier")
 
     for tier in ["COMMUNITY", "PRO", "TEAM", "ENTERPRISE"]:
         t = Tier(name=tier)
         t.save()
 
+
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('myauth', '0001_initial'),
+        ("myauth", "0001_initial"),
     ]
 
-    operations = [
-        migrations.RunPython(add_tiers)
-    ]
+    operations = [migrations.RunPython(add_tiers)]

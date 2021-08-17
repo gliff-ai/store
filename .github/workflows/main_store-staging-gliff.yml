@@ -19,17 +19,18 @@ jobs:
       with:
         submodules: true
 
-    - name: Copy package tools
-      run: |
-        cp -r package_tools/* etebase-server/
+    - name: TEMP - remove lock files to force Oryx to use requirements.txt
+      run: rm Pipfile*
 
     - name: Build using AppService-Build
       uses: azure/appservice-build@v2
+      with:
+        DISABLE_COLLECTSTATIC: true
 
     - name: Run Azure webapp deploy action using publish profile credentials
       uses: azure/webapps-deploy@v2
       with:
         app-name: store-staging-gliff
         slot-name: Production
-        publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_3FF9842FDB624FBDAB1D28DC28D9AC0A }}
+        publish-profile: ${{ secrets.AzureAppService_PublishProfile_b58befcb77d44482b30f143064f6885a }}
 
