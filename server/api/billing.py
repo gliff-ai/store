@@ -457,7 +457,7 @@ def stripe_webhook(request):
 
 def complete_payment(session):
     try:
-        print(session)  # Log properly
+        logger.info(session)
 
         subscription = stripe.Subscription.retrieve(session["subscription"])
         metatdata = session["metadata"]
