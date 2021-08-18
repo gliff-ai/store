@@ -396,7 +396,7 @@ def create_checkout_session(request, payload: CheckoutSessionIn):
 
         # This is a free plan, no need to bill them
         if tier.stripe_flat_price_id is None:
-            logger.error("we shouldn't create_checkout_session for a free plan?!")
+            logger.error(f"we shouldn't create_checkout_session for a free plan?! ({payload.tier_id})")
             return 409, {"message": "Can't pay for a free tier"}
 
         # Charge the flat rate and add storage, which is updated daily
@@ -416,6 +416,8 @@ def create_checkout_session(request, payload: CheckoutSessionIn):
             cancel_url=settings.CANCEL_URL,
             metadata={"tier_id": tier.id, "tier_name": tier.name, "team_id": team.id},
             allow_promotion_codes=True,
+            tax_id_collection={"enabled": True},
+            billing_address_collection="required",
         )
         return {"id": checkout_session.id}
     except Exception as e:
