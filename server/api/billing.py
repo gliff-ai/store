@@ -416,6 +416,7 @@ def create_checkout_session(request, payload: CheckoutSessionIn):
             cancel_url=settings.CANCEL_URL,
             metadata={"tier_id": tier.id, "tier_name": tier.name, "team_id": team.id},
             allow_promotion_codes=True,
+            automatic_tax={"enabled": True},
             tax_id_collection={"enabled": True},
             billing_address_collection="required",
         )
