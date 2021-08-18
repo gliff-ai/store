@@ -415,6 +415,7 @@ def create_checkout_session(request, payload: CheckoutSessionIn):
             success_url=settings.SUCCESS_URL,
             cancel_url=settings.CANCEL_URL,
             metadata={"tier_id": tier.id, "tier_name": tier.name, "team_id": team.id},
+            allow_promotion_codes=True,
         )
         return {"id": checkout_session.id}
     except Exception as e:
