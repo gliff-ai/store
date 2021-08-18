@@ -21,7 +21,7 @@ router = Router()
 def email_collab(request, payload: CreateInvite):
     user = request.auth
     message = Mail(
-        from_email="support@gliff.app",
+        from_email="contact@gliff.ai",
         to_emails=payload.email,
     )
 
