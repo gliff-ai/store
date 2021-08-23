@@ -7,7 +7,7 @@ from myauth.models import User, UserProfile, Tier, Team, TrustedService
 
 TierSchema = create_schema(Tier)
 
-TrustedServiceSchema = create_schema(TrustedService)
+TrustedServiceSchema = create_schema(TrustedService, exclude=["id"])
 
 
 class TrustedServiceCreated(Schema):
