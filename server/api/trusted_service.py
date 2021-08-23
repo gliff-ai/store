@@ -6,8 +6,6 @@ from django.shortcuts import get_object_or_404
 from myauth.models import TrustedService
 from .schemas import TrustedServiceSchema, Error, TrustedServiceCreated
 
-# from loguru import logger
-
 router = Router()
 
 
@@ -22,7 +20,7 @@ def get_employee(request, trusted_service_id: int):
     return trusted_service
 
 
-@router.post("/", response=TrustedServiceCreated, auth=None)
+@router.post("/", response={200: TrustedServiceCreated, 500: Error}, auth=None)
 def create_trusted_service(request, trusted_service: TrustedServiceSchema):
     trusted_service = TrustedService.objects.create(**trusted_service.dict())
     return {"id": trusted_service.id}
