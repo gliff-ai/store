@@ -19,6 +19,7 @@ class EnforceCollabMiddleware:
             ("POST", "/django/api/invite"),  # Invite User
             ("GET", "/django/api/team"),  # View team
             ("*", "/django/api/billing"),  # Any billing routes
+            ("POST", "/django/api/trusted_services"),  # Create TrustedService
         ]
 
         # Explicit Allow
