@@ -142,6 +142,7 @@ class EmailVerification(models.Model):
 
 class TrustedService(models.Model):
     id: int
+    team = models.ForeignKey(Team, on_delete=models.RESTRICT)
     name = models.CharField(blank=False, null=False, max_length=50)
     base_url = models.URLField(blank=False, null=False, max_length=200)
 
