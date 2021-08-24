@@ -2,25 +2,28 @@ from typing import List
 
 from ninja import Router
 
-from django.shortcuts import get_object_or_404
 from myauth.models import TrustedService
-from .schemas import TrustedServiceSchema, Error, TrustedServiceCreated
+from .schemas import TrustedServiceOut, TrustedServiceIn, Error, TrustedServiceCreated
 
 router = Router()
 
 
-@router.get("/", response=List[TrustedServiceSchema], auth=None)
-def list_trusted_services(request):
-    return TrustedService.objects.all()
+@router.get("/{team_id}", response={200: List[TrustedServiceOut], 403: Error})
+def get_trusted_service(request, team_id: int):
+    user = request.auth
+
+    if user.userprofile.team_id is not team_id:
+        return 403, {"message": "Only team members view the trusted services."}
+
+    ts_list = TrustedService.objects.filter(team_id=team_id)
+    return ts_list
 
 
-@router.get("/{trusted_service_id}", response=TrustedServiceSchema, auth=None)
-def get_employee(request, trusted_service_id: int):
-    trusted_service = get_object_or_404(TrustedService, id=trusted_service_id)
-    return trusted_service
+@router.post("/", response={200: TrustedServiceCreated, 403: Error, 500: Error})
+def create_trusted_service(request, payload: TrustedServiceIn):
+    user = request.auth
 
-
-@router.post("/", response={200: TrustedServiceCreated, 500: Error}, auth=None)
-def create_trusted_service(request, trusted_service: TrustedServiceSchema):
-    trusted_service = TrustedService.objects.create(**trusted_service.dict())
-    return {"id": trusted_service.id}
+    if user.userprofile.team_id is not payload.team_id:
+        return 403, {"message": "Only owners can create trusted services."}
+    ts = TrustedService.objects.create(**payload.dict())
+    return {"id": ts.id}
