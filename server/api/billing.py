@@ -16,6 +16,9 @@ from server.api.schemas import (
     InvoicesOut,
     CurrentLimitsOut,
     CurrentPlanOut,
+    Addons,
+    AddonPrices,
+    PaymentOut,
 )
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
@@ -50,6 +53,9 @@ def calculate_plan_total(base, addons):
 
 def calculate_plan(team):
     plan = dict(tier_name=team.tier.name, tier_id=team.tier.id)
+
+    if not hasattr(team, "billing"):
+        return plan
 
     subscription = stripe.Subscription.retrieve(team.billing.subscription_id)
 
@@ -145,6 +151,26 @@ def calculate_limits(team):
 
 
 @router.get(
+    "/payment-method",
+    response={200: PaymentOut, 403: Error, 500: Error},
+)
+def get_payments(request):
+    user = request.auth
+    team = Team.objects.get(owner_id=user.id)
+
+    subscription = stripe.Subscription.retrieve(team.billing.subscription_id)
+    payment_method = stripe.PaymentMethod.retrieve(subscription["default_payment_method"])
+
+    payment = dict(
+        number=f"**** **** **** **** {payment_method.card.last4}",
+        expiry=f"{payment_method.card.exp_month}/{payment_method.card.exp_year}",
+        brand=payment_method.card.brand,
+        name=payment_method.billing_details.name,
+    )
+    return payment
+
+
+@router.get(
     "/invoices",
     response={200: InvoicesOut, 403: Error, 500: Error},
 )
@@ -189,6 +215,70 @@ def get_plan(request):
         return 403, {"message": "Only owners can view plan details"}
 
     return calculate_plan(team)
+
+
+@router.get(
+    "/addon-prices",
+    response={200: AddonPrices, 422: Error, 403: Error, 500: Error},
+)
+def addonPrice(request):
+    user = request.auth
+    team = Team.objects.get(owner_id=user.id)
+
+    if user.team.owner_id is not user.id:
+        return 403, {"message": "Only owners can upgrade plans"}
+
+    if not hasattr(team, "billing"):
+        return 422, {"message": "No valid subscription to upgrade. Try changing your plan"}
+
+    prices = dict(project=None, user=None, collaborator=None)
+    if team.tier.stripe_project_price_id:
+        project = stripe.Price.retrieve(team.tier.stripe_project_price_id, expand=["tiers"])
+        prices["project"] = project.tiers[1].unit_amount
+    if team.tier.stripe_user_price_id:
+        user = stripe.Price.retrieve(team.tier.stripe_user_price_id, expand=["tiers"])
+        prices["user"] = user.tiers[1].unit_amount
+
+    if team.tier.stripe_collaborator_price_id:
+        collaborator = stripe.Price.retrieve(team.tier.stripe_collaborator_price_id, expand=["tiers"])
+        prices["collaborator"] = collaborator.tiers[1].unit_amount
+
+    print(user)
+
+    return prices
+
+
+@router.post(
+    "/cancel",
+    response={200: None, 422: Error, 403: Error, 500: Error},
+)
+def cancel(request):
+    try:
+        user = request.auth
+        team = Team.objects.get(owner_id=user.id)
+
+        if user.team.owner_id is not user.id:
+            return 403, {"message": "Only owners can upgrade plans"}
+
+        if not hasattr(team, "billing"):
+            return 422, {"message": "No valid subscription to upgrade. Try changing your plan"}
+
+        res = stripe.Subscription.delete(team.billing.subscription_id)
+
+        if res.status != "cancelled":
+            return 500, {"message": "There was an error cancelling, contact us at contact@gliff.ai"}
+
+        team.billing.cancel_date = res.cancelled_at
+        team.save()
+
+        users = User.objects.filter(team=team.id)
+        users.update(is_active=False)
+
+        return 200
+
+    except Exception as e:
+        logger.error(e)
+        return 500, {"message": "There was an error cancelling, contact us at contact@gliff.ai"}
 
 
 @router.post(
@@ -266,6 +356,37 @@ def addon(request, payload: AddonIn):
         return 500, {"message": "Unknown Error"}
 
 
+@router.post("/create-authd-checkout-session", response={200: CheckoutSessionOut, 422: Error, 403: Error})
+def create_auth_checkout_session(request):
+    try:
+        user = request.auth
+        team = Team.objects.get(owner_id=user.id)
+
+        if user.team.owner_id is not user.id:
+            return 403, {"message": "Only owners can upgrade plans"}
+
+        if not hasattr(team, "billing"):
+            return 422, {"message": "No valid subscription to upgrade. Try changing your plan"}
+
+        session = stripe.checkout.Session.create(
+            payment_method_types=["card"],
+            mode="setup",
+            customer=team.billing.stripe_customer_id,
+            setup_intent_data={
+                "metadata": {
+                    "subscription_id": team.billing.subscription_id,
+                },
+            },
+            success_url=settings.BASE_URL + "/billing/success",
+            cancel_url=settings.BASE_URL + "/billing/error",
+        )
+
+        return {"id": session.id}
+    except Exception as e:
+        logger.error(str(e))
+        return 403, {"message": str(e)}
+
+
 @router.post("/create-checkout-session", response={200: CheckoutSessionOut, 403: Error, 409: Error}, auth=None)
 def create_checkout_session(request, payload: CheckoutSessionIn):
     try:
@@ -275,7 +396,7 @@ def create_checkout_session(request, payload: CheckoutSessionIn):
 
         # This is a free plan, no need to bill them
         if tier.stripe_flat_price_id is None:
-            logger.error("we shouldn't create_checkout_session for a free plan?!")
+            logger.error(f"we shouldn't create_checkout_session for a free plan?! ({payload.tier_id})")
             return 409, {"message": "Can't pay for a free tier"}
 
         # Charge the flat rate and add storage, which is updated daily
@@ -294,6 +415,10 @@ def create_checkout_session(request, payload: CheckoutSessionIn):
             success_url=settings.SUCCESS_URL,
             cancel_url=settings.CANCEL_URL,
             metadata={"tier_id": tier.id, "tier_name": tier.name, "team_id": team.id},
+            allow_promotion_codes=True,
+            automatic_tax={"enabled": True},
+            tax_id_collection={"enabled": True},
+            billing_address_collection="required",
         )
         return {"id": checkout_session.id}
     except Exception as e:
@@ -339,7 +464,7 @@ def stripe_webhook(request):
 
 def complete_payment(session):
     try:
-        print(session)  # Log properly
+        logger.info(session)
 
         subscription = stripe.Subscription.retrieve(session["subscription"])
         metatdata = session["metadata"]

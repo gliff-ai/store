@@ -23,7 +23,9 @@ class EnforceCollabMiddleware:
         ]
 
         # Explicit Allow
-        if scope["path"].startswith("/django/api/billing/create-checkout-session"):
+        if scope["path"].startswith("/django/api/billing/create-checkout-session") or scope["path"].startswith(
+            "/django/api/billing/webhook"
+        ):
             await self.app(scope, receive, send)
             return
 

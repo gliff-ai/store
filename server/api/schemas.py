@@ -102,8 +102,8 @@ class AddonIn(Schema):
 
 
 class Addon(Schema):
-    quantity: int
-    name: str
+    quantity: int = 0
+    name: str = None
     price_per_unit: int
 
 
@@ -111,6 +111,12 @@ class Addons(Schema):
     project: Addon = None
     user: Addon = None
     collaborator: Addon = None
+
+
+class AddonPrices(Schema):
+    project: int = None
+    user: int = None
+    collaborator: int = None
 
 
 class CurrentPlanOut(Schema):
@@ -151,3 +157,10 @@ class Invoice(Schema):
 
 class InvoicesOut(Schema):
     invoices: List[Invoice]
+
+
+class PaymentOut(Schema):
+    number: str
+    expiry: str
+    brand: str
+    name: str
