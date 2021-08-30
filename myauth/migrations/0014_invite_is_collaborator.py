@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('myauth', '0013_userprofile_is_collaborator'),
+        ("myauth", "0013_userprofile_is_collaborator"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='invite',
-            name='is_collaborator',
+            model_name="invite",
+            name="is_collaborator",
             field=models.BooleanField(default=False),
         ),
     ]
