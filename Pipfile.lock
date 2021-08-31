@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "61916fa77ad577b59e4c2be9e4793b49678ff4f0170119e4e3902dc8a7e75c95"
+            "sha256": "8d2d3c57538df3e613d634410495a4da35e180a3968798d994336451527da815"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -210,11 +210,11 @@
         },
         "django-ninja": {
             "hashes": [
-                "sha256:02526074539d4308135f5540276e52311a70b67bfb690e5aff750a7370ae6503",
-                "sha256:7beec6308629eb2bd60f286c08741adc0ebb7c2b74438f212deff3cc9b62dd77"
+                "sha256:b1804d0494ef2e00b9d2bb7b0f956887094a6b2b49b00f85c0d9d9b153ba8d1a",
+                "sha256:b9f2eacfed8e584a5ecea9ee80031a8b553cc5ed4410a4f0ec5022a3c36a8465"
             ],
             "index": "pypi",
-            "version": "==0.13.2"
+            "version": "==0.14.0"
         },
         "django-storages": {
             "git": "https://github.com/pjsier/django-storages.git",
@@ -550,6 +550,10 @@
                 "sha256:fa6c47b933f01060936d87ae9327fead68768b69c6c9ea2109c48be30f2d4dbc"
             ],
             "version": "==1.3.0"
+        },
+        "sanitized-package": {
+            "editable": true,
+            "file": "file:///home/dependabot/dependabot-updater/tmp/dependabot_20210831-10-11jsyhv/etebase-server"
         },
         "sendgrid": {
             "hashes": [
