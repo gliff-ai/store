@@ -6,28 +6,28 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('myauth', '0011_auto_20210802_1609'),
+        ("myauth", "0011_auto_20210802_1609"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='tier',
-            name='base_collaborator_limit',
+            model_name="tier",
+            name="base_collaborator_limit",
             field=models.IntegerField(null=True),
         ),
         migrations.AlterField(
-            model_name='tier',
-            name='base_project_limit',
+            model_name="tier",
+            name="base_project_limit",
             field=models.IntegerField(null=True),
         ),
         migrations.AlterField(
-            model_name='tier',
-            name='base_storage_limit',
+            model_name="tier",
+            name="base_storage_limit",
             field=models.IntegerField(null=True),
         ),
         migrations.AlterField(
-            model_name='tier',
-            name='base_user_limit',
+            model_name="tier",
+            name="base_user_limit",
             field=models.IntegerField(null=True),
         ),
     ]
