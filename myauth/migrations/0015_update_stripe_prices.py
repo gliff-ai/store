@@ -1,3 +1,4 @@
+# flake8: noqa: W291
 import os
 from django.db import migrations
 
@@ -24,7 +25,7 @@ class Migration(migrations.Migration):
                 base_storage_limit = 10000,
                 base_user_limit = 1 
             WHERE id = 1;
-            
+
             UPDATE myauth_tier SET name = 'PRO',
                 stripe_flat_price_id = 'price_1JPmabFauXVlvS5w1BvZJ9dS',
                 stripe_storage_price_id = 'price_1JNbeUFauXVlvS5wDzvmBLuQ',
@@ -36,6 +37,7 @@ class Migration(migrations.Migration):
                 base_storage_limit = 100000,
                 base_user_limit = 10 
             WHERE id = 2;
+
             UPDATE myauth_tier SET name = 'TEAM',
                 stripe_flat_price_id = 'price_1JMrQGFauXVlvS5wDBOJnJHm',
                 stripe_storage_price_id = 'price_1JMrOtFauXVlvS5wKV9LOuw8',
@@ -66,7 +68,7 @@ class Migration(migrations.Migration):
                 base_storage_limit = 10000,
                 base_user_limit = 1 
             WHERE id = 1;
-            
+
             UPDATE myauth_tier SET name = 'PRO',
                 stripe_flat_price_id = 'price_1JPNxxFauXVlvS5wva02Iw90',
                 stripe_storage_price_id = 'price_1JPNxjFauXVlvS5wQ5GwrWE2',
@@ -78,6 +80,7 @@ class Migration(migrations.Migration):
                 base_storage_limit = 100000,
                 base_user_limit = 10 
             WHERE id = 2;
+
             UPDATE myauth_tier SET name = 'TEAM',
                 stripe_flat_price_id = 'price_1JPNyUFauXVlvS5wbefopTwb',
                 stripe_storage_price_id = 'price_1JPNxjFauXVlvS5wUnCkQ7Hv',
