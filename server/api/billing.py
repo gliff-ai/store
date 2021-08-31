@@ -479,7 +479,12 @@ def complete_payment(session):
 
         billing.save()
 
+        team = Team.objects.get(id=metatdata.team_id)
+        team.tier.id = metatdata.tier_id
+
+        team.save()
+
         return True
     except Exception as e:
-        print(e)
+        logger.error(e)
         return False
