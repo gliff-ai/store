@@ -479,8 +479,7 @@ def complete_payment(session):
 
         billing.save()
 
-        team = Team.objects.filter(id=metadata.team_id).update(tier_id=metadata.tier_id)
-        team.save()
+        Team.objects.filter(id=metadata.team_id).update(tier_id=metadata.tier_id)
 
         return True
     except Exception as e:
