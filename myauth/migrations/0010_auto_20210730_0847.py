@@ -7,58 +7,58 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('myauth', '0009_userprofile_accepted_terms_and_conditions'),
+        ("myauth", "0009_userprofile_accepted_terms_and_conditions"),
     ]
 
     operations = [
         migrations.RenameField(
-            model_name='tier',
-            old_name='stripe_seat_price_id',
-            new_name='stripe_collaborator_price_id',
+            model_name="tier",
+            old_name="stripe_seat_price_id",
+            new_name="stripe_collaborator_price_id",
         ),
         migrations.AddField(
-            model_name='tier',
-            name='base_collaborator_limit',
+            model_name="tier",
+            name="base_collaborator_limit",
             field=models.IntegerField(default=0),
             preserve_default=False,
         ),
         migrations.AddField(
-            model_name='tier',
-            name='base_project_limit',
+            model_name="tier",
+            name="base_project_limit",
             field=models.IntegerField(default=0),
             preserve_default=False,
         ),
         migrations.AddField(
-            model_name='tier',
-            name='base_storage_limit',
+            model_name="tier",
+            name="base_storage_limit",
             field=models.IntegerField(default=0),
             preserve_default=False,
         ),
         migrations.AddField(
-            model_name='tier',
-            name='base_user_limit',
+            model_name="tier",
+            name="base_user_limit",
             field=models.IntegerField(default=0),
             preserve_default=False,
         ),
         migrations.AddField(
-            model_name='tier',
-            name='stripe_collaborator_project_id',
+            model_name="tier",
+            name="stripe_collaborator_project_id",
             field=models.CharField(blank=True, max_length=50, null=True, unique=True),
         ),
         migrations.AddField(
-            model_name='tier',
-            name='stripe_user_price_id',
+            model_name="tier",
+            name="stripe_user_price_id",
             field=models.CharField(blank=True, max_length=50, null=True, unique=True),
         ),
         migrations.CreateModel(
-            name='TierAddons',
+            name="TierAddons",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('additional_user_count', models.IntegerField(null=True)),
-                ('additional_project_count', models.IntegerField(null=True)),
-                ('additional_collaborator_count', models.IntegerField(null=True)),
-                ('created_date', models.DateTimeField(auto_now_add=True)),
-                ('team', models.ForeignKey(on_delete=django.db.models.deletion.RESTRICT, to='myauth.team')),
+                ("id", models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("additional_user_count", models.IntegerField(null=True)),
+                ("additional_project_count", models.IntegerField(null=True)),
+                ("additional_collaborator_count", models.IntegerField(null=True)),
+                ("created_date", models.DateTimeField(auto_now_add=True)),
+                ("team", models.ForeignKey(on_delete=django.db.models.deletion.RESTRICT, to="myauth.team")),
             ],
         ),
     ]

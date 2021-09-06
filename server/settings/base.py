@@ -8,6 +8,8 @@ import os
 from decouple import config
 from django.core.exceptions import ImproperlyConfigured
 
+VERSION = "store@1.6.0"
+
 
 # Use this if you want to enforce an env var being set. If you want a default, just use decouple directly
 def get_env_value(env_variable):

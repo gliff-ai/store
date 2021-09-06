@@ -484,5 +484,5 @@ def complete_payment(session):
 
         return True
     except Exception as e:
-        print(e)
+        logger.error(e)
         return False

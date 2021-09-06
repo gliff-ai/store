@@ -3,9 +3,21 @@ from ninja import Schema
 from ninja.orm import create_schema
 from pydantic import validator, typing, conint
 
-from myauth.models import User, UserProfile, Tier, Team
+from myauth.models import User, UserProfile, Tier, Team, TrustedService
 
 TierSchema = create_schema(Tier)
+
+TrustedServiceOut = create_schema(TrustedService, exclude=["id"])
+
+
+class TrustedServiceIn(Schema):
+    team_id: int
+    name: str
+    base_url: str
+
+
+class TrustedServiceCreated(Schema):
+    id: int
 
 
 class Error(Schema):
