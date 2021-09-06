@@ -467,22 +467,19 @@ def complete_payment(session):
         logger.info(session)
 
         subscription = stripe.Subscription.retrieve(session["subscription"])
-        metatdata = session["metadata"]
+        metadata = session["metadata"]
 
         billing = Billing.objects.create(
             stripe_customer_id=subscription["customer"],
             start_date=datetime.fromtimestamp(subscription["current_period_start"], timezone.utc),
             renewal_date=datetime.fromtimestamp(subscription["current_period_end"], timezone.utc),
-            team_id=metatdata.team_id,
+            team_id=metadata.team_id,
             subscription_id=subscription["id"],
         )
 
         billing.save()
 
-        team = Team.objects.get(id=metatdata.team_id)
-        team.tier.id = metatdata.tier_id
-
-        team.save()
+        Team.objects.filter(id=metadata.team_id).update(tier_id=metadata.tier_id)
 
         return True
     except Exception as e:
