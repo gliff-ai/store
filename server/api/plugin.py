@@ -30,7 +30,6 @@ def create_plugin(request, payload: PluginIn):
 
     try:
         plugin = Plugin.objects.create(url=payload.url, product=payload.product)
-        logger.info(plugin)
         plugin.teams.add(user.userprofile.team)
         plugin.save()
         return {"id": plugin.id}
