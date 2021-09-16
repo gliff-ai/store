@@ -11,6 +11,7 @@ from django.contrib.staticfiles import finders
 from ninja import NinjaAPI
 from ninja.security import APIKeyHeader
 from myauth.models import TrustedService
+from myauth.models import Plugin
 
 from etebase_fastapi.dependencies import get_authenticated_user
 
@@ -20,6 +21,7 @@ from .api.team import router as teams_router
 from .api.project import router as project_router
 from .api.billing import router as billing_router
 from .api.trusted_service import router as trusted_service_router
+from .api.plugin import router as plugin_router
 from .api.sentry import router as sentry_router
 
 
@@ -53,6 +55,7 @@ api.add_router("/billing", billing_router)
 api.add_router("/project", project_router)
 api.add_router("/tunnel", sentry_router)
 api.add_router("/trusted_service", trusted_service_router)
+api.add_router("/plugin", plugin_router)
 
 
 urlpatterns = [

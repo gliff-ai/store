@@ -147,6 +147,19 @@ class TrustedService(models.Model):
     base_url = models.URLField(blank=False, null=False, max_length=200)
 
 
+class Plugin(models.Model):
+    PRODUCTS = (
+        ("CURATE", "CURATE"),
+        ("ANNOTATE", "ANNOTATE"),
+    )
+
+    id: int
+    teams = models.ManyToManyField(Team)
+    url = models.URLField(blank=False, null=False, max_length=200, unique=True)
+    product = models.CharField(max_length=20, choices=PRODUCTS)
+    enabled = models.BooleanField(null=False, default=False)
+
+
 UserType = User
 
 
