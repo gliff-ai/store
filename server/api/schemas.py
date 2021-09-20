@@ -11,7 +11,7 @@ TrustedServiceOut = create_schema(TrustedService, exclude=["id"])
 
 
 class TrustedServiceIn(Schema):
-    team_id: int
+    id: str
     name: str
     base_url: str
 
