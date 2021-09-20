@@ -6,9 +6,8 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('myauth', '0015_update_stripe_prices'),
-        ('myauth', '0015_trustedservice'),
+        ("myauth", "0015_update_stripe_prices"),
+        ("myauth", "0015_trustedservice"),
     ]
 
-    operations = [
-    ]
+    operations = []

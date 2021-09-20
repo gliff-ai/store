@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('myauth', '0019_trustedservice_user'),
+        ("myauth", "0019_trustedservice_user"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='userprofile',
-            name='recovery_key',
+            model_name="userprofile",
+            name="recovery_key",
             field=models.TextField(null=True),
         ),
     ]

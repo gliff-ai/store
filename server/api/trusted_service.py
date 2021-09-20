@@ -9,16 +9,14 @@ from .schemas import TrustedServiceOut, TrustedServiceIn, Error, TrustedServiceC
 router = Router()
 
 
-@router.get("/{team_id}", response={200: List[TrustedServiceOut], 403: Error})
-def get_trusted_service(request, team_id: int):
+@router.get("/", response={200: List[TrustedServiceOut], 403: Error})
+def get_trusted_service(request):
     user = request.auth
-
-    team = Team.objects.get(owner_id=user.id)
 
     if user.team.owner_id is not user.id:
         return 403, {"message": "Only owners can view trusted services."}
 
-    ts_list = TrustedService.objects.filter(team_id=team_id)
+    ts_list = TrustedService.objects.filter(team_id=user.team.id)
     return ts_list
 
 
