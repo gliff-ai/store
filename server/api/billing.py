@@ -107,9 +107,15 @@ def calculate_plan(team):
 
 def calculate_limits(team):
     team_members = UserProfile.objects.filter(team__owner_id=team.owner).values_list("user_id", flat=True)
-    users = User.objects.filter(userprofile__team__owner_id=team.owner, userprofile__is_collaborator=False).count()
+    users = User.objects.filter(
+        userprofile__team__owner_id=team.owner,
+        userprofile__is_collaborator=False,
+        userprofile__is_trusted_service=False,
+    ).count()
     collaborators = User.objects.filter(
-        userprofile__team__owner_id=team.owner, userprofile__is_collaborator=True
+        userprofile__team__owner_id=team.owner,
+        userprofile__is_collaborator=True,
+        userprofile__is_trusted_service=False,
     ).count()
     storage = Team.objects.filter(id=team.id).values("usage")[0]
     projects = Collection.objects.filter(owner__in=team_members).count()
