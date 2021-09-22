@@ -19,7 +19,7 @@ def get_team(request):
     if user.userprofile.team.owner_id is not user.id:
         return 403, {"message": "Only owners can view the team"}
 
-    users = User.objects.filter(userprofile__team__owner_id=user.id)
+    users = User.objects.filter(userprofile__team__owner_id=user.id).filter(userprofile__is_trusted_service=False)
 
     profiles = []
     for u in users:
