@@ -13,9 +13,6 @@ router = Router()
 def get_trusted_service(request):
     user = request.auth
 
-    if user.team.owner_id is not user.id:
-        return 403, {"message": "Only owners can view trusted services."}
-
     ts_list = TrustedService.objects.filter(team_id=user.team.id)
     return ts_list
 
