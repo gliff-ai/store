@@ -95,11 +95,12 @@ class TierAddons(models.Model):
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
     name = models.CharField(max_length=200)
-    recovery_key = models.TextField()
+    recovery_key = models.TextField(null=True)
     team = models.ForeignKey(Team, on_delete=models.RESTRICT)
     email_verified = models.DateTimeField(blank=True, null=True)
     accepted_terms_and_conditions = models.DateTimeField(blank=True, null=True)
     is_collaborator = models.BooleanField(null=False, default=False)
+    is_trusted_service = models.BooleanField(null=False, default=False)
 
     def __str__(self):
         return self.user.email
@@ -142,6 +143,7 @@ class EmailVerification(models.Model):
 
 class TrustedService(models.Model):
     id: int
+    user = models.ForeignKey(User, on_delete=models.RESTRICT)
     team = models.ForeignKey(Team, on_delete=models.RESTRICT)
     name = models.CharField(blank=False, null=False, max_length=50)
     base_url = models.URLField(blank=False, null=False, max_length=200)
