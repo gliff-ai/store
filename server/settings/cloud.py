@@ -17,7 +17,9 @@ CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOW_CREDENTIALS = True
 # CORS_ORIGIN_WHITELIST = config("CORS_ORIGIN_WHITELIST").split(",")
 
-HOST = "0.0.0.0"
+# HOST = "0.0.0.0"
+HOST = "127.0.0.1"
+DEBUG = True
 
 DATABASES = {
     "default": {
