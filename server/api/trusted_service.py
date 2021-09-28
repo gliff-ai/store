@@ -37,6 +37,7 @@ def create_trusted_service(request, payload: TrustedServiceIn):
         accepted_terms_and_conditions=datetime.now(tz=timezone.utc),
         is_collaborator=False,
         is_trusted_service=True,
+        email_verified=datetime.now(tz=timezone.utc),
     )
     user_profile.id = user_profile.user_id
     user_profile.email = user.email
