@@ -12,7 +12,7 @@ def get_user_is_collab(key):
 @sync_to_async()
 def get_team_limits(key):
     user = get_authenticated_user(key)
-    return calculate_limits(user.team)
+    return calculate_limits(user.userprofile.team)
 
 
 def get_key_from_headers(headers):
