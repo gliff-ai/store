@@ -4,7 +4,6 @@
 from loguru import logger
 from starlette.responses import JSONResponse
 from starlette.types import ASGIApp, Scope, Receive, Send
-import pdb
 
 from .helpers import get_key_from_headers, get_user_is_collab
 
