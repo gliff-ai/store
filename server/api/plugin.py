@@ -13,7 +13,7 @@ router = Router()
 def get_plugins(request):
     user = request.auth
 
-    filter_args = {"teams__id": user.team.id, "enabled": True}
+    filter_args = {"teams__id": user.userprofile.team.id, "enabled": True}
     plugins_list = Plugin.objects.filter(**filter_args)
     return plugins_list
 
