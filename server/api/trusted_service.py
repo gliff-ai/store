@@ -13,7 +13,7 @@ router = Router()
 def get_trusted_service(request):
     user = request.auth
 
-    ts_list = TrustedService.objects.filter(team_id=user.team.id)
+    ts_list = TrustedService.objects.filter(team_id=user.userprofile.team.id)
     return ts_list
 
 
