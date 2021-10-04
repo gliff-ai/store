@@ -107,9 +107,15 @@ def calculate_plan(team):
 
 def calculate_limits(team):
     team_members = UserProfile.objects.filter(team__owner_id=team.owner).values_list("user_id", flat=True)
-    users = User.objects.filter(userprofile__team__owner_id=team.owner, userprofile__is_collaborator=False).count()
+    users = User.objects.filter(
+        userprofile__team__owner_id=team.owner,
+        userprofile__is_collaborator=False,
+        userprofile__is_trusted_service=False,
+    ).count()
     collaborators = User.objects.filter(
-        userprofile__team__owner_id=team.owner, userprofile__is_collaborator=True
+        userprofile__team__owner_id=team.owner,
+        userprofile__is_collaborator=True,
+        userprofile__is_trusted_service=False,
     ).count()
     storage = Team.objects.filter(id=team.id).values("usage")[0]
     projects = Collection.objects.filter(owner__in=team_members).count()
@@ -467,19 +473,21 @@ def complete_payment(session):
         logger.info(session)
 
         subscription = stripe.Subscription.retrieve(session["subscription"])
-        metatdata = session["metadata"]
+        metadata = session["metadata"]
 
         billing = Billing.objects.create(
             stripe_customer_id=subscription["customer"],
             start_date=datetime.fromtimestamp(subscription["current_period_start"], timezone.utc),
             renewal_date=datetime.fromtimestamp(subscription["current_period_end"], timezone.utc),
-            team_id=metatdata.team_id,
+            team_id=metadata.team_id,
             subscription_id=subscription["id"],
         )
 
         billing.save()
 
+        Team.objects.filter(id=metadata.team_id).update(tier_id=metadata.tier_id)
+
         return True
     except Exception as e:
-        print(e)
+        logger.error(e)
         return False

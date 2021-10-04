@@ -32,4 +32,6 @@ def get_team(request):
         "email", "sent_date", "is_collaborator"
     )
 
+    # We send trusted services as users too and filter them frontend
+
     return {"profiles": profiles, "pending_invites": list(invites)}
