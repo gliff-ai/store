@@ -20,13 +20,7 @@ class TrustedServiceCreated(Schema):
     id: int
 
 
-class PluginOut(Schema):
-    url: str
-    product: str
-
-
-class PluginIn(Schema):
-    team_id: int
+class PluginSchema(Schema):
     url: str
     product: str
 

@@ -3,34 +3,31 @@ from typing import List
 from ninja import Router
 
 from myauth.models import Plugin
-from .schemas import PluginOut, PluginIn, PluginCreated, Error
+from .schemas import PluginSchema, PluginCreated, Error
 from loguru import logger
 
 router = Router()
 
 
-@router.get("/{team_id}", response={200: List[PluginOut], 403: Error})
-def get_plugins(request, team_id: int):
+@router.get("/", response={200: List[PluginSchema], 403: Error})
+def get_plugins(request):
     user = request.auth
 
-    if user.userprofile.team_id is not team_id:
-        return 403, {"message": "Only team members can view plugins."}
-
-    filter_args = {"teams__id": team_id, "enabled": True}
+    filter_args = {"teams__id": user.userprofile.team.id, "enabled": True}
     plugins_list = Plugin.objects.filter(**filter_args)
     return plugins_list
 
 
 @router.post("/", response={200: PluginCreated, 403: Error, 500: Error})
-def create_plugin(request, payload: PluginIn):
+def create_plugin(request, payload: PluginSchema):
     user = request.auth
 
-    if user.userprofile.team_id is not payload.team_id:
+    if user.team.owner_id is not user.id:
         return 403, {"message": "Only owners can add plugins."}
 
     try:
         plugin = Plugin.objects.create(url=payload.url, product=payload.product)
-        plugin.teams.add(user.userprofile.team)
+        plugin.teams.add(user.team)
         plugin.save()
         return {"id": plugin.id}
     except Exception as e:
