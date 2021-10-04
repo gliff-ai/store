@@ -15,7 +15,7 @@ class EnforceCollabMiddleware:
     async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
         # [(Method, Path)]
         routes = [
-            ("POST", "/api/v1/collection"),  # Create Collection
+            ("POST", "/api/v1/collection"),  # Collections
             ("POST", "/django/api/invite"),  # Invite User
             ("GET", "/django/api/team"),  # View team
             ("*", "/django/api/billing"),  # Any billing routes
@@ -24,11 +24,19 @@ class EnforceCollabMiddleware:
         ]
 
         # Explicit Allow
-        if scope["path"].startswith("/django/api/billing/create-checkout-session") or scope["path"].startswith(
-            "/django/api/billing/webhook"
-        ):
-            await self.app(scope, receive, send)
-            return
+        allowed_routes = [
+            ("POST", "/django/api/billing/create-checkout-session"),
+            ("POST", "/django/api/billing/webhook"),
+            ("POST", "/api/v1/collection/list_multi/"),
+            ("POST", "/item/fetch_updates/"),
+            ("POST", "/item/transaction/"),
+            ("POST", "/item/batch/"),
+        ]
+
+        for (method, path) in allowed_routes:
+            if (method == scope["method"] or method == "*") and scope["path"].endswith(path):
+                await self.app(scope, receive, send)
+                return
 
         # Allow CORS requests
         if scope["method"] == "OPTIONS":
