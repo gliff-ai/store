@@ -6,7 +6,7 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("myauth", "0014_invite_is_collaborator"),
+        ("myauth", "0020_auto_20210920_1016"),
     ]
 
     if os.environ.get("DJANGO_SETTINGS_MODULE") == "server.settings.production":

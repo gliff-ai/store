@@ -42,8 +42,9 @@ def create_user(request, payload: UserProfileIn):
 
     if payload.team_id is None:
         # Create a team for this user. All teams are on the basic plan until we have processed payment
+        # use the sign up name for default team name
         tier = Tier.objects.get(name__exact="COMMUNITY")
-        team = Team.objects.create(owner_id=user.id, tier_id=tier.id, usage=0)
+        team = Team.objects.create(owner_id=user.id, name=f"{payload.name}'s Team", tier_id=tier.id, usage=0)
     else:
         try:
             invite = Invite.objects.get(from_team=payload.team_id, uid=payload.invite_id, email=user.email)
