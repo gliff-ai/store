@@ -74,7 +74,7 @@ class Tier(models.Model):
 
 class Team(models.Model):
     id: int
-
+    name = models.CharField(max_length=200, default="")
     # Protect means you can't delete an owner, remove the team first!
     owner = models.OneToOneField(User, on_delete=models.PROTECT)
     tier = models.ForeignKey(Tier, on_delete=models.PROTECT)
