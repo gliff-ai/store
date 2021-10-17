@@ -25,7 +25,7 @@ class EnforceCollabMiddleware:
 
         # Explicit Allow
         allowed_routes = [
-            ("POST", "/django/api/billing/create-checkout-session"),
+            ("POST", "/django/api/billing/create-checkout-session/"),
             ("POST", "/django/api/billing/webhook"),
             ("POST", "/api/v1/collection/list_multi/"),
             ("POST", "/item/fetch_updates/"),

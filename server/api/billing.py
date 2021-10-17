@@ -362,7 +362,7 @@ def addon(request, payload: AddonIn):
         return 500, {"message": "Unknown Error"}
 
 
-@router.post("/create-authd-checkout-session", response={200: CheckoutSessionOut, 422: Error, 403: Error})
+@router.post("/create-authd-checkout-session/", response={200: CheckoutSessionOut, 422: Error, 403: Error})
 def create_auth_checkout_session(request):
     try:
         user = request.auth
@@ -393,7 +393,7 @@ def create_auth_checkout_session(request):
         return 403, {"message": str(e)}
 
 
-@router.post("/create-checkout-session", response={200: CheckoutSessionOut, 403: Error, 409: Error}, auth=None)
+@router.post("/create-checkout-session/", response={200: CheckoutSessionOut, 403: Error, 409: Error}, auth=None)
 def create_checkout_session(request, payload: CheckoutSessionIn):
     try:
         user = User.objects.get(id__exact=payload.user_id)
