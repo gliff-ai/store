@@ -71,6 +71,8 @@ class Tier(models.Model):
     base_collaborator_limit = models.IntegerField(null=True)
     base_storage_limit = models.IntegerField(null=True)
 
+    is_custom = models.BooleanField(null=False, default=False)
+
 
 class Team(models.Model):
     id: int
@@ -108,11 +110,17 @@ class UserProfile(models.Model):
 
 class Billing(models.Model):
     team = models.OneToOneField(Team, on_delete=models.CASCADE)
-
     stripe_customer_id = models.CharField(max_length=255, unique=True)
     start_date = models.DateTimeField(blank=True, null=True)
     renewal_date = models.DateTimeField(blank=True, null=True)
     subscription_id = models.CharField(max_length=255, blank=True)
+    cancel_date = models.DateTimeField(blank=True, null=True)
+
+
+class CustomBilling(models.Model):
+    team = models.OneToOneField(Team, on_delete=models.CASCADE)
+    start_date = models.DateTimeField(blank=True, null=True)
+    renewal_date = models.DateTimeField(blank=True, null=True)
     cancel_date = models.DateTimeField(blank=True, null=True)
 
 

@@ -7,7 +7,7 @@ from ninja import Router
 import stripe
 
 
-from myauth.models import Tier, Team, Billing, TierAddons, User, UserProfile
+from myauth.models import Tier, Team, Billing, TierAddons, User, UserProfile, CustomBilling
 from server.api.schemas import (
     CheckoutSessionIn,
     CheckoutSessionOut,
@@ -54,6 +54,8 @@ def calculate_plan_total(base, addons):
 def calculate_plan(team):
     plan = dict(tier_name=team.tier.name, tier_id=team.tier.id)
 
+    # They are either on the free plan or a custom plan
+    # Either way, they can't have addons so just return the standard plan
     if not hasattr(team, "billing"):
         return plan
 
@@ -132,7 +134,7 @@ def calculate_limits(team):
     plan["storage_included_limit"] = team.tier.base_storage_limit
 
     # Add limits
-    if not hasattr(team, "billing"):
+    if not hasattr(team, "billing") and not hasattr(team, "custombilling"):
         # Team is on the free plan so it's whatever those limits are
         plan["has_billing"] = False
         plan["projects_limit"] = team.tier.base_project_limit
@@ -164,6 +166,9 @@ def get_payments(request):
     user = request.auth
     team = Team.objects.get(owner_id=user.id)
 
+    if hasattr(team, "custombilling"):
+        return 422, {"message": "Payment methods for custom plans cannot be shown here"}
+
     subscription = stripe.Subscription.retrieve(team.billing.subscription_id)
     payment_method = stripe.PaymentMethod.retrieve(subscription["default_payment_method"])
 
@@ -187,6 +192,9 @@ def get_invoices(request):
 
         if user.team.owner_id is not user.id:
             return 403, {"message": "Only owners can view invoices"}
+
+        if hasattr(team, "custombilling"):
+            return 403, {"message": "Custom invoices cannot be shown here"}
 
         invoices = stripe.Invoice.list(customer=team.billing.stripe_customer_id)
         if invoices:
@@ -299,6 +307,9 @@ def addon(request, payload: AddonIn):
         if user.team.owner_id is not user.id:
             return 403, {"message": "Only owners can upgrade plans"}
 
+        if hasattr(team, "custombilling"):
+            return 422, {"message": "You can't have addons on a custom plan"}
+
         if not hasattr(team, "billing"):
             return 422, {"message": "No valid subscription to upgrade. Try changing your plan"}
 
@@ -371,6 +382,9 @@ def create_auth_checkout_session(request):
         if user.team.owner_id is not user.id:
             return 403, {"message": "Only owners can upgrade plans"}
 
+        if hasattr(team, "custombilling"):
+            return 422, {"message": "You can't upgrade a custom plan"}
+
         if not hasattr(team, "billing"):
             return 422, {"message": "No valid subscription to upgrade. Try changing your plan"}
 
@@ -393,7 +407,9 @@ def create_auth_checkout_session(request):
         return 403, {"message": str(e)}
 
 
-@router.post("/create-checkout-session/", response={200: CheckoutSessionOut, 403: Error, 409: Error}, auth=None)
+@router.post(
+    "/create-checkout-session/", response={200: CheckoutSessionOut, 201: None, 403: Error, 409: Error}, auth=None
+)
 def create_checkout_session(request, payload: CheckoutSessionIn):
     try:
         user = User.objects.get(id__exact=payload.user_id)
@@ -401,9 +417,24 @@ def create_checkout_session(request, payload: CheckoutSessionIn):
         team = Team.objects.get(owner_id=user.id)
 
         # This is a free plan, no need to bill them
-        if tier.stripe_flat_price_id is None:
+        if tier.id == 1:
             logger.error(f"we shouldn't create_checkout_session for a free plan?! ({payload.tier_id})")
             return 409, {"message": "Can't pay for a free tier"}
+
+        if tier.is_custom:
+            # Has this plan already been used?
+            if Team.objects.filter(tier_id=payload.tier_id):
+                logger.error(f"Custom Tier already used - ({payload.tier_id})")
+                return 409, {"message": "This tier is unavailable"}
+
+            CustomBilling.objects.create(
+                start_date=datetime.now(tz=timezone.utc),
+                renewal_date=None,
+                team_id=team.id,
+            ).save()
+
+            Team.objects.filter(id=team.id).update(tier_id=payload.tier_id)
+            return 201
 
         # Charge the flat rate and add storage, which is updated daily
         line_items = [
