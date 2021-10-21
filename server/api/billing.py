@@ -160,7 +160,7 @@ def calculate_limits(team):
 
 @router.get(
     "/payment-method",
-    response={200: PaymentOut, 403: Error, 500: Error},
+    response={200: PaymentOut, 403: Error, 422: Error, 500: Error},
 )
 def get_payments(request):
     user = request.auth
@@ -219,7 +219,7 @@ def get_plan_limits(request):
 
 @router.get(
     "/plan",
-    response={200: CurrentPlanOut, 403: Error, 500: Error},
+    response={200: CurrentPlanOut, 204: None, 403: Error, 500: Error},
 )
 def get_plan(request):
     user = request.auth
@@ -227,6 +227,9 @@ def get_plan(request):
 
     if user.team.owner_id is not user.id:
         return 403, {"message": "Only owners can view plan details"}
+
+    if hasattr(team, "custombilling"):
+        return 204, None
 
     return calculate_plan(team)
 
@@ -434,7 +437,7 @@ def create_checkout_session(request, payload: CheckoutSessionIn):
             ).save()
 
             Team.objects.filter(id=team.id).update(tier_id=payload.tier_id)
-            return 201
+            return 201, None
 
         # Charge the flat rate and add storage, which is updated daily
         line_items = [
