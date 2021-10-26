@@ -266,7 +266,7 @@ def addonPrice(request):
 
 
 @router.post(
-    "/cancel",
+    "/cancel/",
     response={200: None, 422: Error, 403: Error, 500: Error},
 )
 def cancel(request):
@@ -299,7 +299,7 @@ def cancel(request):
 
 
 @router.post(
-    "/addon",
+    "/addon/",
     response={201: None, 422: Error, 403: Error, 500: Error},
 )
 def addon(request, payload: AddonIn):
