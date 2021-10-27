@@ -25,7 +25,7 @@ class EnforceCollabMiddleware:
 
         # Explicit Allow
         allowed_routes = [
-            ("POST", "/django/api/billing/create-checkout-session"),
+            ("POST", "/django/api/billing/create-checkout-session/"),
             ("POST", "/django/api/billing/webhook"),
             ("POST", "/api/v1/collection/list_multi/"),
             ("POST", "/item/fetch_updates/"),
@@ -47,6 +47,11 @@ class EnforceCollabMiddleware:
             if (method == scope["method"] or method == "*") and scope["path"].startswith(path):
                 # This runs before our regular auth, so we have to check here
                 key = get_key_from_headers(scope["headers"])
+                if key is None:
+                    logger.error("Blocked by EnforceCollabMiddleware (No key)")
+                    response = JSONResponse({"message": "Collaborators can't access this"}, status_code=401)
+                    await response(scope, receive, send)
+                    return
                 is_collab = await get_user_is_collab(key)
                 if is_collab:
                     logger.info("Blocked by EnforceCollabMiddleware")

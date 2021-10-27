@@ -43,6 +43,7 @@ class UserProfileIn(Schema):
 
 class TeamSchema(Schema):
     id: int
+    name: str
     owner_id: int
     tier: TierSchema
     usage: int

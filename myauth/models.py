@@ -71,10 +71,12 @@ class Tier(models.Model):
     base_collaborator_limit = models.IntegerField(null=True)
     base_storage_limit = models.IntegerField(null=True)
 
+    is_custom = models.BooleanField(null=False, default=False)
+
 
 class Team(models.Model):
     id: int
-
+    name = models.CharField(max_length=200, default="")
     # Protect means you can't delete an owner, remove the team first!
     owner = models.OneToOneField(User, on_delete=models.PROTECT)
     tier = models.ForeignKey(Tier, on_delete=models.PROTECT)
@@ -108,11 +110,17 @@ class UserProfile(models.Model):
 
 class Billing(models.Model):
     team = models.OneToOneField(Team, on_delete=models.CASCADE)
-
     stripe_customer_id = models.CharField(max_length=255, unique=True)
     start_date = models.DateTimeField(blank=True, null=True)
     renewal_date = models.DateTimeField(blank=True, null=True)
     subscription_id = models.CharField(max_length=255, blank=True)
+    cancel_date = models.DateTimeField(blank=True, null=True)
+
+
+class CustomBilling(models.Model):
+    team = models.OneToOneField(Team, on_delete=models.CASCADE)
+    start_date = models.DateTimeField(blank=True, null=True)
+    renewal_date = models.DateTimeField(blank=True, null=True)
     cancel_date = models.DateTimeField(blank=True, null=True)
 
 
