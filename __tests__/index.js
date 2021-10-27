@@ -101,12 +101,11 @@ describe("create a basic new user", () => {
   }, 30000);
 
   afterAll(async () => {
-    await userReq.post("/billing/cancel/").expect(200);
-    helpers.getUserProfile(userId).then((profile) => {
-      console.log(profile);
-
-      console.log("DONE");
-    });
+    await userReq
+      .post("/billing/cancel/")
+      .expect(422, {
+        message: "No valid subscription to cancel. Try changing your plan",
+      });
   });
 
   describe("validate user", () => {

@@ -275,10 +275,10 @@ def cancel(request):
         team = Team.objects.get(owner_id=user.id)
 
         if user.team.owner_id is not user.id:
-            return 403, {"message": "Only owners can upgrade plans"}
+            return 403, {"message": "Only owners can cancel plans"}
 
         if not hasattr(team, "billing"):
-            return 422, {"message": "No valid subscription to upgrade. Try changing your plan"}
+            return 422, {"message": "No valid subscription to cancel. Try changing your plan"}
 
         res = stripe.Subscription.delete(team.billing.subscription_id)
 
