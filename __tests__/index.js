@@ -100,6 +100,15 @@ describe("create a basic new user", () => {
       .set("Authorization", `Token ${newEtebaseUser.authToken}`);
   }, 30000);
 
+  afterAll(async () => {
+    await userReq.post("/billing/cancel/").expect(200);
+    helpers.getUserProfile(userId).then((profile) => {
+      console.log(profile);
+
+      console.log("DONE");
+    });
+  });
+
   describe("validate user", () => {
     // We can't really check the email gets sent, but we can do the rest of the process
     test("validate user email", (done) => {
@@ -116,8 +125,6 @@ describe("create a basic new user", () => {
             .expect(200)
             .end(() => {
               helpers.getUserProfile(userId).then((profile) => {
-                console.log(profile);
-
                 expect(profile.email_verified).not.toBeNull();
                 done();
               });
@@ -157,7 +164,7 @@ describe("create a basic new user", () => {
     });
 
     it("free user can't addon", async () => {
-      await userReq.post("/billing/addon").send({ users: 3 }).expect(422);
+      await userReq.post("/billing/addon/ ").send({ users: 3 }).expect(422);
     });
 
     // TODO support this and make the test CAN upgrade
