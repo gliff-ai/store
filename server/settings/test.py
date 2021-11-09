@@ -5,6 +5,6 @@ os.environ["STRIPE_SECRET_KEY"] = "-"
 os.environ["STRIPE_WEBHOOK_SECRET"] = "-"
 os.environ["SENDGRID_API_KEY"] = "-"
 
-from .base import *
+from .base import *  # noqa: E402
 
 DEBUG = False
