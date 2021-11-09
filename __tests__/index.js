@@ -101,11 +101,9 @@ describe("create a basic new user", () => {
   }, 30000);
 
   afterAll(async () => {
-    await userReq
-      .post("/billing/cancel/")
-      .expect(422, {
-        message: "No valid subscription to cancel. Try changing your plan",
-      });
+    await userReq.post("/billing/cancel/").expect(422, {
+      message: "No valid subscription to cancel. Try changing your plan",
+    });
   });
 
   describe("validate user", () => {
@@ -251,5 +249,13 @@ describe("create a basic new user", () => {
       const { data } = await collectionManager.list("gliff.test.gallery");
       expect(data.length).toBe(1);
     });
+
+    // TODO: Other stuff a free user can't do?
   });
 });
+
+// TODO Collab
+
+// TODO Team Member
+
+// TODO Paid team (think this just tests limits?)
