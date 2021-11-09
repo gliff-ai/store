@@ -81,3 +81,15 @@ There's also a Docker image if preferred.
 
 Staging deploys to: https://store.staging.gliff.app/
 Production https://store.gliff.app/
+
+## Black Box Tests
+
+These run against the API with a clean sqlite instance on port 8000. 
+Definitely don't run them when pointing at a real DB unless you are 1000% certain
+The target can be changed by setting `BASE_URL` as an env var before running npm test, the default is `http://localhost:8000`
+
+One time: `cd __tests__ && npm i` (Requires Node 16)
+
+Run as normal (with `DJANGO_SETTINGS_MODULE=server.settings.test`)
+
+then `cd __tests__ && npm run test`

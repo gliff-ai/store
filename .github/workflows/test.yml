@@ -15,7 +15,7 @@ jobs:
       - name: run Docker and wait
         run: |
            touch db.sqlite3
-           docker run -d -p 8000:8000 -e STRIPE_SECRET_KEY=12345 -e STRIPE_WEBHOOK_SECRET=1234 -e SENDGRID_API_KEY=12345  -v $PWD/db.sqlite3:/app/db.sqlite3 store
+           docker run -d -p 8000:8000 -e DJANGO_SETTINGS_MODULE=server.settings.test  -v $PWD/db.sqlite3:/app/db.sqlite3 store
            while ! curl 127.0.0.1:8000/django/api; do
              echo "waiting"
              sleep 1
