@@ -94,7 +94,6 @@ class InviteOut(Schema):
 
 class CreateInvite(Schema):
     email: str
-    is_collaborator: bool = False
 
 
 class AccountRecovery(Schema):

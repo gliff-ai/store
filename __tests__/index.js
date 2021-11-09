@@ -191,17 +191,16 @@ describe("create a basic new user", () => {
     it("fail to send an invite", async () => {
       await userReq
         .post("/user/invite/")
-        .send({ email: inviteeEmail, is_collaborator: false })
+        .send({ email: inviteeEmail })
         .expect(401, { message: "Can't invite a new user, limit is reached" });
     });
 
-    // TODO fix api
-    it.skip("invite collaborator", async () => {
+    it("create collaborator invite", async () => {
       const {
         body: { id },
       } = await userReq
-        .post("/user/invite/")
-        .send({ email: inviteeEmail, is_collaborator: true })
+        .post("/user/invite/collaborator/")
+        .send({ email: inviteeEmail })
         .expect(200);
     });
 

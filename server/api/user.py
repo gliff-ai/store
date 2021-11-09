@@ -132,17 +132,15 @@ def update_user(request, payload: UserProfileIn):
 
 @router.post("/invite/", response={200: InviteCreated, 409: Error, 500: Error})
 def create_invite_user(request, payload: CreateInvite):
-    payload.is_collaborator = False
-    return create_invite(request, payload)
+    return create_invite(request, payload.email, False)
 
 
-@router.post("/invite/collaborator", response={200: InviteCreated, 409: Error, 500: Error})
+@router.post("/invite/collaborator/", response={200: InviteCreated, 409: Error, 500: Error})
 def create_invite_collaborator(request, payload: CreateInvite):
-    payload.is_collaborator = True
-    return create_invite(request, payload)
+    return create_invite(request, payload.email, True)
 
 
-def create_invite(request, payload):
+def create_invite(request, email, is_collaborator):
     try:
         uid = str(uuid4())
         user = request.auth
@@ -150,7 +148,7 @@ def create_invite(request, payload):
         team = Team.objects.get(owner_id=user.id)
 
         try:
-            invitee = User.objects.get(email=payload.email)
+            invitee = User.objects.get(email=email)
             if invitee is not None:
                 return 409, {"message": "user is already on a team"}
 
@@ -158,9 +156,7 @@ def create_invite(request, payload):
             logger.info(f"Received ObjectDoesNotExist error {e}")
             pass
 
-        invite = Invite.objects.create(
-            uid=uid, email=payload.email, from_team_id=team.id, is_collaborator=payload.is_collaborator
-        )
+        invite = Invite.objects.create(uid=uid, email=email, from_team_id=team.id, is_collaborator=is_collaborator)
 
         invite.save()
 
@@ -171,7 +167,7 @@ def create_invite(request, payload):
             # TODO slightly different email for a collaborator?
             message = Mail(
                 from_email="contact@gliff.ai",
-                to_emails=payload.email,
+                to_emails=email,
             )
             message.dynamic_template_data = {
                 "invite_url": settings.BASE_URL + "/signup?invite_id=" + uid,
