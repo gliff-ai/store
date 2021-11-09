@@ -31,7 +31,10 @@ class EnforcePlanLimitsMiddleware:
                 response = JSONResponse({"message": "Can't create a new project, limit is reached"}, status_code=401)
 
         # Users
-        if scope["path"].startswith("/django/api/user/invite") and team_limits["users_limit"] is not None:
+        if (
+            scope["path"].startswith("/django/api/user/invite")
+            and not scope["path"].startswith("/django/api/user/invite/collaborator")
+        ) and team_limits["users_limit"] is not None:
             if team_limits["users"] >= team_limits["users_limit"]:
                 logger.info("Can't invite a new user, limit is reached")
                 response = JSONResponse({"message": "Can't invite a new user, limit is reached"}, status_code=401)
