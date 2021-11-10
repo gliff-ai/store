@@ -7,3 +7,5 @@ pythonenv*/
 db.sqlite3
 media/
 .env
+
+node_modules/
