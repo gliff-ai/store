@@ -1,0 +1,28 @@
+name: Production Deploy
+on:
+  schedule:
+    - cron:  '0 06 * * 1'
+jobs:
+  update-dep:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          ref: main
+      - name: Open Pull Request
+        id: pull
+        uses: tretuna/sync-branches@1.4.0
+        with:
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+          FROM_BRANCH: "staging"
+          TO_BRANCH: "main"
+          PULL_REQUEST_TITLE: "chore: prod deploy"
+          CONTENT_COMPARISON: true
+          TEAM_REVIEWERS: '["gliff-ai/techteam"]'
+      - name: Enable Automerge
+        if: steps.pull.outputs.PULL_REQUEST_NUMBER > 1
+        uses: peter-evans/enable-pull-request-automerge@v1
+        with:
+          token: ${{ secrets.AUTOMERGE_PAT }}
+          pull-request-number: ${{ steps.pull.outputs.PULL_REQUEST_NUMBER }}
+          merge-method: merge
