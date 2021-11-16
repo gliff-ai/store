@@ -59,8 +59,9 @@ logger.add(
 
 LOG_LEVEL = "DEBUG"  # used for intercepting uvicorn and django logs, which use Python's own logging
 
-# filter for sentry to ignore /api/ healthcheck hits
+
 def strip_healthcheck(event, hint):
+    # filter for sentry to ignore /api/ healthcheck hits
     # see: https://docs.sentry.io/platforms/python/configuration/filtering/
     if event.get("transaction") == "/api/":
         return None
