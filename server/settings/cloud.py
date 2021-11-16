@@ -57,8 +57,14 @@ logger.add(
     level="ERROR",
 )
 
-
 LOG_LEVEL = "DEBUG"  # used for intercepting uvicorn and django logs, which use Python's own logging
+
+# filter for sentry to ignore /api/ healthcheck hits
+def strip_healthcheck(event, hint):
+    # see: https://docs.sentry.io/platforms/python/configuration/filtering/
+    if event.get("transaction") == "/api/":
+        return None
+    return event
 
 # vars used in background tasks
 RUN_TASK_UPDATE_STORAGE = get_env_value("RUN_TASK_UPDATE_STORAGE")

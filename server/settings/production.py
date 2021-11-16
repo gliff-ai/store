@@ -25,7 +25,7 @@ sentry_sdk.init(
     # If you wish to associate users to errors (assuming you are using
     # django.contrib.auth) you may enable sending PII data.
     send_default_pii=True,
-    # flag for filtering
-    environment="production",  # set to "production" for production
-    debug=False,  # set to False for production
+    environment="production",
+    debug=False,
+    before_send=strip_healthcheck,
 )
