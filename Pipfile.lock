@@ -247,7 +247,7 @@
         },
         "etebase-server": {
             "editable": true,
-            "file": "file:///home/chas/gliff-ai/store/etebase-server"
+            "file": "./etebase-server"
         },
         "fastapi": {
             "hashes": [
