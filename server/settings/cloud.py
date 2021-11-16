@@ -66,6 +66,7 @@ def strip_healthcheck(event, hint):
         return None
     return event
 
+
 # vars used in background tasks
 RUN_TASK_UPDATE_STORAGE = get_env_value("RUN_TASK_UPDATE_STORAGE")
 TASK_UPDATE_STORAGE_HOUR = get_env_value("TASK_UPDATE_STORAGE_HOUR")
