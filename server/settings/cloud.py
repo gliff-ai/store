@@ -60,6 +60,7 @@ logger.add(
 
 LOG_LEVEL = "DEBUG"  # used for intercepting uvicorn and django logs, which use Python's own logging
 
+
 @add_global_event_processor
 def ignore_healthcheck(event, hint):
     # filter for sentry to ignore /api/ healthcheck hits
