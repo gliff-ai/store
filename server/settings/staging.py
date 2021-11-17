@@ -27,5 +27,4 @@ sentry_sdk.init(
     send_default_pii=True,
     environment="staging",
     debug=True,
-    before_send=strip_healthcheck,
 )

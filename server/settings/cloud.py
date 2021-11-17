@@ -1,5 +1,6 @@
 from .base import *
 import sentry_sdk
+from sentry_sdk.scope import add_global_event_processor
 from sentry_sdk.integrations.django import DjangoIntegration
 from sentry_sdk.integrations.logging import (
     LoggingIntegration,
@@ -60,10 +61,11 @@ logger.add(
 LOG_LEVEL = "DEBUG"  # used for intercepting uvicorn and django logs, which use Python's own logging
 
 
-def strip_healthcheck(event, hint):
+@add_global_event_processor
+def ignore_healthcheck(event, hint):
     # filter for sentry to ignore /api/ healthcheck hits
     # see: https://docs.sentry.io/platforms/python/configuration/filtering/
-    if event.get("transaction") == "/api/":
+    if event.get("transaction") == "/api/" or event.get("transaction") == "/api":
         return None
     return event
 
