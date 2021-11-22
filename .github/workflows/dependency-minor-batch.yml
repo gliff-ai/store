@@ -1,0 +1,59 @@
+name: Scheduled Batch of Minor/Patch Updates
+on:
+  schedule:
+    - cron: "0 06 * * *"
+
+jobs:
+  Update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          ref: staging
+      - name: Create branch for updates
+        run: |
+          git checkout -b dependencies
+          git push --set-upstream origin dependencies
+      - name: Setup python
+        uses: palewire/install-python-pipenv-pipfile@v2
+        with:
+          python-version: 3.8
+      - name: Update pipenv dependecies
+        run: |
+          pipenv update --dev
+          pipenv lock -r --dev > requirements.txt
+          sed -i -e 's/file:\/\/\/home\/chas\/gliff-ai\/store/\./g' Pipfile.lock
+          sed -i -e 's/file:\/\/\/home\/chas\/gliff-ai\/store/\./g' requirements.txt
+      - name: Commit updates
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_options: "-am --allow-empty"
+          commit_message: "build(deps): update minor pipenv dependencies"
+      - name: Lint and format
+        run: |
+          pipenv run lint
+          pipenv run format
+      - name: Commit updates
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_options: "-am --allow-empty"
+          commit_message: "chore: lint and format"
+      - name: Open Pull Request
+        id: pull
+        uses: tretuna/sync-branches@1.4.0
+        with:
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+          FROM_BRANCH: "dependencies"
+          TO_BRANCH: "staging"
+          PULL_REQUEST_TITLE: "build(deps): apply minor and patch dependency updates"
+          CONTENT_COMPARISON: true
+          TEAM_REVIEWERS: '["gliff-ai/techteam"]'
+      - name: Enable Automerge
+        if: steps.pull.outputs.PULL_REQUEST_NUMBER > 1
+        uses: peter-evans/enable-pull-request-automerge@v1
+        with:
+          token: ${{ secrets.AUTOMERGE_PAT }}
+          pull-request-number: ${{ steps.pull.outputs.PULL_REQUEST_NUMBER }}
+          merge-method: merge
