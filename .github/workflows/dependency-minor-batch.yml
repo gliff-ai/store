@@ -13,7 +13,9 @@ jobs:
         with:
           ref: staging
       - name: Create branch for updates
-        run: git checkout -b dependencies
+        run: |
+          git checkout -b dependencies
+          git push --set-upstream origin dependencies
       - name: Setup python
         uses: palewire/install-python-pipenv-pipfile@v2
         with:
