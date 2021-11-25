@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('myauth', '0021_update_stripe_storage_prices'),
+        ("myauth", "0021_update_stripe_storage_prices"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='team',
-            name='name',
-            field=models.CharField(default='', max_length=200),
+            model_name="team",
+            name="name",
+            field=models.CharField(default="", max_length=200),
         ),
     ]
