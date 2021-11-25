@@ -81,6 +81,7 @@ class Team(models.Model):
     owner = models.OneToOneField(User, on_delete=models.PROTECT)
     tier = models.ForeignKey(Tier, on_delete=models.PROTECT)
     usage = models.IntegerField(verbose_name="Storage usage in MB", null=True)
+    projects = models.IntegerField(verbose_name="Number of user projects", null=True)
 
 
 # These are any addons that a user has purchased, the pricing is determined by their tier
