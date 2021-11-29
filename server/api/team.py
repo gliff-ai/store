@@ -1,4 +1,5 @@
 from ninja import Router
+from loguru import logger
 
 from myauth.models import User, Invite
 from .schemas import TeamsOut, Error
@@ -13,13 +14,10 @@ router = Router()
 def get_team(request):
     user = request.auth
 
-    # is the user the owner of the team?
-    user.userprofile.id = user.id
+    if user.userprofile.is_collaborator or user.userprofile.is_trusted_service:
+        return 403, {"message": "Only owners or members can view the team"}
 
-    if user.userprofile.team.owner_id is not user.id:
-        return 403, {"message": "Only owners can view the team"}
-
-    users = User.objects.filter(userprofile__team__owner_id=user.id)
+    users = User.objects.filter(userprofile__team__owner_id=user.userprofile.team.owner)
 
     profiles = []
     for u in users:
