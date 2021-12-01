@@ -59,6 +59,7 @@ class UserProfileOut(Schema):
     email: str
     email_verified: typing.Any  # we cast this to a bool
     is_collaborator: bool
+    is_trusted_service: bool
     team: TeamSchema
 
 
