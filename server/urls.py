@@ -45,7 +45,10 @@ api = NinjaAPI(auth=ApiKey())
 
 @api.get("/", auth=None)
 def healthcheck(request):
-    return "Hello World"
+    if settings.TEST_MODE:
+        return "Hello Test World"
+    else:
+        return "Hello World"
 
 
 api.add_router("/tier", tiers_router)

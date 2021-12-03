@@ -42,13 +42,17 @@ beforeAll(async () => {
   });
 });
 
-test("Healthcheck ok", (done) => {
+test("Check for test mode", (done) => {
   request(API_URL)
     .get("/")
-    .expect(200)
+    .expect(200, '"Hello Test World"')
     .then(() => done())
-    .catch(() => {
-      console.log(`Healthcheck test failed, is STORE running at ${BASE_URL} ?`);
+    .catch((e) => {
+      console.log(
+        `Healthcheck test failed, is STORE running at ${BASE_URL}? If it is, ensure you are using the test.py settings file`
+      );
+      console.log(e.message);
+      process.exit(1); // Bail hard
       done(true);
     });
 });
