@@ -124,7 +124,7 @@ def update_team_storage_usage():
         user_id = str(user.id)
         if user_id in user_ids:
             # Add this users usage to their team usage
-            usage = round(data_select[user_id] * 10 ** -6)
+            usage = int(round(data_select[user_id] * 10 ** -6))
             teams[user.team.id] = teams.get(user.team.id, 0) + usage
             logger.info(f"Updated team {user.team.id} with {user_id}: new usage = {teams[user.team.id]}")
 
