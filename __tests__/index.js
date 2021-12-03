@@ -45,7 +45,7 @@ beforeAll(async () => {
 test("Check for test mode", (done) => {
   request(API_URL)
     .get("/")
-    .expect(200, '"Hello Test World>?"')
+    .expect(200, '"Hello Test World"')
     .then(() => done())
     .catch((e) => {
       console.log(
