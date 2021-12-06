@@ -5,7 +5,7 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "test": "NODE_OPTIONS=--experimental-vm-modules npx jest --bail"
+    "test": "NODE_OPTIONS=--experimental-vm-modules npx jest --bail --runInBand"
   },
   "author": "",
   "license": "ISC",
