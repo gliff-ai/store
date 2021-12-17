@@ -17,6 +17,7 @@ jobs:
         run: |
           git checkout -B dependencies
           git push --set-upstream origin dependencies
+          git submodule update --init --recursive
       - name: Setup python
         uses: palewire/install-python-pipenv-pipfile@v2
         with:
@@ -25,8 +26,8 @@ jobs:
         run: |
           pipenv update --dev
           pipenv lock -r --dev > requirements.txt
-          sed -i -e 's/file:\/\/\/home\/chas\/gliff-ai\/store/\./g' Pipfile.lock
-          sed -i -e 's/file:\/\/\/home\/chas\/gliff-ai\/store/\./g' requirements.txt
+          sed -i -e 's/file:\/\/\/home\/runner\/work\/store/store/\./g' Pipfile.lock
+          sed -i -e 's/file:\/\/\/home\/runner\/work\/store/store/\./g' requirements.txt
       - name: Commit updates
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
