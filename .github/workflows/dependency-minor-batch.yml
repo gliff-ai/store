@@ -1,63 +1,13 @@
 name: scheduled batch of minor/patch updates
 on:
   schedule:
-    - cron: "00 * * * 5"
+    - cron: "00 06 * * 1"
 
 jobs:
-  Update:
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    steps:
-      - name: checkout
-        uses: actions/checkout@v2
-        with:
-          token: ${{ secrets.ROBOT_PAT }}
-          ref: staging
-      - name: create branch for updates
-        run: |
-          git checkout -B dependencies
-          git push --set-upstream origin dependencies
-          git submodule update --init --recursive
-      - name: Setup python
-        uses: palewire/install-python-pipenv-pipfile@v2
-        with:
-          python-version: 3.8
-      - name: Update pipenv dependecies
-        run: |
-          pipenv update --dev
-          pipenv lock -r --dev > requirements.txt
-          sed -i -e 's/file:\/\/\/home\/runner\/work\/store/store/\./g' Pipfile.lock
-          sed -i -e 's/file:\/\/\/home\/runner\/work\/store/store/\./g' requirements.txt
-      - name: Commit updates
-        uses: stefanzweifel/git-auto-commit-action@v4
-        with:
-          commit_options: "-am --allow-empty"
-          commit_message: "build(deps): update minor pipenv dependencies"
-          commit_user_name: gliff-ai-robot
-          commit_user_email: chas+noteG@gliff.ai
-      - name: Lint and format
-        run: |
-          pipenv run lint
-          pipenv run format
-      - name: commit updates
-        if: steps.auto-commit-action.outputs.changes_detected == 'true'
-        uses: stefanzweifel/git-auto-commit-action@v4
-        with:
-          commit_options: "-am --allow-empty"
-          commit_message: "chore: lint and format"
-          commit_user_name: gliff-ai-robot
-          commit_user_email: chas+noteG@gliff.ai
-      - name: open Pull Request
-        id: pull
-        uses: tretuna/sync-branches@1.4.0
-        with:
-          GITHUB_TOKEN: ${{ secrets.ROBOT_PAT }}
-          FROM_BRANCH: "dependencies"
-          TO_BRANCH: "staging"
-          PULL_REQUEST_TITLE: "build(deps): apply minor and patch dependency updates"
-          CONTENT_COMPARISON: true
-          TEAM_REVIEWERS: "['gliff-ai/backend']"
-      - name: delete branch if failed
-        if: ${{ failure() }}
-        run: |
-          git branch -D dependencies
+  npm_update:
+    uses: gliff-ai/.github/.github/workflows/dependency-updates.yml@main
+    with:
+      package_manager: pipenv
+      main_branch: staging
+    secrets:
+      ROBOT_PAT: ${{ secrets.ROBOT_PAT }}
