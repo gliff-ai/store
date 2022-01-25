@@ -13,7 +13,7 @@ router = Router()
 def get_plugins(request):
     user = request.auth
 
-    filter_args = {"teams__id": user.userprofile.team.id, "enabled": True}
+    filter_args = {"teams__id": user.userprofile.team.id}
     plugins_list = Plugin.objects.filter(**filter_args)
     return plugins_list
 
@@ -26,7 +26,9 @@ def create_plugin(request, payload: PluginSchema):
         return 403, {"message": "Only owners can add plugins."}
 
     try:
-        plugin = Plugin.objects.create(url=payload.url, product=payload.product)
+        plugin = Plugin.objects.create(
+            name=payload.name, url=payload.url, products=payload.products, enabled=payload.enabled
+        )
         plugin.teams.add(user.team)
         plugin.save()
         return {"id": plugin.id}
