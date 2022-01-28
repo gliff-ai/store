@@ -3,7 +3,7 @@ from ninja import Schema
 from ninja.orm import create_schema
 from pydantic import validator, typing, conint
 
-from myauth.models import Plugin, User, UserProfile, Tier, Team, TrustedService
+from myauth.models import Tier, TrustedService
 
 TierSchema = create_schema(Tier)
 
@@ -12,8 +12,11 @@ TrustedServiceOut = create_schema(TrustedService, exclude=["id"])
 
 class TrustedServiceIn(Schema):
     id: str
+    type: str
     name: str
-    base_url: str
+    url: str
+    products: str
+    enabled: bool
 
 
 class TrustedServiceCreated(Schema):
@@ -21,8 +24,10 @@ class TrustedServiceCreated(Schema):
 
 
 class PluginSchema(Schema):
+    name: str
     url: str
-    product: str
+    products: str
+    enabled: bool
 
 
 class Error(Schema):

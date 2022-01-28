@@ -149,24 +149,33 @@ class EmailVerification(models.Model):
     expiry_date = models.DateTimeField(blank=False, null=False)
 
 
+PRODUCTS = (
+    ("CURATE", "CURATE"),
+    ("ANNOTATE", "ANNOTATE"),
+    ("ALL", "ALL"),
+)
+
+
 class TrustedService(models.Model):
+    TYPE = (("Python", "Python"), ("AI", "AI"))
+
     id: int
     user = models.ForeignKey(User, on_delete=models.RESTRICT)
     team = models.ForeignKey(Team, on_delete=models.RESTRICT)
-    name = models.CharField(blank=False, null=False, max_length=50)
-    base_url = models.URLField(blank=False, null=False, max_length=200)
+    type = models.CharField(max_length=20, choices=TYPE)
+    name = models.CharField(blank=True, null=False, max_length=50)
+    url = models.URLField(blank=False, null=False, max_length=200)
+    products = models.CharField(max_length=20, choices=PRODUCTS)
+    enabled = models.BooleanField(null=False, default=False)
 
 
 class Plugin(models.Model):
-    PRODUCTS = (
-        ("CURATE", "CURATE"),
-        ("ANNOTATE", "ANNOTATE"),
-    )
 
     id: int
     teams = models.ManyToManyField(Team)
+    name = models.CharField(blank=False, null=False, max_length=50)
     url = models.URLField(blank=False, null=False, max_length=200, unique=True)
-    product = models.CharField(max_length=20, choices=PRODUCTS)
+    products = models.CharField(max_length=20, choices=PRODUCTS)
     enabled = models.BooleanField(null=False, default=False)
 
 

@@ -44,7 +44,13 @@ def create_trusted_service(request, payload: TrustedServiceIn):
     user_profile.save()
 
     ts = TrustedService.objects.create(
-        user_id=ts_user.id, name=payload.name, base_url=payload.base_url, team_id=team.id
+        user_id=ts_user.id,
+        type=payload.type,
+        name=payload.name,
+        url=payload.url,
+        team_id=team.id,
+        products=payload.products,
+        enabled=payload.enabled,
     )
 
     return {"id": ts.id}
