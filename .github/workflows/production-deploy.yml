@@ -14,7 +14,7 @@ jobs:
         id: pull
         uses: tretuna/sync-branches@1.4.0
         with:
-          GITHUB_TOKEN: ${{secrets.DEPENDENCY_ROBOT_PAT}}
+          GITHUB_TOKEN: ${{secrets.ROBOT_PAT}}
           FROM_BRANCH: "staging"
           TO_BRANCH: "main"
           PULL_REQUEST_TITLE: "chore: prod deploy"
