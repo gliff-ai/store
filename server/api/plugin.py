@@ -34,3 +34,39 @@ def create_plugin(request, payload: PluginSchema):
         return {"id": plugin.id}
     except Exception as e:
         logger.error(e)
+
+
+@router.put("/", response={200: PluginCreated, 403: Error, 500: Error})
+def update_plugin(request, payload: PluginSchema):
+    user = request.auth
+
+    if user.team.owner_id is not user.id:
+        return 403, {"message": "Only owners can update plugins."}
+
+    try:
+        filter_args = {"teams__id": user.userprofile.team.id, "url": payload.url}
+        plugin = Plugin.objects.get(**filter_args)
+        plugin.name = payload.name
+        plugin.products = payload.products
+        plugin.enabled = payload.enabled
+        plugin.save()
+        return {"id": plugin.id}
+    except Exception as e:
+        logger.error(e)
+
+
+@router.delete("/", response={200: PluginCreated, 403: Error, 500: Error})
+def delete_plugin(request, payload: PluginSchema):
+    user = request.auth
+
+    if user.team.owner_id is not user.id:
+        return 403, {"message": "Only owners can delete plugins."}
+
+    try:
+        filter_args = {"teams__id": user.userprofile.team.id, "url": payload.url}
+        plugin = Plugin.objects.get(**filter_args)
+        plugin_id = plugin.id
+        plugin.delete()
+        return {"id": plugin_id}
+    except Exception as e:
+        logger.error(e)
