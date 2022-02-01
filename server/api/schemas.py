@@ -10,13 +10,16 @@ TierSchema = create_schema(Tier)
 TrustedServiceOut = create_schema(TrustedService, exclude=["id"])
 
 
-class TrustedServiceIn(Schema):
-    id: str
+class TrustedServiceInWithoutId(Schema):
     type: str
     name: str
     url: str
     products: str
     enabled: bool
+
+
+class TrustedServiceIn(TrustedServiceInWithoutId):
+    id: str
 
 
 class TrustedServiceCreated(Schema):
