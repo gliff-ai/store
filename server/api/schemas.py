@@ -134,10 +134,15 @@ class CurrentPlanOut(Schema):
     tier_id: int
     current_period_end: int
     current_period_start: int
+    trial_end: int
     base_price: int
     addons: Addons
     billed_usage: int
     billed_usage_gb_price: int
+
+
+class UpdatePlanIn(Schema):
+    tier_id: int
 
 
 class CurrentLimitsOut(Schema):

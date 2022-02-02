@@ -1,0 +1,37 @@
+{
+  "_meta": {
+    "template_version": 0
+  },
+  "fixtures": [
+    {
+      "name": "essentials-base-test-product",
+      "path": "/v1/products",
+      "method": "post",
+      "params": {
+        "id": "essentials-base-test-product",
+        "name": "essentials-base-test-product",
+        "type": "service"
+      }
+    },
+    {
+      "name": "small-team-base-test-product",
+      "path": "/v1/products",
+      "method": "post",
+      "params": {
+        "id": "small-team-base-test-product",
+        "name": "small-team-base-test-product",
+        "type": "service"
+      }
+    },
+    {
+      "name": "growing-team-base-test-product",
+      "path": "/v1/products",
+      "method": "post",
+      "params": {
+        "id": "growing-team-base-test-product",
+        "name": "growing-team-base-test-product",
+        "type": "service"
+      }
+    }
+  ]
+}

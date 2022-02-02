@@ -113,6 +113,8 @@ class Billing(models.Model):
     stripe_customer_id = models.CharField(max_length=255, unique=True)
     start_date = models.DateTimeField(blank=True, null=True)
     renewal_date = models.DateTimeField(blank=True, null=True)
+    trial_start = models.DateTimeField(blank=True, null=True)
+    trial_end = models.DateTimeField(blank=True, null=True)
     subscription_id = models.CharField(max_length=255, blank=True)
     cancel_date = models.DateTimeField(blank=True, null=True)
 

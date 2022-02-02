@@ -13,7 +13,7 @@ import Etebase, {
   CollectionAccessLevel,
 } from "etebase";
 
-import { init, BASE_URL, API_URL, ETEBASE_URL } from "./helpers";
+import { init, getNewEmail, BASE_URL, API_URL, ETEBASE_URL } from "./helpers";
 
 let db;
 let helpers;
@@ -27,7 +27,6 @@ beforeAll(async () => {
     if (err) {
       console.error(err.message);
     }
-    console.log("Connected to the database.");
   });
 
   helpers = init(db);
@@ -53,7 +52,7 @@ describe("create a basic new user", () => {
   let collaborators = [];
 
   beforeAll(async () => {
-    owner = await helpers.signup(`${Math.random()}@gliff.ai`);
+    owner = await helpers.signup(getNewEmail());
   }, 30000);
 
   afterAll(async () => {
@@ -69,28 +68,14 @@ describe("create a basic new user", () => {
     });
 
     test("must accept terms and conditions", async () => {
-      const email = `${Math.random()}@gliff.ai`;
-      const etebaseUser = await Account.signup(
-        {
-          username: toBase64(email),
-          email,
-        },
-        "password",
-        ETEBASE_URL
-      );
-
-      await request(API_URL)
-        .post("/user/")
-        .set("Content-Type", "application/json")
-        .set("Authorization", `Token ${etebaseUser.authToken}`)
-        .send({
-          name: "Test User",
-          team_id: null,
-          invite_id: null,
+      expect.assertions(1);
+      try {
+        await helpers.signup(getNewEmail(), {
           accepted_terms_and_conditions: false,
-          recovery_key: "",
-        })
-        .expect(409, { message: "Terms and conditions not accepted" });
+        });
+      } catch (e) {
+        expect(e).toEqual(new Error('expected 200 "OK", got 409 "Conflict"'));
+      }
     });
 
     test("the user should be a team owner", async () => {
@@ -128,7 +113,7 @@ describe("create a basic new user", () => {
 
     it("free user can't addon", async () => {
       await owner.userReq
-        .post("/billing/addon/ ")
+        .post("/billing/addon/")
         .send({ users: 3 })
         .expect(422);
     });
@@ -161,24 +146,30 @@ describe("create a basic new user", () => {
     it("can't invite a new user - limit reached", async () => {
       await owner.userReq
         .post("/user/invite/")
-        .send({ email: `${Math.random()}@gliff.ai` })
+        .send({ email: getNewEmail() })
         .expect(401, { message: "Can't invite a new user, limit is reached" });
     });
 
-    it.each([1, 2])("can invite collaborator number %s", async () => {
-      const email = `${Math.random()}@gliff.ai`;
-      const {
-        body: { id: invite_id },
-      } = await owner.userReq
-        .post("/user/invite/collaborator/")
-        .send({ email })
-        .expect(200);
+    it.each([1, 2])(
+      "can invite collaborator number %s",
+      async () => {
+        const email = getNewEmail();
+        const {
+          body: { id: invite_id },
+        } = await owner.userReq
+          .post("/user/invite/collaborator/")
+          .send({ email })
+          .expect(200);
 
-      collaborators.push(await helpers.signup(email, owner.teamId, invite_id));
-    });
+        collaborators.push(
+          await helpers.signup(email, { team_id: owner.teamId, invite_id })
+        );
+      },
+      30000
+    );
 
     it("can't invite collaborator number 3 - limit reached", async () => {
-      const email = `${Math.random()}@gliff.ai`;
+      const email = getNewEmail();
       const {
         body: { id },
       } = await owner.userReq

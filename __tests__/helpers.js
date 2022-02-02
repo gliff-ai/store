@@ -15,17 +15,20 @@ const { BASE_URL = "http://localhost:8000" } = process.env;
 const API_URL = `${BASE_URL}/django/api`;
 const ETEBASE_URL = `${BASE_URL}/etebase`;
 
+const getNewEmail = () => `${Math.random()}@gliff.ai`;
+
 const init = (db) => {
-  const getUserProfile = (id) => {
-    return new Promise((resolve) => {
+  const getUserProfile = (id) =>
+    new Promise((resolve) => {
       db.get(
         `SELECT * FROM myauth_userprofile WHERE user_id = "${id}"`,
         (_err, row) => resolve(row)
       );
     });
-  };
-
-  const signup = async function (email, team_id = null, invite_id = null) {
+  const signup = async function (
+    email,
+    additionalFields = { team_id: null, invite_id: null }
+  ) {
     const etebaseUser = await Account.signup(
       {
         username: toBase64(email),
@@ -35,16 +38,15 @@ const init = (db) => {
       ETEBASE_URL
     );
 
-    let userId;
-    db.get(
-      `SELECT *
+    const userId = await new Promise((resolve) => {
+      db.get(
+        `SELECT *
            FROM myauth_user 
            WHERE email = "${email}"
            LIMIT 1`,
-      (_err, row) => {
-        userId = row.id;
-      }
-    );
+        (_err, row) => resolve(row.id)
+      );
+    });
 
     await request(API_URL)
       .post("/user/")
@@ -52,10 +54,9 @@ const init = (db) => {
       .set("Authorization", `Token ${etebaseUser.authToken}`)
       .send({
         name: "Test User",
-        team_id,
-        invite_id,
         accepted_terms_and_conditions: true,
         recovery_key: "",
+        ...additionalFields,
       })
       .expect(200);
 
@@ -63,6 +64,8 @@ const init = (db) => {
       .agent(API_URL)
       .set("Content-Type", "application/json")
       .set("Authorization", `Token ${etebaseUser.authToken}`);
+
+    console.log(etebaseUser.authToken);
     return { etebaseUser, userReq, userId, email };
   };
 
@@ -92,4 +95,4 @@ const init = (db) => {
   return { getUserProfile, validate, signup };
 };
 
-export { init, BASE_URL, API_URL, ETEBASE_URL };
+export { init, getNewEmail, BASE_URL, API_URL, ETEBASE_URL };
