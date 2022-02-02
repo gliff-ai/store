@@ -172,7 +172,7 @@ class TrustedService(models.Model):
 class Plugin(models.Model):
 
     id: int
-    teams = models.ManyToManyField(Team)
+    team = models.ForeignKey(Team, on_delete=models.RESTRICT, null=True)
     name = models.CharField(blank=False, null=False, max_length=50)
     url = models.URLField(blank=False, null=False, max_length=200, unique=True)
     products = models.CharField(max_length=20, choices=PRODUCTS)

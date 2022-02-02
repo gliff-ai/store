@@ -13,7 +13,7 @@ router = Router()
 def get_plugins(request):
     user = request.auth
 
-    filter_args = {"teams__id": user.userprofile.team.id}
+    filter_args = {"team_id": user.userprofile.team.id}
     plugins_list = Plugin.objects.filter(**filter_args)
     return plugins_list
 
@@ -27,9 +27,8 @@ def create_plugin(request, payload: PluginSchema):
 
     try:
         plugin = Plugin.objects.create(
-            name=payload.name, url=payload.url, products=payload.products, enabled=payload.enabled
+            name=payload.name, team_id=user.team.id, url=payload.url, products=payload.products, enabled=payload.enabled
         )
-        plugin.teams.add(user.team)
         plugin.save()
         return {"id": plugin.id}
     except Exception as e:
@@ -44,7 +43,7 @@ def update_plugin(request, payload: PluginSchema):
         return 403, {"message": "Only owners can update plugins."}
 
     try:
-        filter_args = {"teams__id": user.userprofile.team.id, "url": payload.url}
+        filter_args = {"team_id": user.userprofile.team.id, "url": payload.url}
         plugin = Plugin.objects.get(**filter_args)
         plugin.name = payload.name
         plugin.products = payload.products
@@ -63,7 +62,7 @@ def delete_plugin(request, payload: PluginSchema):
         return 403, {"message": "Only owners can delete plugins."}
 
     try:
-        filter_args = {"teams__id": user.userprofile.team.id, "url": payload.url}
+        filter_args = {"team_id": user.userprofile.team.id, "url": payload.url}
         plugin = Plugin.objects.get(**filter_args)
         plugin_id = plugin.id
         plugin.delete()
