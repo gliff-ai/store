@@ -27,7 +27,12 @@ def create_plugin(request, payload: PluginSchema):
 
     try:
         plugin = Plugin.objects.create(
-            name=payload.name, team_id=user.team.id, url=payload.url, products=payload.products, enabled=payload.enabled
+            name=payload.name,
+            type="Javascript",
+            team_id=user.team.id,
+            url=payload.url,
+            products=payload.products,
+            enabled=payload.enabled,
         )
         plugin.save()
         return {"id": plugin.id}

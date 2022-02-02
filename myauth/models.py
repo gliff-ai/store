@@ -170,9 +170,11 @@ class TrustedService(models.Model):
 
 
 class Plugin(models.Model):
+    TYPE = (("Javascript", "Javascript"), ("Python", "Python"), ("AI", "AI"))
 
     id: int
     team = models.ForeignKey(Team, on_delete=models.RESTRICT, null=True)
+    type = models.CharField(max_length=20, choices=TYPE)
     name = models.CharField(blank=False, null=False, max_length=50)
     url = models.URLField(blank=False, null=False, max_length=200, unique=True)
     products = models.CharField(max_length=20, choices=PRODUCTS)
