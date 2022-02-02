@@ -6,39 +6,37 @@ from ninja import Router
 
 from loguru import logger
 
-from myauth.models import TrustedService, Team, User, UserProfile
+from myauth.models import TrustedService, Plugin, Team, User, UserProfile
 from .schemas import (
-    TrustedServiceOut,
-    TrustedServiceIn,
-    Error,
+    TrustedServiceSchema,
+    ExtendedTrustedServiceSchema,
     TrustedServiceCreated,
-    TrustedServiceInWithoutId,
+    Error,
 )
 
 router = Router()
 
 
-@router.get("/", response={200: List[TrustedServiceOut], 403: Error})
+@router.get("/", response={200: List[TrustedServiceSchema], 403: Error})
 def get_trusted_service(request):
     user = request.auth
 
-    ts_list = TrustedService.objects.filter(team_id=user.userprofile.team.id)
+    ts_list = Plugin.objects.filter(team_id=user.userprofile.team.id).exclude(type="Javascript")
     return ts_list
 
 
 @router.post("/", response={200: TrustedServiceCreated, 403: Error, 409: Error, 500: Error})
-def create_trusted_service(request, payload: TrustedServiceIn):
+def create_trusted_service(request, payload: ExtendedTrustedServiceSchema):
     user = request.auth
-    team = Team.objects.get(owner_id=user.id)
 
     if user.team.owner_id is not user.id:
         return 403, {"message": "Only owners can create trusted services."}
 
     try:
         filter_args = {"team_id": user.userprofile.team.id, "url": payload.url}
-        ts = TrustedService.objects.get(**filter_args)
-        if ts is not None:
-            return 409, {"message": "Trusted service already exists."}
+        plugin = Plugin.objects.get(**filter_args)
+        if plugin is not None:
+            return 409, {"message": "Plugin already exists."}
 
     except ObjectDoesNotExist as e:
         pass
@@ -50,7 +48,7 @@ def create_trusted_service(request, payload: TrustedServiceIn):
         # Create a profile
         user_profile = UserProfile.objects.create(
             user_id=ts_user.id,
-            team_id=team.id,
+            team_id=user.team.id,
             name=payload.name,
             recovery_key=None,
             accepted_terms_and_conditions=datetime.now(tz=timezone.utc),
@@ -62,14 +60,18 @@ def create_trusted_service(request, payload: TrustedServiceIn):
         user_profile.email = user.email
         user_profile.save()
 
-        ts = TrustedService.objects.create(
-            user_id=ts_user.id,
+        plugin = Plugin.objects.create(
+            team_id=user.team.id,
             type=payload.type,
             name=payload.name,
             url=payload.url,
-            team_id=team.id,
             products=payload.products,
             enabled=payload.enabled,
+        )
+
+        ts = TrustedService.objects.create(
+            user_id=ts_user.id,
+            plugin_id=plugin.id,
         )
 
         return {"id": ts.id}
@@ -78,7 +80,7 @@ def create_trusted_service(request, payload: TrustedServiceIn):
 
 
 @router.put("/", response={200: TrustedServiceCreated, 403: Error, 500: Error})
-def update_trusted_service(request, payload: TrustedServiceInWithoutId):
+def update_trusted_service(request, payload: TrustedServiceSchema):
 
     user = request.auth
 
@@ -87,22 +89,25 @@ def update_trusted_service(request, payload: TrustedServiceInWithoutId):
 
     try:
         filter_args = {"team_id": user.userprofile.team.id, "url": payload.url}
-        ts = TrustedService.objects.get(**filter_args)
+        plugin = Plugin.objects.get(**filter_args)
+
+        plugin.name = payload.name
+        plugin.products = payload.products
+        plugin.enabled = payload.enabled
+        plugin.save()
+
+        ts = TrustedService.objects.get(plugin_id=plugin.id)
         user_profile = ts.user.userprofile
         user_profile.name = payload.name
-        ts.name = payload.name
-        ts.products = payload.products
-        ts.enabled = payload.enabled
-
         user_profile.save()
-        ts.save()
+
         return {"id": ts.id}
     except Exception as e:
         logger.error(e)
 
 
 @router.delete("/", response={200: TrustedServiceCreated, 403: Error, 500: Error})
-def delete_trusted_service(request, payload: TrustedServiceInWithoutId):
+def delete_trusted_service(request, payload: TrustedServiceSchema):
 
     user = request.auth
 
@@ -111,10 +116,11 @@ def delete_trusted_service(request, payload: TrustedServiceInWithoutId):
 
     try:
         filter_args = {"team_id": user.userprofile.team.id, "url": payload.url}
-        ts = TrustedService.objects.get(**filter_args)
+        plugin = Plugin.objects.get(**filter_args)
+        ts = TrustedService.objects.get(plugin_id=plugin.id)
         ts_id = ts.id
         ts_user = ts.user
-        ts.delete()
+        plugin.delete()
         ts_user.delete()
         return {"id": ts_id}
     except Exception as e:

@@ -156,29 +156,23 @@ PRODUCTS = (
 )
 
 
-class TrustedService(models.Model):
-    TYPE = (("Python", "Python"), ("AI", "AI"))
+class Plugin(models.Model):
+    TYPE = (("Javascript", "Javascript"), ("Python", "Python"), ("AI", "AI"))
 
     id: int
-    user = models.ForeignKey(User, on_delete=models.RESTRICT)
     team = models.ForeignKey(Team, on_delete=models.RESTRICT)
     type = models.CharField(max_length=20, choices=TYPE)
-    name = models.CharField(blank=True, null=False, max_length=50)
+    name = models.CharField(blank=False, null=False, max_length=50)
     url = models.URLField(blank=False, null=False, max_length=200)
     products = models.CharField(max_length=20, choices=PRODUCTS)
     enabled = models.BooleanField(null=False, default=False)
 
 
-class Plugin(models.Model):
-    TYPE = (("Javascript", "Javascript"), ("Python", "Python"), ("AI", "AI"))
+class TrustedService(models.Model):
 
     id: int
-    team = models.ForeignKey(Team, on_delete=models.RESTRICT, null=True)
-    type = models.CharField(max_length=20, choices=TYPE)
-    name = models.CharField(blank=False, null=False, max_length=50)
-    url = models.URLField(blank=False, null=False, max_length=200, unique=True)
-    products = models.CharField(max_length=20, choices=PRODUCTS)
-    enabled = models.BooleanField(null=False, default=False)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    plugin = models.ForeignKey(Plugin, unique=True, on_delete=models.CASCADE)
 
 
 UserType = User
