@@ -6,6 +6,7 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.base_user import BaseUserManager
 from django.core.validators import RegexValidator
+from django_etebase.models import Collection
 
 UidValidator = RegexValidator(regex=r"^[a-zA-Z0-9\-_]{20,}$", message="Not a valid UID")
 
@@ -166,13 +167,14 @@ class Plugin(models.Model):
     url = models.URLField(blank=False, null=False, max_length=200)
     products = models.CharField(max_length=20, choices=PRODUCTS)
     enabled = models.BooleanField(null=False, default=False)
+    collections = models.ManyToManyField(Collection, blank=True)
 
 
 class TrustedService(models.Model):
 
     id: int
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    plugin = models.ForeignKey(Plugin, unique=True, on_delete=models.CASCADE)
+    plugin = models.OneToOneField(Plugin, on_delete=models.CASCADE)
 
 
 UserType = User
