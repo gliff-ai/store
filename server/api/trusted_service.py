@@ -25,9 +25,8 @@ def process_collection_uids(model, collection_uids):
                 collection = Collection.objects.get(uid=uid)
                 model.collections.add(collection)
 
-            except ObjectDoesNotExist as e:
-                logger.error("Project {} doesn't exist.".format(uid))
-                pass
+            except ObjectDoesNotExist:
+                logger.error("Project {} does not exist.".format(uid))
         model.save()
 
 
