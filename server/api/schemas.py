@@ -9,10 +9,12 @@ TierSchema = create_schema(Tier)
 
 
 class PluginSchema(Schema):
+    type: str
     name: str
     url: str
     products: str
     enabled: bool
+    collection_uids: Optional[List[str]] = None
 
 
 class PluginCreated(Schema):
@@ -20,11 +22,7 @@ class PluginCreated(Schema):
 
 
 class TrustedServiceSchema(PluginSchema):
-    type: str
-
-
-class ExtendedTrustedServiceSchema(TrustedServiceSchema):
-    id: str
+    username: str
 
 
 class TrustedServiceCreated(Schema):

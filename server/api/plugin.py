@@ -5,6 +5,8 @@ from ninja import Router
 from myauth.models import Plugin
 from .schemas import PluginSchema, PluginCreated, Error
 from django.core.exceptions import ObjectDoesNotExist
+from .trusted_service import process_collection_uids
+from django_etebase.models import Collection
 
 from loguru import logger
 
@@ -16,8 +18,11 @@ def get_plugins(request):
     user = request.auth
 
     filter_args = {"team_id": user.userprofile.team.id, "type": "Javascript"}
-    plugins_list = Plugin.objects.filter(**filter_args)
-    return plugins_list
+    plugins = Plugin.objects.filter(**filter_args)
+    for p in plugins:
+        p.collection_uids = p.collections.values_list("uid", flat=True)
+
+    return plugins
 
 
 @router.post("/", response={200: PluginCreated, 403: Error, 500: Error})
@@ -39,13 +44,15 @@ def create_plugin(request, payload: PluginSchema):
     try:
         plugin = Plugin.objects.create(
             name=payload.name,
-            type="Javascript",
+            type=payload.type,
             team_id=user.team.id,
             url=payload.url,
             products=payload.products,
             enabled=payload.enabled,
         )
-        plugin.save()
+
+        process_collection_uids(plugin, payload.collection_uids)
+
         return {"id": plugin.id}
     except Exception as e:
         logger.error(e)
@@ -61,10 +68,14 @@ def update_plugin(request, payload: PluginSchema):
     try:
         filter_args = {"team_id": user.userprofile.team.id, "url": payload.url}
         plugin = Plugin.objects.get(**filter_args)
+
         plugin.name = payload.name
         plugin.products = payload.products
         plugin.enabled = payload.enabled
         plugin.save()
+
+        process_collection_uids(plugin, payload.collection_uids)
+
         return {"id": plugin.id}
     except Exception as e:
         logger.error(e)

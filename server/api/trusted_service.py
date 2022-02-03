@@ -6,10 +6,10 @@ from ninja import Router
 
 from loguru import logger
 
-from myauth.models import TrustedService, Plugin, Team, User, UserProfile
+from myauth.models import TrustedService, Plugin, User, UserProfile
+from django_etebase.models import Collection
 from .schemas import (
     TrustedServiceSchema,
-    ExtendedTrustedServiceSchema,
     TrustedServiceCreated,
     Error,
 )
@@ -17,16 +17,35 @@ from .schemas import (
 router = Router()
 
 
+def process_collection_uids(model, collection_uids):
+    if collection_uids is not None:
+        model.collections.clear()
+        for uid in collection_uids:
+            try:
+                collection = Collection.objects.get(uid=uid)
+                model.collections.add(collection)
+
+            except ObjectDoesNotExist as e:
+                logger.error("Project {} doesn't exist.".format(uid))
+                pass
+        model.save()
+
+
 @router.get("/", response={200: List[TrustedServiceSchema], 403: Error})
 def get_trusted_service(request):
     user = request.auth
 
-    ts_list = Plugin.objects.filter(team_id=user.userprofile.team.id).exclude(type="Javascript")
-    return ts_list
+    plugins = Plugin.objects.filter(team_id=user.userprofile.team.id).exclude(type="Javascript")
+
+    for p in plugins:
+        p.collection_uids = p.collections.values_list("uid", flat=True)
+        ts = TrustedService.objects.get(plugin_id=p.id)
+        p.username = ts.user.username
+    return plugins
 
 
 @router.post("/", response={200: TrustedServiceCreated, 403: Error, 409: Error, 500: Error})
-def create_trusted_service(request, payload: ExtendedTrustedServiceSchema):
+def create_trusted_service(request, payload: TrustedServiceSchema):
     user = request.auth
 
     if user.team.owner_id is not user.id:
@@ -43,7 +62,7 @@ def create_trusted_service(request, payload: ExtendedTrustedServiceSchema):
 
     try:
         # Get the "user" for the service
-        ts_user = User.objects.get(email=payload.id)
+        ts_user = User.objects.get(email=payload.username)
 
         # Create a profile
         user_profile = UserProfile.objects.create(
@@ -68,6 +87,8 @@ def create_trusted_service(request, payload: ExtendedTrustedServiceSchema):
             products=payload.products,
             enabled=payload.enabled,
         )
+
+        process_collection_uids(plugin, payload.collection_uids)
 
         ts = TrustedService.objects.create(
             user_id=ts_user.id,
@@ -96,6 +117,8 @@ def update_trusted_service(request, payload: TrustedServiceSchema):
         plugin.enabled = payload.enabled
         plugin.save()
 
+        process_collection_uids(plugin, payload.collection_uids)
+
         ts = TrustedService.objects.get(plugin_id=plugin.id)
         user_profile = ts.user.userprofile
         user_profile.name = payload.name
@@ -115,13 +138,11 @@ def delete_trusted_service(request, payload: TrustedServiceSchema):
         return 403, {"message": "Only owners can delete trusted services."}
 
     try:
-        filter_args = {"team_id": user.userprofile.team.id, "url": payload.url}
-        plugin = Plugin.objects.get(**filter_args)
-        ts = TrustedService.objects.get(plugin_id=plugin.id)
+        ts_user = User.objects.get(email=payload.username)
+        ts = TrustedService.objects.get(user_id=ts_user.id)
         ts_id = ts.id
-        ts_user = ts.user
-        plugin.delete()
-        ts_user.delete()
+        ts.plugin.delete()
+        ts.user.delete()
         return {"id": ts_id}
     except Exception as e:
         logger.error(e)
