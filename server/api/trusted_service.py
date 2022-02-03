@@ -56,7 +56,7 @@ def create_trusted_service(request, payload: TrustedServiceSchema):
         if plugin is not None:
             return 409, {"message": "Plugin already exists."}
 
-    except ObjectDoesNotExist as e:
+    except ObjectDoesNotExist:
         pass
 
     try:
