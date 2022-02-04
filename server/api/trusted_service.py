@@ -1,6 +1,7 @@
 from datetime import datetime, timezone
 from typing import List
-from django.core.exceptions import ObjectDoesNotExist
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
+from django.core.validators import URLValidator
 
 from ninja import Router
 
@@ -26,8 +27,18 @@ def process_collection_uids(model, collection_uids):
                 model.collections.add(collection)
 
             except ObjectDoesNotExist:
-                logger.error("Project {} does not exist.".format(uid))
+                logger.error(f"Project {uid} does not exist.")
         model.save()
+
+
+def is_valid_url(url):
+    validator = URLValidator()
+    try:
+        validator(url)
+        return True
+    except ValidationError as e:
+        logger.warning(f"Received ValidationError: {e}")
+        return False
 
 
 @router.get("/", response={200: List[TrustedServiceSchema], 403: Error})
@@ -43,12 +54,15 @@ def get_trusted_service(request):
     return plugins
 
 
-@router.post("/", response={200: TrustedServiceCreated, 403: Error, 409: Error, 500: Error})
+@router.post("/", response={200: TrustedServiceCreated, 403: Error, 409: Error, 500: Error, 400: Error})
 def create_trusted_service(request, payload: TrustedServiceSchema):
     user = request.auth
 
     if user.team.owner_id is not user.id:
         return 403, {"message": "Only owners can create trusted services."}
+
+    if not is_valid_url(payload.url):
+        return 400, {"message": "The URL is invalid."}
 
     try:
         filter_args = {"team_id": user.userprofile.team.id, "url": payload.url}

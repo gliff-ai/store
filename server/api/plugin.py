@@ -5,7 +5,7 @@ from ninja import Router
 from myauth.models import Plugin
 from .schemas import PluginSchema, PluginCreated, Error
 from django.core.exceptions import ObjectDoesNotExist
-from .trusted_service import process_collection_uids
+from .trusted_service import process_collection_uids, is_valid_url
 from django_etebase.models import Collection
 
 from loguru import logger
@@ -25,12 +25,15 @@ def get_plugins(request):
     return plugins
 
 
-@router.post("/", response={200: PluginCreated, 403: Error, 500: Error})
+@router.post("/", response={200: PluginCreated, 403: Error, 500: Error, 400: Error})
 def create_plugin(request, payload: PluginSchema):
     user = request.auth
 
     if user.team.owner_id is not user.id:
         return 403, {"message": "Only owners can add plugins."}
+
+    if not is_valid_url(payload.url):
+        return 400, {"message": "The URL is invalid."}
 
     try:
         filter_args = {"team_id": user.userprofile.team.id, "url": payload.url}
