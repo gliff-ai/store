@@ -8,9 +8,6 @@ on:
     branches:
       - staging
       - azure-pipelines
-      -
-on: [push]
-name: Linux_Container_Workflow
 
 jobs:
     build-and-deploy:
