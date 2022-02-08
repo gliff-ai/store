@@ -21,11 +21,11 @@ resources:
     - repository: store
       type: github
       name: gliff-ai/store
-      endpoint: GliffGithubServiceConnection
+      endpoint: github.com_cooper667
     - repository: etebase-server
       type: github
       name: gliff-ai/etebase-server
-      endpoint: GliffGithubServiceConnection
+      endpoint: github.com_cooper667
     
 stages:
 - stage: Build
