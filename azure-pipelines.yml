@@ -16,14 +16,14 @@ variables:
   # Agent VM image name
   vmImageName: 'ubuntu-latest'
 
-resources:
-  repositories:
-    - repository: store
-      type: github
-      name: gliff-ai/store
-    - repository: etebase-server
-      type: github
-      name: gliff-ai/etebase-server
+# resources:
+#   repositories:
+#     - repository: store
+#       type: github
+#       name: gliff-ai/store
+#     - repository: etebase-server
+#       type: github
+#       name: gliff-ai/etebase-server
     
 stages:
 - stage: Build
@@ -39,8 +39,9 @@ stages:
       submodules: false
     - bash: |
         ls
-        git submodule init
-        git submodule update
+
+        git -c credential.helper= submodule init
+        git -c credential.helper= submodule update
     - task: Docker@2
       displayName: Build and push an image to container registry
       inputs:
