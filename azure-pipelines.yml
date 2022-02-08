@@ -26,7 +26,7 @@ stages:
       vmImage: $(vmImageName)
       
     steps:
-    - checkout: store
+    - checkout: self
       submodules: false
     - bash: |
         cd store/etebase-server
