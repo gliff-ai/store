@@ -1,0 +1,49 @@
+# Docs for the Azure Web Apps Deploy action: https://go.microsoft.com/fwlink/?linkid=2134798
+# More GitHub Actions for Azure: https://go.microsoft.com/fwlink/?linkid=2135048
+
+name: Azure App Service - store-staging-gliff, Build and deploy Python app
+
+on:
+  push:
+    branches:
+      - staging
+      - azure-pipelines
+      -
+on: [push]
+name: Linux_Container_Workflow
+
+jobs:
+    build-and-deploy:
+        runs-on: ubuntu-latest
+        steps:
+        # checkout the repo
+        - name: 'Checkout GitHub Action'
+          uses: actions/checkout@main
+          with:
+            submodules: true
+        - name: 'Login via Azure CLI'
+          uses: azure/login@v1
+          with:
+            creds: ${{ secrets.v2_AZURE_CREDENTIALS }}
+
+        - name: 'Build and push image'
+          uses: azure/docker-login@v1
+          with:
+            login-server: ${{ secrets.v2_REGISTRY_LOGIN_SERVER }}
+            username: ${{ secrets.v2_REGISTRY_USERNAME }}
+            password: ${{ secrets.v2_REGISTRY_PASSWORD }}
+        - run: |
+            docker build . -t ${{ secrets.v2_REGISTRY_LOGIN_SERVER }}/store:${{ github.sha }}
+            docker push ${{ secrets.v2_REGISTRY_LOGIN_SERVER }}/store:${{ github.sha }}
+
+        - name: 'Deploy to Azure Container Instances'
+          uses: 'azure/aci-deploy@v1'
+          with:
+            resource-group: ${{ secrets.v2_RESOURCE_GROUP }}
+            dns-name-label: ${{ secrets.v2_RESOURCE_GROUP }}${{ github.run_number }}
+            image: ${{ secrets.v2_REGISTRY_LOGIN_SERVER }}/store:${{ github.sha }}
+            registry-login-server: ${{ secrets.v2_REGISTRY_LOGIN_SERVER }}
+            registry-username: ${{ secrets.v2_REGISTRY_USERNAME }}
+            registry-password: ${{ secrets.v2_REGISTRY_PASSWORD }}
+            name: store
+            location: 'west eu'
