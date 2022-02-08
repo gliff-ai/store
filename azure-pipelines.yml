@@ -26,10 +26,11 @@ stages:
       vmImage: $(vmImageName)
       
     steps:
-    - checkout: none
-    # - checkout: store
-    #   submodules: true
-    #   persistCredentials: true
+    - checkout: store
+      submodules: false
+    - bash: |
+        cd store/etebase-server
+        git pull
     - task: Docker@2
       displayName: Build and push an image to container registry
       inputs:
