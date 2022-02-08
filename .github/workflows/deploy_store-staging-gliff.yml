@@ -1,7 +1,4 @@
-# Docs for the Azure Web Apps Deploy action: https://go.microsoft.com/fwlink/?linkid=2134798
-# More GitHub Actions for Azure: https://go.microsoft.com/fwlink/?linkid=2135048
-
-name: Azure App Service - store-staging-gliff, Build and deploy Python app
+name: Build, Publish and Deploy store-staging-gliff
 
 on:
   push:
@@ -32,15 +29,3 @@ jobs:
         - run: |
             docker build . -t ${{ secrets.v2_REGISTRY_LOGIN_SERVER }}/store:${{ github.sha }}
             docker push ${{ secrets.v2_REGISTRY_LOGIN_SERVER }}/store:${{ github.sha }}
-
-        - name: 'Deploy to Azure Container Instances'
-          uses: 'azure/aci-deploy@v1'
-          with:
-            resource-group: ${{ secrets.v2_RESOURCE_GROUP }}
-            dns-name-label: ${{ secrets.v2_RESOURCE_GROUP }}${{ github.run_number }}
-            image: ${{ secrets.v2_REGISTRY_LOGIN_SERVER }}/store:${{ github.sha }}
-            registry-login-server: ${{ secrets.v2_REGISTRY_LOGIN_SERVER }}
-            registry-username: ${{ secrets.v2_REGISTRY_USERNAME }}
-            registry-password: ${{ secrets.v2_REGISTRY_PASSWORD }}
-            name: store
-            location: 'west eu'
