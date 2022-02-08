@@ -5,17 +5,6 @@
 trigger:
 - staging
 
-resources:
-  repositories:  
-    - repository: store
-      type: github
-      endpoint: gliff-ai
-      name: gliff-ai/store
-    - repository: etebase-server
-      type: github
-      endpoint: gliff-ai
-      name: gliff-ai/etebase-server
-
 variables:
   # Container registry service connection established during pipeline creation
   dockerRegistryServiceConnection: '79c65186-8e8d-4f44-bf61-a68591824e25'
@@ -35,10 +24,12 @@ stages:
     displayName: Build
     pool:
       vmImage: $(vmImageName)
+      
     steps:
-    - checkout: store
-      submodules: true
-      persistCredentials: true
+    - checkout: none
+    # - checkout: store
+    #   submodules: true
+    #   persistCredentials: true
     - task: Docker@2
       displayName: Build and push an image to container registry
       inputs:
