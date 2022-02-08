@@ -5,6 +5,13 @@
 trigger:
 - staging
 
+resources:
+  repositories:  
+    - repository: etebase-server
+      type: github
+      endpoint: gliff-ai
+      name: gliff-ai/etebase-server
+
 variables:
   # Container registry service connection established during pipeline creation
   dockerRegistryServiceConnection: '79c65186-8e8d-4f44-bf61-a68591824e25'
