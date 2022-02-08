@@ -38,12 +38,7 @@ stages:
       
     steps:
     - checkout: self
-      submodules: false
-    - bash: |
-        ls
-
-        git -c credential.helper= submodule init
-        git -c credential.helper= submodule update
+      submodules: true
     - task: Docker@2
       displayName: Build and push an image to container registry
       inputs:
