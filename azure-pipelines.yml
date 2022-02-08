@@ -16,6 +16,15 @@ variables:
   # Agent VM image name
   vmImageName: 'ubuntu-latest'
 
+resources:
+  repositories:
+    - repository: store
+      type: github
+      name: gliff-ai/store
+    - repository: etebase-server
+      type: github
+      name: gliff-ai/etebase-server
+    
 stages:
 - stage: Build
   displayName: Build and push stage
