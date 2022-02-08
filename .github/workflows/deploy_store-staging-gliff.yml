@@ -18,14 +18,14 @@ jobs:
         - name: 'Login via Azure CLI'
           uses: azure/login@v1
           with:
-            creds: ${{ secrets.v2_AZURE_CREDENTIALS }}
+            creds: ${{ secrets.V2_AZURE_CREDENTIALS }}
 
         - name: 'Build and push image'
           uses: azure/docker-login@v1
           with:
-            login-server: ${{ secrets.v2_REGISTRY_LOGIN_SERVER }}
-            username: ${{ secrets.v2_REGISTRY_USERNAME }}
-            password: ${{ secrets.v2_REGISTRY_PASSWORD }}
+            login-server: ${{ secrets.V2_REGISTRY_LOGIN_SERVER }}
+            username: ${{ secrets.V2_REGISTRY_USERNAME }}
+            password: ${{ secrets.V2_REGISTRY_PASSWORD }}
         - run: |
-            docker build . -t ${{ secrets.v2_REGISTRY_LOGIN_SERVER }}/store:${{ github.sha }}
-#            docker push ${{ secrets.v2_REGISTRY_LOGIN_SERVER }}/store:${{ github.sha }}
+            docker build . -t ${{ secrets.V2_REGISTRY_LOGIN_SERVER }}/store:${{ github.sha }}
+            docker push ${{ secrets.V2_REGISTRY_LOGIN_SERVER }}/store:${{ github.sha }}
