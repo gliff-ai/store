@@ -28,4 +28,4 @@ jobs:
             password: ${{ secrets.v2_REGISTRY_PASSWORD }}
         - run: |
             docker build . -t ${{ secrets.v2_REGISTRY_LOGIN_SERVER }}/store:${{ github.sha }}
-            docker push ${{ secrets.v2_REGISTRY_LOGIN_SERVER }}/store:${{ github.sha }}
+#            docker push ${{ secrets.v2_REGISTRY_LOGIN_SERVER }}/store:${{ github.sha }}
