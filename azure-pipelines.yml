@@ -1,15 +1,11 @@
 # trigger:
 # - staging
+parameters:  
+  - name: tag
+    displayName: Docker Image Tag
+    type: string
 
 variables:
-  # Container registry service connection established during pipeline creation
-  dockerRegistryServiceConnection: '79c65186-8e8d-4f44-bf61-a68591824e25'
-  imageRepository: 'gliffaistore'
-  containerRegistry: 'gliff.azurecr.io'
-  dockerfilePath: '$(Build.SourcesDirectory)/Dockerfile'
-  tag: 'latest'
-
-  # Agent VM image name
   vmImageName: 'ubuntu-latest'
     
 stages:
