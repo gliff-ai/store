@@ -1,5 +1,6 @@
-# trigger:
-# - staging
+trigger:
+- staging
+
 parameters:  
   - name: tag
     displayName: Docker Image Tag
