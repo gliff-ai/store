@@ -7,7 +7,7 @@ on:
       - azure-pipelines
 
 jobs:
-    build-and-deploy:
+    build_and_deploy:
         runs-on: ubuntu-latest
         steps:
         # checkout the repo
@@ -29,3 +29,10 @@ jobs:
         - run: |
             docker build . -t ${{ secrets.V2_REGISTRY_LOGIN_SERVER }}/store:${{ github.sha }}
             docker push ${{ secrets.V2_REGISTRY_LOGIN_SERVER }}/store:${{ github.sha }}
+        - name: Azure Pipelines Action
+          uses: Azure/pipelines@v1
+          with:
+            azure-devops-project-url: https://dev.azure.com/gliff/Store
+            azure-pipeline-name: 'gliff-ai.store'
+            azure-devops-token: ${{ secrets.AZURE_PIPELINE_ACCESS_TOKEN }} # This is a PAT expiring Feb 2023
+            azure-pipeline-variables:  '{"tag": "${{ github.sha }}"}'
