@@ -28,4 +28,4 @@ stages:
         runOnce:
           deploy:
             steps:
-              - script: echo my first deployment
+              - script: touch /home/azureuser/hello
