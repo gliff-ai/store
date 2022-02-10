@@ -1,9 +1,5 @@
-# Docker
-# Build and push an image to Azure Container Registry
-# https://docs.microsoft.com/azure/devops/pipelines/languages/docker
-
-trigger:
-- staging
+# trigger:
+# - staging
 
 variables:
   # Container registry service connection established during pipeline creation
@@ -15,36 +11,21 @@ variables:
 
   # Agent VM image name
   vmImageName: 'ubuntu-latest'
-
-resources:
-  repositories:
-    - repository: store
-      type: github
-      name: gliff-ai/store
-      endpoint: github.com_cooper667
-    - repository: etebase-server
-      type: github
-      name: gliff-ai/etebase-server
-      endpoint: github.com_cooper667
     
 stages:
 - stage: Build
   displayName: Build and push stage
+
   jobs:
-  - job: Build
-    displayName: Build
-    pool:
-      vmImage: $(vmImageName)
-      
-    steps:
-    - checkout: self
-      submodules: true
-    - task: Docker@2
-      displayName: Build and push an image to container registry
-      inputs:
-        command: buildAndPush
-        repository: $(imageRepository)
-        dockerfile: $(dockerfilePath)
-        containerRegistry: $(dockerRegistryServiceConnection)
-        tags: |
-          $(tag)
+    - deployment: VMDeploy
+      displayName: web
+      pool:
+        vmImage: 'ubuntu-latest'
+      environment:
+        name: Staging
+        resourceType: VirtualMachine
+      strategy:
+        runOnce:
+          deploy:
+            steps:
+              - script: echo my first deployment
