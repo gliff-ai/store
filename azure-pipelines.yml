@@ -24,4 +24,4 @@ stages:
         runOnce:
           deploy:
             steps:
-              - script: TAG=${tag} docker-compose -d up
+              - script: TAG=${paramters.tag} docker-compose up
