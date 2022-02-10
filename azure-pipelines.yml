@@ -28,4 +28,4 @@ stages:
         runOnce:
           deploy:
             steps:
-              - script: TAG=${variables.tag} docker-compose -d up
+              - script: TAG=${tag} docker-compose -d up
