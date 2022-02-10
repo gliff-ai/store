@@ -30,7 +30,7 @@ jobs:
             docker build . -t ${{ secrets.V2_REGISTRY_LOGIN_SERVER }}/store:${{ github.sha }}
             docker push ${{ secrets.V2_REGISTRY_LOGIN_SERVER }}/store:${{ github.sha }}
         - name: Azure Pipelines Action
-          uses: Azure/pipelines@v1.2
+          uses: gliff-ai/pipelines@master
           with:
             azure-devops-project-url: https://dev.azure.com/gliff/Store
             azure-pipeline-name: 'gliff-ai.store'
