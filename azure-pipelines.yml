@@ -1,14 +1,10 @@
 trigger:
 - staging
 
-parameters:  
-  - name: tag
-    displayName: Docker Image Tag
-    type: string
-
 variables:
-  vmImageName: 'ubuntu-latest'
-    
+ - name: tag
+   value: latest
+   
 stages:
 - stage: Build
   displayName: Build and push stage
