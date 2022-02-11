@@ -17,4 +17,6 @@ stages:
         runOnce:
           deploy:
             steps:
-              - script: TAG=$(tag) docker-compose up -d
+              - script: |
+                  az acr login --name gliff
+                  TAG=$(tag) docker-compose up -d
