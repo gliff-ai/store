@@ -1,10 +1,6 @@
 trigger:
 - staging
 
-variables:
- - name: tag
-   value: latest
-   
 stages:
 - stage: Build
   displayName: Build and push stage
@@ -21,4 +17,4 @@ stages:
         runOnce:
           deploy:
             steps:
-              - script: TAG=${{parameters.tag}} docker-compose up -d
+              - script: TAG=${{tag}} docker-compose up -d
