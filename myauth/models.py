@@ -6,6 +6,7 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.base_user import BaseUserManager
 from django.core.validators import RegexValidator
+from django_etebase.models import Collection
 
 UidValidator = RegexValidator(regex=r"^[a-zA-Z0-9\-_]{20,}$", message="Not a valid UID")
 
@@ -156,27 +157,24 @@ PRODUCTS = (
 )
 
 
-class TrustedService(models.Model):
-    TYPE = (("Python", "Python"), ("AI", "AI"))
+class Plugin(models.Model):
+    TYPE = (("Javascript", "Javascript"), ("Python", "Python"), ("AI", "AI"))
 
     id: int
-    user = models.ForeignKey(User, on_delete=models.RESTRICT)
     team = models.ForeignKey(Team, on_delete=models.RESTRICT)
     type = models.CharField(max_length=20, choices=TYPE)
-    name = models.CharField(blank=True, null=False, max_length=50)
+    name = models.CharField(blank=False, null=False, max_length=50)
     url = models.URLField(blank=False, null=False, max_length=200)
     products = models.CharField(max_length=20, choices=PRODUCTS)
     enabled = models.BooleanField(null=False, default=False)
+    collections = models.ManyToManyField(Collection, blank=True)
 
 
-class Plugin(models.Model):
+class TrustedService(models.Model):
 
     id: int
-    teams = models.ManyToManyField(Team)
-    name = models.CharField(blank=False, null=False, max_length=50)
-    url = models.URLField(blank=False, null=False, max_length=200, unique=True)
-    products = models.CharField(max_length=20, choices=PRODUCTS)
-    enabled = models.BooleanField(null=False, default=False)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    plugin = models.OneToOneField(Plugin, on_delete=models.CASCADE)
 
 
 UserType = User
