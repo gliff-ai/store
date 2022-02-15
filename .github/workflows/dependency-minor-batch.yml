@@ -7,7 +7,7 @@ jobs:
   npm_update:
     uses: gliff-ai/.github/.github/workflows/dependency-updates.yml@main
     with:
-      package_manager: pipenv
-      main_branch: staging
+      package_manager: "pipenv"
+      main_branch: "staging"
     secrets:
       ROBOT_PAT: ${{ secrets.ROBOT_PAT }}

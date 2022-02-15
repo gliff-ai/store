@@ -1,3 +1,4 @@
 [submodule "etebase-server"]
 	path = etebase-server
 	url = git@github.com:gliff-ai/etebase-server.git
+    ignore = dirty
