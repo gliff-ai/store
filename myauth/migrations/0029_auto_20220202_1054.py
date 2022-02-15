@@ -47,38 +47,4 @@ class Migration(migrations.Migration):
             field=models.URLField(),
         ),
         migrations.RunPython(transfer_trustedservices_to_plugins),
-        migrations.RemoveField(
-            model_name="trustedservice",
-            name="enabled",
-        ),
-        migrations.RemoveField(
-            model_name="trustedservice",
-            name="name",
-        ),
-        migrations.RemoveField(
-            model_name="trustedservice",
-            name="products",
-        ),
-        migrations.RemoveField(
-            model_name="trustedservice",
-            name="team",
-        ),
-        migrations.RemoveField(
-            model_name="trustedservice",
-            name="type",
-        ),
-        migrations.RemoveField(
-            model_name="trustedservice",
-            name="url",
-        ),
-        migrations.AlterField(
-            model_name="trustedservice",
-            name="user",
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL),
-        ),
-        migrations.AlterField(
-            model_name="trustedservice",
-            name="plugin",
-            field=models.OneToOneField(null=False, on_delete=django.db.models.deletion.CASCADE, to="myauth.plugin"),
-        ),
     ]
