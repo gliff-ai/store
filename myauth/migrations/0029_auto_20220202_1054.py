@@ -6,55 +6,79 @@ import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
+    def transfer_trustedservices_to_plugins(apps, schema_editor):
+        TrustedService = apps.get_model("myauth", "TrustedService")
+        Plugin = apps.get_model("myauth", "Plugin")
+        trusted_services = TrustedService.objects.all()
+
+        for ts in trusted_services:
+            plugin = Plugin.objects.create(
+                name=ts.name,
+                type=ts.type,
+                team_id=ts.team.id,
+                url=ts.url,
+                products=ts.products,
+                enabled=ts.enabled,
+            )
+            ts.plugin = plugin
+            ts.save()
 
     dependencies = [
-        ('myauth', '0028_plugin_type'),
+        ("myauth", "0028_plugin_type"),
     ]
 
     operations = [
-        migrations.RemoveField(
-            model_name='trustedservice',
-            name='enabled',
-        ),
-        migrations.RemoveField(
-            model_name='trustedservice',
-            name='name',
-        ),
-        migrations.RemoveField(
-            model_name='trustedservice',
-            name='products',
-        ),
-        migrations.RemoveField(
-            model_name='trustedservice',
-            name='team',
-        ),
-        migrations.RemoveField(
-            model_name='trustedservice',
-            name='type',
-        ),
-        migrations.RemoveField(
-            model_name='trustedservice',
-            name='url',
-        ),
         migrations.AddField(
-            model_name='trustedservice',
-            name='plugin',
-            field=models.ForeignKey(default=None, on_delete=django.db.models.deletion.CASCADE, to='myauth.plugin', unique=True),
+            model_name="trustedservice",
+            name="plugin",
+            field=models.ForeignKey(
+                default=None, on_delete=django.db.models.deletion.CASCADE, to="myauth.plugin", unique=True, null=True
+            ),
             preserve_default=False,
         ),
         migrations.AlterField(
-            model_name='plugin',
-            name='team',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.RESTRICT, to='myauth.team'),
+            model_name="plugin",
+            name="team",
+            field=models.ForeignKey(on_delete=django.db.models.deletion.RESTRICT, to="myauth.team"),
         ),
         migrations.AlterField(
-            model_name='plugin',
-            name='url',
+            model_name="plugin",
+            name="url",
             field=models.URLField(),
         ),
+        migrations.RunPython(transfer_trustedservices_to_plugins),
+        migrations.RemoveField(
+            model_name="trustedservice",
+            name="enabled",
+        ),
+        migrations.RemoveField(
+            model_name="trustedservice",
+            name="name",
+        ),
+        migrations.RemoveField(
+            model_name="trustedservice",
+            name="products",
+        ),
+        migrations.RemoveField(
+            model_name="trustedservice",
+            name="team",
+        ),
+        migrations.RemoveField(
+            model_name="trustedservice",
+            name="type",
+        ),
+        migrations.RemoveField(
+            model_name="trustedservice",
+            name="url",
+        ),
         migrations.AlterField(
-            model_name='trustedservice',
-            name='user',
+            model_name="trustedservice",
+            name="user",
             field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL),
+        ),
+        migrations.AlterField(
+            model_name="trustedservice",
+            name="plugin",
+            field=models.OneToOneField(null=False, on_delete=django.db.models.deletion.CASCADE, to="myauth.plugin"),
         ),
     ]
