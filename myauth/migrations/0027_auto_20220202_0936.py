@@ -7,17 +7,17 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('myauth', '0026_auto_20220125_1539'),
+        ("myauth", "0026_auto_20220125_1539"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='plugin',
-            name='teams',
+            model_name="plugin",
+            name="teams",
         ),
         migrations.AddField(
-            model_name='plugin',
-            name='team',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.RESTRICT, to='myauth.team'),
+            model_name="plugin",
+            name="team",
+            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.RESTRICT, to="myauth.team"),
         ),
     ]
