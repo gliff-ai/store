@@ -4,26 +4,18 @@ on:
     types: [opened, edited, synchronize, auto_merge_enabled, reopened]
 
 jobs:
-  format:
+  lint:
     runs-on: ubuntu-latest
     timeout-minutes: 2
     steps:
       - name: checkout
         uses: actions/checkout@v2
-      - name: check formatting with black
-        uses: lgeiger/black-action@master
+      - name: black and flake8
+        uses: ricardochaves/python-lint@v1.4.0
         with:
-          args: --diff .
-  lint:
-    needs: format
-    runs-on: ubuntu-latest
-    steps:
-      - name: checkout
-        uses: actions/checkout@v1
-      - name: lint with flake8
-        uses: grantmcconnaughey/lintly-flake8-github-action@v1.0
-        with:
-          # The GitHub API token to create reviews with
-          token: ${{ secrets.GITHUB_TOKEN }}
-          # Fail if "new" violations detected or "any", default "new"
-          failIf: "any"
+          use-pylint: false
+          use-pycodestyle: false
+          use-flake8: true
+          use-black: true
+          use-mypy: false
+          use-isort: false
