@@ -1,5 +1,7 @@
-name: lint and fomat
-on: push
+name: lint and format
+on:
+  pull_request:
+    types: [opened, edited, synchronize, auto_merge_enabled, reopened]
 
 jobs:
   format:
@@ -15,17 +17,13 @@ jobs:
   lint:
     needs: format
     runs-on: ubuntu-latest
-    timeout-minutes: 2
     steps:
       - name: checkout
-        uses: actions/checkout@v2
-      - name: setup python
-        uses: actions/setup-python@v2
-        with:
-          python-version: "3.8"
-      - name: install pipenv
-        run: pip install pipenv
-      - name: install dependencies
-        run: pipenv sync --dev
+        uses: actions/checkout@v1
       - name: lint with flake8
-        run: pipenv run lint
+        uses: grantmcconnaughey/lintly-flake8-github-action@v1.0
+        with:
+          # The GitHub API token to create reviews with
+          token: ${{ secrets.GITHUB_TOKEN }}
+          # Fail if "new" violations detected or "any", default "new"
+          failIf: "any"
