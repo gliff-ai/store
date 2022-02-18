@@ -8,16 +8,10 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v2
-      - name: setup python
-        uses: actions/setup-python@v2
+      - name: check formatting with black
+        uses: lgeiger/black-action@master
         with:
-          python-version: "3.8"
-      - name: install pipenv
-        run: pip install pipenv
-      - name: install dependencies
-        run: pipenv sync --dev
-      - name: format with black
-        run: pipenv run black --verbose --diff .
+          args: --diff .
   lint:
     needs: format
     runs-on: ubuntu-latest
