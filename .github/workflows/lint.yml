@@ -1,22 +1,37 @@
-name: Lint
+name: lint and fomat
 on: push
 
 jobs:
-  Lint:
+  format:
     runs-on: ubuntu-latest
     timeout-minutes: 2
     steps:
-      - name: Checkout
+      - name: checkout
         uses: actions/checkout@v2
-        with:
-          submodules: true
-      - name: Setup Python version
+      - name: setup python
         uses: actions/setup-python@v2
         with:
           python-version: "3.8"
-      - name: Setup dependencies
-        run: pip install -r requirements.txt
-      - name: Lint
-        run: flake8 .
-      - name: Format
-        run: black --verbose --diff .
+      - name: install pipenv
+        run: pip install pipenv
+      - name: install dependencies
+        run: pipenv sync --dev
+      - name: format with black
+        run: pipenv run black --verbose --diff .
+  lint:
+    needs: format
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+      - name: setup python
+        uses: actions/setup-python@v2
+        with:
+          python-version: "3.8"
+      - name: install pipenv
+        run: pip install pipenv
+      - name: install dependencies
+        run: pipenv sync --dev
+      - name: lint with flake8
+        run: pipenv run lint
