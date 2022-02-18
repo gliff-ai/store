@@ -22,7 +22,7 @@ azure-storage-blob = "==12.8.1"
 django-storages = {ref = "update-azure-storage", git = "https://github.com/pjsier/django-storages.git"}
 
 [dev-packages]
-black = "==21.6b0"
+black = "==22.1.0"
 flake8 = ">=3.9.2"
 mypy-extensions = ">=0.4.3"
 mypy = ">=0.910"
