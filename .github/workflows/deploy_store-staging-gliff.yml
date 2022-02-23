@@ -13,8 +13,6 @@ jobs:
         # checkout the repo
         - name: 'Checkout GitHub Action'
           uses: actions/checkout@main
-          with:
-            submodules: true
         - name: 'Login via Azure CLI'
           uses: azure/login@v1
           with:
