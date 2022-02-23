@@ -1,0 +1,96 @@
+variant: fcos
+version: 1.4.0
+
+storage:
+  files:
+    - path: /var/home/core/bin/docker-compose
+      mode: 0755
+      contents:
+        source: https://github.com/docker/compose/releases/download/1.21.2/docker-compose-Linux-x86_64
+        verification:
+          hash: sha512-5A9CCBE01CBF585732907F38FBACC21AECD2EDC9351BD1EE91DF750740A7FFF9D73BD489D708087D9D8892AD8F448A78A8EE401D240A51D0202ED0C08E30BF88
+
+    - path: /etc/papertrail-bundle.pem 
+      mode: 0444
+      contents:
+        source: https://papertrailapp.com/tools/papertrail-bundle.pem
+
+    - path: /var/home/core/bin/mount.sh
+      mode: 0755
+      contents:
+        inline: |
+          #!/bin/bash
+
+          # This is silly but there's no good way to find this attached drive! It suggests looking up the LUN in the UI, but I think this works
+          DRIVE_ADDRESS=`lsblk -o NAME,HCTL,SIZE,MOUNTPOINT,LABEL,PARTLABEL -Js | jq -r '.blockdevices[] | select(.partlabel == "xfspart") | .name'`
+          mkdir /var/datadrive
+          mount /dev/$DRIVE_ADDRESS /var/datadrive  
+
+    - path: /var/home/core/bin/az-login.sh
+      mode: 0755
+      contents:
+        inline: |
+          #!/bin/bash
+
+          export ACCESS_TOKEN=$(sudo docker run -it mcr.microsoft.com/azure-cli /bin/bash -c "az login --identity > /dev/null; az acr login --name gliff --expose-token --only-show-errors --output tsv --query accessToken")
+          echo $ACCESS_TOKEN | sudo docker login gliff.azurecr.io --username 00000000-0000-0000-0000-000000000000 --password-stdin 
+
+
+    - path: /var/app/docker-compose.yml
+      mode: 0644
+      contents:
+        inline: |
+          version: '3'
+
+          services:
+            store:
+              image: "gliff.azurecr.io/store:${TAG}"
+              ports:
+                - "80:8000"
+              env_file:
+                - store.env
+              volumes:
+                - /datadrive:/app/media
+              logging:
+                driver: syslog
+                options:
+                  syslog-address: "udp://logs3.papertrailapp.com:40454"
+                  tag: "{{.Name}}/{{.ID}}"
+      
+systemd:
+  units:
+    - name: onboot.timer
+      enabled: true
+      contents: |
+        [Unit]
+        Description=Run once at system boot
+
+        [Timer]
+        OnBootSec=1s
+
+        [Install]
+        WantedBy=multi-user.target
+
+    - name: onboot.service
+      contents: |
+        [Unit]
+        Description=Run once at system boot
+
+        [Service]
+        Type=oneshot
+        ExecStart=/var/home/core/bin/mount.sh
+
+    - name: install-papertrail.service
+      enabled: true
+      contents: |
+        [Unit]
+        Description=Papertrail
+        After=systemd-journald.service
+        Requires=systemd-journald.service
+        [Service]
+        ExecStart=/bin/sh -c "journalctl -f | socat - SSL:logs3.papertrailapp.com:40454,cafile=/etc/papertrail-bundle.pem"
+        TimeoutStartSec=0
+        Restart=on-failure
+        RestartSec=5s
+        [Install]
+        WantedBy=multi-user.target
