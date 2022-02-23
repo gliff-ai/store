@@ -50,11 +50,11 @@ storage:
               env_file:
                 - store.env
               volumes:
-                - /datadrive:/app/media
+                - /var/datadrive:/app/media
               logging:
                 driver: syslog
                 options:
-                  syslog-address: "udp://logs3.papertrailapp.com:40454"
+                  syslog-address: "udp://=logs3.papertrailapp.com:40454"
                   tag: "{{.Name}}/{{.ID}}"
       
 systemd:
@@ -88,7 +88,7 @@ systemd:
         After=systemd-journald.service
         Requires=systemd-journald.service
         [Service]
-        ExecStart=/bin/sh -c "journalctl -f | socat - SSL:logs3.papertrailapp.com:40454,cafile=/etc/papertrail-bundle.pem"
+        ExecStart=/bin/sh -c "journalctl -f | socat - SSL:=logs3.papertrailapp.com:40454,cafile=/etc/papertrail-bundle.pem"
         TimeoutStartSec=0
         Restart=on-failure
         RestartSec=5s
