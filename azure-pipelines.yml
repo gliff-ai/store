@@ -18,4 +18,4 @@ stages:
           deploy:
             steps:
               - script: |
-                  TAG=$(tag) docker-compose up -f /var/app/docker-compose.yml -d
+                  TAG=$(tag) docker-compose -f /var/app/docker-compose.yml up -d
