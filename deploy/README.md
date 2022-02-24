@@ -11,7 +11,6 @@ butane deploy.bu --strict -o deploy.ign
 
 Then we create the Azure VM, assign it an identity which has permission to access ACR and get our .env file. We attach the data drive too, which we mount when the ignition script runs.
 
-
 For All Environments:
 ```bash
 VM_NAME=machine1 # Change this
@@ -32,9 +31,14 @@ az vm create -n "${VM_NAME}" -g "${RESOURCE_GROUP}" \
    --admin-username core \
    --custom-data ./deploy.ign \
    --attach-data-disks $DISK_ID \
-   --assign-identity [system] vm_registry_access_store \
+   --assign-identity vm_registry_access_store \
    --admin-username core \
    --ssh-key-name "${SSH_KEY_NAME}" \
    --boot-diagnostics-storage "${STORAGE_ACCOUNT}"
 ```
+
+Add to the Application Gateway Backend Pool (TODO: Cli Command for this or Butane to self register)
+Register with the Deploy Pipeline in Azure (TODO: Add this to Butane)
+
+Ideally we'd use a Scaling Set for the VMs but this doesn't seem to support mounting a shared drive
 

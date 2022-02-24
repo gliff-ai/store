@@ -6,9 +6,9 @@ storage:
     - path: /var/home/core/bin/docker-compose
       mode: 0755
       contents:
-        source: https://github.com/docker/compose/releases/download/1.21.2/docker-compose-Linux-x86_64
+        source: https://github.com/docker/compose/releases/download/v2.2.3/docker-compose-linux-x86_64
         verification:
-          hash: sha512-5A9CCBE01CBF585732907F38FBACC21AECD2EDC9351BD1EE91DF750740A7FFF9D73BD489D708087D9D8892AD8F448A78A8EE401D240A51D0202ED0C08E30BF88
+          hash: sha256-f15a7cd54a85f760a8ece92da63fb85b93036c72ead8056391b8a3fe9dc73134
 
     - path: /etc/papertrail-bundle.pem 
       mode: 0444
@@ -24,7 +24,10 @@ storage:
           # This is silly but there's no good way to find this attached drive! It suggests looking up the LUN in the UI, but I think this works
           DRIVE_ADDRESS=`lsblk -o NAME,HCTL,SIZE,MOUNTPOINT,LABEL,PARTLABEL -Js | jq -r '.blockdevices[] | select(.partlabel == "xfspart") | .name'`
           mkdir /var/datadrive
-          mount /dev/$DRIVE_ADDRESS /var/datadrive  
+          mount /dev/$DRIVE_ADDRESS /var/datadrive
+
+          sudo usermod -aG docker core
+          newgrp docker
 
     - path: /var/home/core/bin/az-login.sh
       mode: 0755
@@ -32,9 +35,8 @@ storage:
         inline: |
           #!/bin/bash
 
-          export ACCESS_TOKEN=$(sudo docker run -it mcr.microsoft.com/azure-cli /bin/bash -c "az login --identity > /dev/null; az acr login --name gliff --expose-token --only-show-errors --output tsv --query accessToken")
-          echo $ACCESS_TOKEN | sudo docker login gliff.azurecr.io --username 00000000-0000-0000-0000-000000000000 --password-stdin 
-
+          export ACCESS_TOKEN=$(docker run -it mcr.microsoft.com/azure-cli /bin/bash -c "az login --identity --username /subscriptions/1eb9ce28-83a1-4fb9-bf41-3cd2442ef0eb/resourcegroups/gliff_staging/providers/Microsoft.ManagedIdentity/userAssignedIdentities/vm_registry_access_store > /dev/null; az acr login --name gliff --expose-token --only-show-errors --output tsv --query accessToken")
+          echo $ACCESS_TOKEN | docker login gliff.azurecr.io --username 00000000-0000-0000-0000-000000000000 --password-stdin
 
     - path: /var/app/docker-compose.yml
       mode: 0644
@@ -54,7 +56,7 @@ storage:
               logging:
                 driver: syslog
                 options:
-                  syslog-address: "udp://=logs3.papertrailapp.com:40454"
+                  syslog-address: "udp://logs3.papertrailapp.com:40454"
                   tag: "{{.Name}}/{{.ID}}"
       
 systemd:
