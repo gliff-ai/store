@@ -18,5 +18,4 @@ stages:
           deploy:
             steps:
               - script: |
-                  az acr login --name gliff
                   TAG=$(tag) docker-compose up -f /var/app/docker-compose.yml -d
