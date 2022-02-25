@@ -36,8 +36,10 @@ az vm create -n "${VM_NAME}" -g "${RESOURCE_GROUP}" \
 ```
 
 Add to the Application Gateway Backend Pool (TODO: Cli Command for this or Butane to self register)
-Add to Azure pipeline (TODO: Butane for this?)
-Remove port 22 access.
+Add to Azure pipeline (TODO: Butane for this? And/Or Docker)
+Remove port 22 access
+Reboot
+Deploy via GH Actions
 
 Ideally we'd use a Scaling Set for the VMs but this doesn't seem to support mounting a shared drive
 
