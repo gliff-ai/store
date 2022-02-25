@@ -18,4 +18,5 @@ stages:
           deploy:
             steps:
               - script: |
+                  /var/home/core/bin/az_login.sh
                   TAG=$(tag) docker-compose -f /var/app/docker-compose.yml up -d
