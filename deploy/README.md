@@ -5,10 +5,6 @@ This writes our docker-compose file, installs docker-compose, papertrail and mou
 
 We are limited to 3 VMs connected to each datadrive, so effectively, 3 vms per environment. 
 
-```bash
-butane deploy.bu --strict -o deploy.ign
-```
-
 Then we create the Azure VM, assign it an identity which has permission to access ACR and get our .env file. We attach the data drive too, which we mount when the ignition script runs.
 
 For All Environments:
@@ -19,6 +15,8 @@ VM_NAME=machine1 # Change this
 For Staging:
 
 ```bash
+butane staging.bu --strict -o deploy.ign
+
 AZ_IMAGE_NAME=fcos-stable # DON'T change these
 SSH_KEY_NAME=storeStagingAdmin
 RESOURCE_GROUP=gliff_staging
@@ -38,7 +36,8 @@ az vm create -n "${VM_NAME}" -g "${RESOURCE_GROUP}" \
 ```
 
 Add to the Application Gateway Backend Pool (TODO: Cli Command for this or Butane to self register)
-Register with the Deploy Pipeline in Azure (TODO: Add this to Butane)
+Add to Azure pipeline (TODO: Butane for this?)
+Remove port 22 access.
 
 Ideally we'd use a Scaling Set for the VMs but this doesn't seem to support mounting a shared drive
 

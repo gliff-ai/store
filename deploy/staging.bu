@@ -15,7 +15,7 @@ storage:
       contents:
         source: https://papertrailapp.com/tools/papertrail-bundle.pem
 
-    - path: /var/home/core/bin/mount.sh
+    - path: /var/home/core/bin/startup.sh
       mode: 0755
       contents:
         inline: |
@@ -26,6 +26,7 @@ storage:
           mkdir /var/datadrive
           mount /dev/$DRIVE_ADDRESS /var/datadrive
 
+          # No sudo for docker
           sudo usermod -aG docker core
           newgrp docker
 
@@ -80,7 +81,7 @@ systemd:
 
         [Service]
         Type=oneshot
-        ExecStart=/var/home/core/bin/mount.sh
+        ExecStart=/var/home/core/bin/startup.sh
 
     - name: install-papertrail.service
       enabled: true
