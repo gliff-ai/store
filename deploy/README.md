@@ -35,11 +35,12 @@ az vm create -n "${VM_NAME}" -g "${RESOURCE_GROUP}" \
    --boot-diagnostics-storage "${STORAGE_ACCOUNT}"
 ```
 
-Add to the Application Gateway Backend Pool (TODO: Cli Command for this or Butane to self register)
-Add to Azure pipeline (TODO: Butane for this? And/Or Docker)
-Remove port 22 access
-Reboot
-Deploy via GH Actions
+- Add to the Application Gateway Backend Pool (TODO: Cli Command for this or Butane to self register)
+- Add to Azure pipeline (TODO: Butane for this? And/Or Docker)
+- [Record the datadrive UUID](https://docs.microsoft.com/en-us/azure/virtual-machines/linux/add-disk#persist-the-mount)
+- Remove port 22 access
+- Reboot
+- Deploy via GH Actions
 
 Ideally we'd use a Scaling Set for the VMs but this doesn't seem to support mounting a shared drive
 
