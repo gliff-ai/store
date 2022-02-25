@@ -18,4 +18,6 @@ stages:
           deploy:
             steps:
               - script: |
-                  TAG=$(tag) docker-compose -f /var/app/docker-compose.yml up -d
+                  sudo -E /var/home/core/bin/az-login.sh
+                  export TAG=$(tag) 
+                  sudo -E env "PATH=$PATH" docker-compose -f /var/app/docker-compose.yml up -d
