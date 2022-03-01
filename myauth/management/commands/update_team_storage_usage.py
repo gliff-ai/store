@@ -141,17 +141,15 @@ class Command(BaseCommand):
         scheduler.add_jobstore(DjangoJobStore(), "default")
 
         # schedule jobs to run every day at hour:minute UTC
-        # scheduler.add_job(
-        #     update_team_storage_usage,
-        #     "cron",
-        #     hour=settings.TASK_UPDATE_STORAGE_HOUR,
-        #     minute=settings.TASK_UPDATE_STORAGE_MINUTE,
-        #     id="update_team_storage_usage",
-        #     replace_existing=True,
-        # )
-        # logger.info("Added daily job: 'update_team_storage_usage'.")
-
-        update_team_storage_usage()
+        scheduler.add_job(
+            update_team_storage_usage,
+            "cron",
+            hour=settings.TASK_UPDATE_STORAGE_HOUR,
+            minute=settings.TASK_UPDATE_STORAGE_MINUTE,
+            id="update_team_storage_usage",
+            replace_existing=True,
+        )
+        logger.info("Added daily job: 'update_team_storage_usage'.")
 
         try:
             logger.info("Scheduler starting..")
