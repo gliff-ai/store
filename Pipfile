@@ -4,8 +4,6 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-azure-common = "==1.1.27"
-azure-storage-common = "==2.1.0"
 django-cors-headers = "==3.7.0"
 django-ninja = "==0.13.2"
 loguru = ">=0.5.3"
@@ -18,8 +16,6 @@ etebase-server = {git = "https://github.com/gliff-ai/etebase-server.git", editab
 appdirs = "==1.4.4"
 psycopg2-binary = ">=2.9.1"
 django-apscheduler = ">=0.6.0"
-azure-storage-blob = "==12.8.1"
-django-storages = {ref = "update-azure-storage", git = "https://github.com/pjsier/django-storages.git"}
 
 [dev-packages]
 black = "==22.1.0"
