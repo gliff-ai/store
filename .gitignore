@@ -8,7 +8,7 @@ pythonenv*/
 db.sqlite3
 media/
 .env
-
+*.ign
 node_modules/
 *.env
 *.ign

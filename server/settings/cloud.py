@@ -34,13 +34,6 @@ DATABASES = {
 STATIC_URL = "/static/"
 STATIC_ROOT = "/store_media/static"
 
-DEFAULT_FILE_STORAGE = "storages.backends.azure_storage.AzureStorage"
-
-AZURE_ACCOUNT_KEY = get_env_value("AZURE_ACCOUNT_KEY")
-AZURE_ACCOUNT_NAME = get_env_value("AZURE_ACCOUNT_NAME")
-AZURE_CONTAINER = get_env_value("AZURE_CONTAINER")
-AZURE_URL_EXPIRATION_SECS = 300
-
 ## Logging settings
 # sentry breadcrumbs are sent only when an 'event' is captured and provide extra info
 logger.add(

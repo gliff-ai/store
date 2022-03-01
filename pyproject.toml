@@ -4,7 +4,6 @@ include = '\.pyi?$'
 exclude = '''
 /(
     \.git
-  | \etebase-server
   | \.hg
   | \.mypy_cache
   | \.tox

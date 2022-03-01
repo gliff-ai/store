@@ -6,14 +6,18 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('myauth', '0027_auto_20220202_0936'),
+        ("myauth", "0027_auto_20220202_0936"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='plugin',
-            name='type',
-            field=models.CharField(choices=[('Javascript', 'Javascript'), ('Python', 'Python'), ('AI', 'AI')], default='Javascript', max_length=20),
+            model_name="plugin",
+            name="type",
+            field=models.CharField(
+                choices=[("Javascript", "Javascript"), ("Python", "Python"), ("AI", "AI")],
+                default="Javascript",
+                max_length=20,
+            ),
             preserve_default=False,
         ),
     ]
