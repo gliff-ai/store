@@ -1,3 +1,4 @@
+import subprocess
 from datetime import datetime
 
 from loguru import logger
@@ -14,13 +15,6 @@ import server.emails as email_template
 from server.api.billing import gliff_to_stripe_usage, stripe_to_gliff_usage
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
-
-
-def get_container_client():
-    from azure.storage.blob import ContainerClient
-
-    connection_string = f"DefaultEndpointsProtocol=https;AccountName={settings.AZURE_ACCOUNT_NAME};AccountKey={settings.AZURE_ACCOUNT_KEY}"
-    return ContainerClient.from_connection_string(conn_str=connection_string, container_name=settings.AZURE_CONTAINER)
 
 
 def update_stripe_usage(subscription_id, storage_price_ids, usage, team_id):
@@ -90,34 +84,23 @@ def suspend_trial_account(team_id):
 
 
 def update_team_storage_usage():
-    try:
-        # get container client
-        container = get_container_client()
-
-        # get list of all blobs
-        blob_list = container.list_blobs()
-    except Exception as e:
-        logger.error(f"Received Exception {e}, Update team usage")
-        pass
-
-    # save data in a dictionary of type { name: size }
-    # necessary step because can iterate through blob_list only once
-    data = {blob.name: blob.size for blob in blob_list}
-
-    logger.info("Got blob data")
-
     data_select = dict()
-    for key, value in data.items():
+    logger.info("Updating team storage scheduled start")
+    for row in subprocess.check_output(["du", "-d 1", settings.MEDIA_ROOT]).splitlines():
+
         try:
-            user_id = key.split("_")[1].split("/")[0]
-            try:
-                data_select[user_id] += value
-            except KeyError:
-                data_select[user_id] = value
-        except AttributeError:
-            logger.error(f"Key {key}: Unexpected format.")
+            [usage, user] = row.split()
+
+            user_id = int(user.decode("utf-8").replace(f"{settings.MEDIA_ROOT}/user_", ""))
+
+            if type(user_id) == int:
+                data_select[user_id] = int(usage.decode("utf-8"))
+        except ValueError:
+            pass
 
     user_ids = data_select.keys()
+
+    logger.info(f"Updating user storage: {data_select}")
 
     teams = dict()
     for user in User.objects.all():
@@ -158,15 +141,17 @@ class Command(BaseCommand):
         scheduler.add_jobstore(DjangoJobStore(), "default")
 
         # schedule jobs to run every day at hour:minute UTC
-        scheduler.add_job(
-            update_team_storage_usage,
-            "cron",
-            hour=settings.TASK_UPDATE_STORAGE_HOUR,
-            minute=settings.TASK_UPDATE_STORAGE_MINUTE,
-            id="update_team_storage_usage",
-            replace_existing=True,
-        )
-        logger.info("Added daily job: 'update_team_storage_usage'.")
+        # scheduler.add_job(
+        #     update_team_storage_usage,
+        #     "cron",
+        #     hour=settings.TASK_UPDATE_STORAGE_HOUR,
+        #     minute=settings.TASK_UPDATE_STORAGE_MINUTE,
+        #     id="update_team_storage_usage",
+        #     replace_existing=True,
+        # )
+        # logger.info("Added daily job: 'update_team_storage_usage'.")
+
+        update_team_storage_usage()
 
         try:
             logger.info("Scheduler starting..")
