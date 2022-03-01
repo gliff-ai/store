@@ -1,23 +1,22 @@
 ###########################
-FROM python:3.8 AS base
+FROM python:3.8-slim AS base
 
 WORKDIR /app/
 
-RUN mkdir etebase-server
-COPY ./etebase-server/requirements.txt ./etebase-server/requirements.txt
-RUN pip install -r ./etebase-server/requirements.txt
+# install git and pipenv
+RUN apt-get update && apt-get install --yes --no-install-recommends git
+RUN pip install pipenv==2022.1.8
 
-# this allows us to pip install the folder
-COPY ./etebase-server ./etebase-server
-RUN pip install ./etebase-server
+# install dependencies
+COPY ./Pipfile /app/Pipfile
+COPY ./Pipfile.lock /app/Pipfile.lock
+RUN pipenv sync
 
-COPY ./requirements.txt /app/requirements.txt
-RUN pip install -r /app/requirements.txt
-
+# copy app files
 COPY ./ /app/
 
 EXPOSE 8000
 
-CMD python /app/manage.py makemigrations && \
-    python /app/manage.py migrate && \
-    python /app/start.py
+CMD pipenv run makemigrations && \
+    pipenv run migrate && \
+    pipenv run serve
