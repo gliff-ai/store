@@ -30,7 +30,7 @@ format = "black ."
 lint = "flake8 ."
 makemigrations = "python manage.py makemigrations"
 migrate = "python manage.py migrate"
-serve = "gunicorn -w 8 -k uvicorn.workers.UvicornWorker start:app"
+serve = "gunicorn -w 8 -k uvicorn.workers.UvicornWorker start:app --host 0.0.0.0 --port 8000"
 
 [requires]
 python_version = "3.8"
