@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - staging
-      - azure-pipelines
+      - gunicorn
 
 jobs:
     build_and_deploy:
