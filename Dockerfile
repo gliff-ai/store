@@ -12,6 +12,8 @@ COPY ./Pipfile /app/Pipfile
 COPY ./Pipfile.lock /app/Pipfile.lock
 RUN pipenv sync
 
+RUN pipenv install fastapi-utils
+
 # copy app files
 COPY ./ /app/
 
