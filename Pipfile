@@ -17,6 +17,7 @@ appdirs = "==1.4.4"
 psycopg2-binary = ">=2.9.1"
 django-apscheduler = ">=0.6.0"
 gunicorn = "*"
+fastapi-utils = "*"
 
 [dev-packages]
 black = "==22.1.0"
