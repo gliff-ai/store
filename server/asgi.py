@@ -32,8 +32,8 @@ def get_application() -> FastAPI:
         allow_headers=["*"],
     )
 
-    for middleware in middlewares:
-        app.add_middleware(middleware)
+    # for middleware in middlewares:
+    # app.add_middleware(middleware)
 
     # We mount Django (and the API, via urls.py) under /django
     app.mount("/django", WSGIMiddleware(get_wsgi_application()))
