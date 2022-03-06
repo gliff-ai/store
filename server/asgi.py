@@ -7,7 +7,6 @@ from fastapi import FastAPI, HTTPException
 from etebase_fastapi.main import create_application
 from fastapi.middleware.wsgi import WSGIMiddleware
 from starlette.middleware.cors import CORSMiddleware
-from fastapi_utils.timing import add_timing_middleware, record_timing
 
 from server.api.middleware import EnforcePlanLimitsMiddleware, EnforceCollabMiddleware
 
@@ -21,9 +20,6 @@ def get_application() -> FastAPI:
     etebase_app = create_application(middlewares=middlewares)
 
     app = FastAPI(title="STORE", debug=settings.DEBUG)
-
-    add_timing_middleware(app, record=logger.info, prefix="app", exclude="untimed")
-
     app.add_middleware(
         CORSMiddleware,
         allow_origins=settings.ALLOWED_HOSTS or ["*"],
@@ -32,8 +28,8 @@ def get_application() -> FastAPI:
         allow_headers=["*"],
     )
 
-    # for middleware in middlewares:
-    # app.add_middleware(middleware)
+    for middleware in middlewares:
+        app.add_middleware(middleware)
 
     # We mount Django (and the API, via urls.py) under /django
     app.mount("/django", WSGIMiddleware(get_wsgi_application()))

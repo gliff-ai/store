@@ -50,7 +50,8 @@ def setup_logging():
 
 django.setup()
 
-from server.asgi import get_application  # requires django to be set up
+# Has to come after django setup
+from server.asgi import get_application  # noqa: E402
 
 # start the asynchronous web app server
 app = get_application()
