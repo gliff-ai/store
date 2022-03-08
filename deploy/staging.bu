@@ -1,0 +1,101 @@
+variant: fcos
+version: 1.4.0
+
+storage:
+  files:
+    - path: /var/home/core/bin/docker-compose
+      mode: 0755
+      contents:
+        source: https://github.com/docker/compose/releases/download/v2.2.3/docker-compose-linux-x86_64
+        verification:
+          hash: sha256-f15a7cd54a85f760a8ece92da63fb85b93036c72ead8056391b8a3fe9dc73134
+
+    - path: /etc/papertrail-bundle.pem 
+      mode: 0444
+      contents:
+        source: https://papertrailapp.com/tools/papertrail-bundle.pem
+
+    - path: /var/home/core/bin/startup.sh
+      mode: 0755
+      contents:
+        inline: |
+          #!/bin/bash
+
+          # This is silly but there's no good way to find this attached drive! It suggests looking up the LUN in the UI, but I think this works
+          DRIVE_ADDRESS=`lsblk -o NAME,HCTL,SIZE,MOUNTPOINT,LABEL,PARTLABEL -Js | jq -r '.blockdevices[] | select(.partlabel == "xfspart") | .name'`
+          mkdir /var/datadrive
+          mount /dev/$DRIVE_ADDRESS /var/datadrive
+
+          # No sudo for docker
+          sudo usermod -aG docker core
+          newgrp docker
+
+    - path: /var/home/core/bin/az-login.sh
+      mode: 0755
+      contents:
+        inline: |
+          #!/bin/bash
+
+          export ACCESS_TOKEN=$(docker run mcr.microsoft.com/azure-cli /bin/bash -c "az login --identity --username /subscriptions/1eb9ce28-83a1-4fb9-bf41-3cd2442ef0eb/resourcegroups/gliff_staging/providers/Microsoft.ManagedIdentity/userAssignedIdentities/vm_registry_access_store > /dev/null; az acr login --name gliff --expose-token --only-show-errors --output tsv --query accessToken")
+          echo $ACCESS_TOKEN | docker login gliff.azurecr.io -u 00000000-0000-0000-0000-000000000000 --password-stdin
+
+          # Get Store.env
+          docker run -v /var/app:/var/app:z mcr.microsoft.com/azure-cli  /bin/bash -c "az login --identity --username /subscriptions/1eb9ce28-83a1-4fb9-bf41-3cd2442ef0eb/resourcegroups/gliff_staging/providers/Microsoft.ManagedIdentity/userAssignedIdentities/vm_registry_access_store > /dev/null; az storage blob download     --account-name staginggliff     --container-name env     --name store.env     --file /var/app/store.env --auth=login"
+    - path: /var/app/docker-compose.yml
+      mode: 0644
+      contents:
+        inline: |
+          version: '3'
+
+          services:
+            store:
+              image: "gliff.azurecr.io/store:${TAG}"
+              ports:
+                - "80:8000"
+              env_file:
+                - store.env
+              volumes:
+                - /var/datadrive:/app/media:z
+              logging:
+                driver: syslog
+                options:
+                  syslog-address: "udp://logs3.papertrailapp.com:40454"
+                  tag: "{{.Name}}/{{.ID}}"
+      
+systemd:
+  units:
+    - name: onboot.timer
+      enabled: true
+      contents: |
+        [Unit]
+        Description=Run once at system boot
+
+        [Timer]
+        OnBootSec=1s
+
+        [Install]
+        WantedBy=multi-user.target
+
+    - name: onboot.service
+      contents: |
+        [Unit]
+        Description=Run once at system boot
+
+        [Service]
+        Type=oneshot
+        ExecStart=/var/home/core/bin/startup.sh
+
+    - name: install-papertrail.service
+      enabled: true
+      contents: |
+        [Unit]
+        Description=Papertrail
+        After=systemd-journald.service
+        Requires=systemd-journald.service
+        [Service]
+        ExecStart=/bin/sh -c "journalctl -f | socat - SSL:=logs3.papertrailapp.com:40454,cafile=/etc/papertrail-bundle.pem"
+        TimeoutStartSec=0
+        Restart=on-failure
+        RestartSec=5s
+        [Install]
+        WantedBy=multi-user.target

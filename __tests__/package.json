@@ -5,7 +5,7 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "test": "NODE_OPTIONS=--experimental-vm-modules npx jest --bail --runInBand --testPathIgnorePatterns helpers\\.js"
+    "test": "NODE_OPTIONS=--experimental-vm-modules npx jest --bail --runInBand --testTimeout=15000 --testPathIgnorePatterns helpers\\.js"
   },
   "author": "",
   "license": "ISC",
