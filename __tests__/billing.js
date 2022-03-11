@@ -134,21 +134,19 @@ describe.only("create a basic new user", () => {
       }, 30000);
     });
 
-    describe("Custom Plans", () => {
+    // This test requires a valid Stripe Subscription to run.
+    // You can use `stripe fixtures stripe_fixtures/create-fixtures.json` to add one, and then manually add the ID to the tiers table
+    describe.skip("Custom Plans", () => {
       it("Can signup (once!) with a custom plan", async () => {
         const custom = await helpers.signup(`${Math.random()}@gliff.ai`, {
           tier_id: 10001,
         });
         await helpers.validate(custom.userReq, custom.userId);
 
-        console.log(custom);
-
         const { body } = await custom.userReq.get("/billing/plan").expect(200);
         expect(body.tier_id).toBe(10001);
       }, 30000);
     });
-
-    describe.skip("Invoice Plans", () => {});
 
     describe.skip("Coupons", () => {});
   });

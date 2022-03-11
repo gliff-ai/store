@@ -1,37 +1,31 @@
+
 {
-  "_meta": {
-    "template_version": 0
-  },
-  "fixtures": [
-    {
-      "name": "essentials-base-test-product",
-      "path": "/v1/products",
-      "method": "post",
-      "params": {
-        "id": "essentials-base-test-product",
-        "name": "essentials-base-test-product",
-        "type": "service"
-      }
+    "_meta": {
+      "template_version": 0
     },
-    {
-      "name": "small-team-base-test-product",
-      "path": "/v1/products",
-      "method": "post",
-      "params": {
-        "id": "small-team-base-test-product",
-        "name": "small-team-base-test-product",
-        "type": "service"
+    "fixtures": [
+      {
+        "name": "customer",
+        "path": "/v1/customers",
+        "method": "post",
+        "params": {
+          "description": "Test User",
+          "source": "tok_visa"
+        }
+      },
+      {
+        "name": "subscription",
+        "path": "/v1/subscriptions",
+        "method": "post",
+        "params": {
+          "customer": "${customer:id}",
+          "items": [
+            {
+              "price": "price_1Kc3bTFauXVlvS5wnxH02LLc",
+              "quantity": 1
+            }
+          ]
+        }
       }
-    },
-    {
-      "name": "growing-team-base-test-product",
-      "path": "/v1/products",
-      "method": "post",
-      "params": {
-        "id": "growing-team-base-test-product",
-        "name": "growing-team-base-test-product",
-        "type": "service"
-      }
-    }
-  ]
-}
+    ]
+  }
