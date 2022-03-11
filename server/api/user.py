@@ -37,8 +37,7 @@ def get_client_ip(request):
 
 
 # We create a userprofile, and if a team hasn't been specified, we create them a team
-# TODO add custom plan/payment method?
-@router.post("/", response={200: UserProfileOut, 409: Error})
+@router.post("/", response={200: UserProfileOut, 409: Error, 422: Error})
 def create_user(request, payload: UserProfileIn):
     user = request.auth
     if hasattr(user, "userprofile"):
@@ -54,14 +53,30 @@ def create_user(request, payload: UserProfileIn):
         # Create a team for this user, and a Stripe subscription
         # use the sign up name for default team name
 
-        # Allow this to be passed
-        tier = Tier.objects.get(name__exact=settings.DEFAULT_PLAN)
+        if payload.tier_id:
+            # Check this tier is allowed (ie it hasn't been used!). We could potentially add more checks here
+            # (such as email address restrictions) but likely not needed now
+            if payload.tier_id < 10000:
+                return 409, {"message": "Invalid Tier ID"}
+
+            tier = Tier.objects.get(id=payload.tier_id)
+
+            if not tier:
+                return 409, {"message": "Invalid Tier ID"}
+
+            # Has this plan already been used?
+            if Team.objects.filter(tier_id=tier.id):
+                logger.error(f"Custom Tier already used - ({tier.id})")
+                return 409, {"message": "This tier is unavailable"}
+
+        else:
+            tier = Tier.objects.get(name__exact=settings.DEFAULT_PLAN)
 
         team = Team.objects.create(owner_id=user.id, name=f"{payload.name}'s Team", tier_id=tier.id, usage=0)
 
         # The IP address helps us guess what tax they are going to want
         subscription, billing = create_stripe_subscription(
-            user.email, payload.name, user.id, team.id, tier.id, get_client_ip(request)
+            user.email, payload.name, user.id, team.id, tier, get_client_ip(request)
         )
 
     else:

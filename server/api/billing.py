@@ -45,17 +45,8 @@ def gliff_to_stripe_usage(usage):
     return usage / 1000
 
 
-def create_team_billing(tier_id: int, team_id: int):
-    tier = Tier.objects.get(id__exact=tier_id)
-
-    if tier.is_custom:
-        # Has this plan already been used?
-        if Team.objects.filter(tier_id=tier_id):
-            logger.error(f"Custom Tier already used - ({tier_id})")
-            return False
-            # return 409, {"message": "This tier is unavailable"}
-
-    Team.objects.filter(id=team_id).update(tier_id=tier_id)
+def create_team_billing(tier: Tier, team_id: int):
+    Team.objects.filter(id=team_id).update(tier_id=tier.id)
 
     return [
         {"price": tier.stripe_flat_price_id, "quantity": 1},
@@ -76,6 +67,7 @@ def create_stripe_customer(email, name, user_id, team_id, ip):
             kwargs["tax"] = {"ip_address": ip}
         else:
             # Ideally we never get here, but if we do, default auto tax to UK for now
+            # We can also get Cloudflare to add a geo header if we wish to help with this
             kwargs["address"] = {"country": "GB", "postal_code": "NE22DS"}
 
         return stripe.Customer.create(**kwargs)
@@ -84,20 +76,25 @@ def create_stripe_customer(email, name, user_id, team_id, ip):
         return None
 
 
-def create_stripe_subscription(email, name, user_id: int, team_id: int, tier_id: int, ip: str):
+def create_stripe_subscription(email, name, user_id: int, team_id: int, tier: Tier, ip: str):
     try:
         customer = create_stripe_customer(email, name, user_id, team_id, ip)
 
-        line_items = create_team_billing(tier_id, team_id)
+        line_items = create_team_billing(tier, team_id)
 
-        subscription = stripe.Subscription.create(
-            customer=customer,
-            items=line_items,
-            trial_period_days=30,
-            automatic_tax={
-                "enabled": True,
-            },
-        )
+        # For a custom tier, we have a subscription ID already so no need to create
+        if not tier.is_custom:
+            subscription = stripe.Subscription.create(
+                customer=customer,
+                items=line_items,
+                trial_period_days=30,
+                automatic_tax={
+                    "enabled": True,
+                },
+            )
+        else:
+            subscription = stripe.Subscription.retrieve(id=tier.custom_subscription_id)
+            # Check if they've paid?
 
         billing = Billing.objects.create(
             stripe_customer_id=subscription["customer"],
@@ -120,13 +117,8 @@ def calculate_plan_total(base, addons):
         return base + addons
 
 
-def calculate_plan(team):
+def calculate_plan(team: Team):
     plan = dict(tier_name=team.tier.name, tier_id=team.tier.id)
-
-    # They are either on the free plan or a custom plan
-    # Either way, they can't have addons so just return the standard plan
-    if not hasattr(team, "billing"):
-        return plan
 
     subscription = stripe.Subscription.retrieve(team.billing.subscription_id)
 
@@ -147,6 +139,8 @@ def calculate_plan(team):
 
     if len(base):
         plan["base_price"] = base[0].price["unit_amount"] if base[0].price["unit_amount"] is not None else 0
+    else:
+        plan["base_price"] = 0
 
     # No addons on free or custom plans
     if team.tier.id != 1 and not team.tier.is_custom:
@@ -176,6 +170,12 @@ def calculate_plan(team):
             plan["billed_usage"] = 0
 
         plan["billed_usage_gb_price"] = storage[0].price.tiers[1].unit_amount
+
+    else:
+        plan["billed_usage"] = 0
+        plan["billed_usage_gb_price"] = 0
+
+    plan["is_custom"] = team.tier.is_custom
 
     return plan
 
@@ -388,9 +388,6 @@ def get_current_plan(request):
 
     if user.team.owner_id != user.id:
         return 403, {"message": "Only owners can view plan details"}
-
-    if hasattr(team, "custombilling"):
-        return 204, None
 
     return calculate_plan(team)
 

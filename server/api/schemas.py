@@ -39,6 +39,7 @@ class UserProfileIn(Schema):
     recovery_key: str
     invite_id: str = None
     accepted_terms_and_conditions: bool = False
+    tier_id: int = None
 
 
 class TeamSchema(Schema):
@@ -134,11 +135,12 @@ class CurrentPlanOut(Schema):
     tier_id: int
     current_period_end: int
     current_period_start: int
-    trial_end: int
-    base_price: int
+    trial_end: int = None
+    base_price: int = None
     addons: Addons
     billed_usage: int
     billed_usage_gb_price: int
+    is_custom: bool
 
 
 class UpdatePlanIn(Schema):

@@ -25,6 +25,7 @@ const init = (db) => {
         (_err, row) => resolve(row)
       );
     });
+
   const signup = async function (
     email,
     additionalFields = { team_id: null, invite_id: null }
