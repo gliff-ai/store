@@ -18,10 +18,12 @@ jobs:
              echo "waiting"
              sleep 1
            done
+
+          curl 127.0.0.1:8000/django/api;
       - name: Setup node
         uses: actions/setup-node@v1
         with:
           node-version: 16
       - run: cd __tests__  && npm i
       - name: Run Tests
-        run: cd __tests__  && npm test
+        run: cd __tests__  && npm test; docker logs store
