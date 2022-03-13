@@ -8,7 +8,7 @@ os.environ["STRIPE_WEBHOOK_SECRET"] = "-"
 
 try:
     STRIPE_SECRET_KEY = config("STRIPE_SECRET_KEY")
-except Exception as e:
+except Exception as e:  # noqa F841
     print("STRIPE_SECRET_KEY is not set. This is OK, but if you run the Billing tests, you should set it")
     os.environ["STRIPE_SECRET_KEY"] = "-"
 
