@@ -24,4 +24,4 @@ jobs:
           node-version: 16
       - run: cd __tests__  && npm i
       - name: Run Tests
-        run: cd __tests__  && npm test; docker logs store
+        run: cd __tests__  && npm test
