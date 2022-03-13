@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('myauth', '0032_merge_20220308_1431'),
+        ("myauth", "0032_merge_20220308_1431"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='tier',
-            name='custom_subscription_id',
+            model_name="tier",
+            name="custom_subscription_id",
             field=models.CharField(blank=True, max_length=50, null=True, unique=True),
         ),
     ]
