@@ -13,13 +13,11 @@ jobs:
       - name: run Docker and wait
         run: |
            touch db.sqlite3
-           docker run -d -p 8000:8000 -e DJANGO_SETTINGS_MODULE=server.settings.test  -v $PWD/db.sqlite3:/app/db.sqlite3 store
+           docker run -d -p 8000:8000 -e DJANGO_SETTINGS_MODULE=server.settings.test -e STRIPE_SECRET_KEY=${{secrets.STRIPE_SECRET_KEY}} -v $PWD/db.sqlite3:/app/db.sqlite3 store
            while ! curl 127.0.0.1:8000/django/api; do
              echo "waiting"
              sleep 1
            done
-
-          curl 127.0.0.1:8000/django/api;
       - name: Setup node
         uses: actions/setup-node@v1
         with:

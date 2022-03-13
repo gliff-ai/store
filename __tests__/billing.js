@@ -44,8 +44,6 @@ describe.only("create a basic new user", () => {
   beforeAll(async () => {
     owner = await helpers.signup(`${Math.random()}@gliff.ai`);
     await helpers.validate(owner.userReq, owner.userId);
-
-    console.log(owner);
   }, 30000);
 
   describe("billing", () => {
@@ -59,7 +57,6 @@ describe.only("create a basic new user", () => {
       it.skip("user can cancel trial", async () => {});
 
       it("user has an invoice for 0", async () => {
-        console.log(owner.userReq._defaults);
         const {
           body: {
             invoices: [invoice],
@@ -110,6 +107,11 @@ describe.only("create a basic new user", () => {
 
         const { body } = await owner.userReq.get("/billing/plan").expect(200);
         expect(body.tier_id).toBe(2);
+      });
+
+      it.skip("user can cancel", async () => {
+        //     await owner.userReq.post("/billing/cancel/").expect(422, {
+        // message: "No valid subscription to cancel. Try changing your plan",
       });
 
       it("user can't choose a lower plan than appropriate", async () => {

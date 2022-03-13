@@ -66,7 +66,6 @@ const init = (db) => {
       .set("Content-Type", "application/json")
       .set("Authorization", `Token ${etebaseUser.authToken}`);
 
-    console.log(etebaseUser.authToken);
     return { etebaseUser, userReq, userId, email };
   };
 

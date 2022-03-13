@@ -5,6 +5,7 @@ from django_etebase.models import Collection
 from loguru import logger
 from ninja import Router
 import stripe
+import ipaddress
 
 
 from myauth.models import Tier, Team, Billing, TierAddons, User, UserProfile, CustomBilling, Invite
@@ -63,7 +64,9 @@ def create_stripe_customer(email, name, user_id, team_id, ip):
             "expand": ["tax"],
         }
 
-        if ip and ip != "127.0.0.1":
+        print("createe_stripe sicsomter")
+        print(ip)
+        if ip and not ipaddress.ip_address(ip).is_private:
             kwargs["tax"] = {"ip_address": ip}
         else:
             # Ideally we never get here, but if we do, default auto tax to UK for now

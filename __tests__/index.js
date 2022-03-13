@@ -55,11 +55,11 @@ describe("create a basic new user", () => {
     owner = await helpers.signup(getNewEmail());
   }, 30000);
 
-  afterAll(async () => {
-    await owner.userReq.post("/billing/cancel/").expect(422, {
-      message: "No valid subscription to cancel. Try changing your plan",
-    });
-  });
+  // afterAll(async () => {
+  //   await owner.userReq.post("/billing/cancel/").expect(422, {
+  //     message: "No valid subscription to cancel. Try changing your plan",
+  //   });
+  // });
 
   describe("validate user", () => {
     // We can't really check the email gets sent, but we can do the rest of the process
