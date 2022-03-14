@@ -16,19 +16,21 @@ etebase-server = {git = "https://github.com/gliff-ai/etebase-server.git", editab
 appdirs = "==1.4.4"
 psycopg2-binary = ">=2.9.1"
 django-apscheduler = ">=0.6.0"
+gunicorn = ">=20.1.0"
 
 [dev-packages]
 black = "==22.1.0"
 flake8 = ">=3.9.2"
 mypy-extensions = ">=0.4.3"
 mypy = ">=0.910"
+locust = "2.8.3"
 
 [scripts]
 format = "black ."
 lint = "flake8 ."
 makemigrations = "python manage.py makemigrations"
 migrate = "python manage.py migrate"
-serve = "python start.py"
+serve = "gunicorn -w 4 --bind 0.0.0.0:8000 -k uvicorn.workers.UvicornWorker start:app"
 
 [requires]
 python_version = "3.8"

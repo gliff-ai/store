@@ -32,7 +32,8 @@ az vm create -n "${VM_NAME}" -g "${RESOURCE_GROUP}" \
    --assign-identity vm_registry_access_store \
    --admin-username core \
    --ssh-key-name "${SSH_KEY_NAME}" \
-   --boot-diagnostics-storage "${STORAGE_ACCOUNT}"
+   --boot-diagnostics-storage "${STORAGE_ACCOUNT}" \
+   --os-disk-size-gb 32
 ```
 
 - Add to the Application Gateway Backend Pool (TODO: Cli Command for this or Butane to self register)

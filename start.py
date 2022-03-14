@@ -48,15 +48,23 @@ def setup_logging():
         logging.getLogger(name).propagate = True
 
 
+django.setup()
+
+# Has to come after django setup
+from server.asgi import get_application  # noqa: E402
+
+# start the asynchronous web app server
+app = get_application()
+
+# setup logging last, to make sure no library overwrites it
+# (they shouldn't, but it happens)
+setup_logging()
+
+if settings.RUN_TASK_UPDATE_STORAGE:
+    # run background task for updating all team's storage usage
+    management.call_command("update_team_storage_usage")
+
 if __name__ == "__main__":
-    # set-up django, loads settings etc.
-    django.setup()
-
-    from server.asgi import get_application  # requires django to be set up
-
-    # start the asynchronous web app server
-    app = get_application()
-
     # initialise uvicorn server
     server = Server(
         Config(
@@ -65,14 +73,6 @@ if __name__ == "__main__":
             log_level=settings.LOG_LEVEL.lower(),  # annoyingly uses lowercase log levels
         ),
     )
-
-    # setup logging last, to make sure no library overwrites it
-    # (they shouldn't, but it happens)
-    setup_logging()
-
-    if settings.RUN_TASK_UPDATE_STORAGE:
-        # run background task for updating all team's storage usage
-        management.call_command("update_team_storage_usage")
 
     # run the thing
     server.run()
