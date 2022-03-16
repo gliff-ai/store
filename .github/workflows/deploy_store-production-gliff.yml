@@ -1,0 +1,35 @@
+name: Build, Publish and Deploy store-production-gliff
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+    build_and_deploy:
+        runs-on: ubuntu-latest
+        steps:
+        # checkout the repo
+        - name: 'Checkout GitHub Action'
+          uses: actions/checkout@main
+        - name: 'Login via Azure CLI'
+          uses: azure/login@v1
+          with:
+            creds: ${{ secrets.V2_AZURE_CREDENTIALS }}
+
+        - name: 'Build and push image'
+          uses: azure/docker-login@v1
+          with:
+            login-server: ${{ secrets.V2_REGISTRY_LOGIN_SERVER }}
+            username: ${{ secrets.V2_REGISTRY_USERNAME }}
+            password: ${{ secrets.V2_REGISTRY_PASSWORD }}
+        - run: |
+            docker build . -t ${{ secrets.V2_REGISTRY_LOGIN_SERVER }}/store:${{ github.sha }}
+            docker push ${{ secrets.V2_REGISTRY_LOGIN_SERVER }}/store:${{ github.sha }}
+        - name: Azure Pipelines Action
+          uses: gliff-ai/pipelines@master
+          with:
+            azure-devops-project-url: https://dev.azure.com/gliff/Store
+            azure-pipeline-name: 'gliff-ai.store Production'
+            azure-devops-token: ${{ secrets.AZURE_PIPELINE_ACCESS_TOKEN }} # This is a PAT expiring Feb 2023
+            azure-pipeline-variables:  '{"tag": "${{ github.sha }}"}'
