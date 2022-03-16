@@ -36,6 +36,11 @@ az vm create -n "${VM_NAME}" -g "${RESOURCE_GROUP}" \
    --os-disk-size-gb 32
 ```
 
+For Production
+
+```
+az vm create -n "${VM_NAME}" -g "${RESOURCE_GROUP}"    --image "${AZ_IMAGE_NAME}"    --admin-username core    --custom-data ./deploy.ign    --attach-data-disks $DISK_ID    --assign-identity vm_identity    --admin-username core    --ssh-key-name "${SSH_KEY_NAME}"    --boot-diagnostics-storage "${STORAGE_ACCOUNT}"    --os-disk-size-gb 32 --vnet-name gliff-production_vnet --subnet main
+```
 - Add to the Application Gateway Backend Pool (TODO: Cli Command for this or Butane to self register)
 - Add to Azure pipeline (TODO: Butane for this? And/Or Docker)
 - [Record the datadrive UUID](https://docs.microsoft.com/en-us/azure/virtual-machines/linux/add-disk#persist-the-mount)
