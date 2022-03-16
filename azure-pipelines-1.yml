@@ -1,6 +1,5 @@
 trigger:
 - main
-- main_vm_deploy
 
 stages:
 - stage: Build
@@ -12,7 +11,7 @@ stages:
       pool:
         vmImage: 'ubuntu-latest'
       environment:
-        name: Staging
+        name: Production
         resourceType: VirtualMachine
       strategy:
         runOnce:
