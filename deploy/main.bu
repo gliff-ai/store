@@ -40,7 +40,7 @@ storage:
           echo $ACCESS_TOKEN | docker login gliff.azurecr.io -u 00000000-0000-0000-0000-000000000000 --password-stdin
 
           # Get Store.env
-          docker run -v /var/app:/var/app:z mcr.microsoft.com/azure-cli  /bin/bash -c "az login --identity --username /subscriptions/1eb9ce28-83a1-4fb9-bf41-3cd2442ef0eb/resourceGroups/gliff_production/providers/Microsoft.ManagedIdentity/userAssignedIdentities/vm_identity > /dev/null; az storage blob download     --account-name staginggliff     --container-name env     --name store.env     --file /var/app/store.env --auth=login"
+          docker run -v /var/app:/var/app:z mcr.microsoft.com/azure-cli  /bin/bash -c "az login --identity --username /subscriptions/1eb9ce28-83a1-4fb9-bf41-3cd2442ef0eb/resourceGroups/gliff_production/providers/Microsoft.ManagedIdentity/userAssignedIdentities/vm_identity > /dev/null; az storage blob download --account-name productiongliff     --container-name env     --name store.env     --file /var/app/store.env --auth=login"
     - path: /var/app/docker-compose.yml
       mode: 0644
       contents:

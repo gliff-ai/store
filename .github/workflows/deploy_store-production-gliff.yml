@@ -1,4 +1,4 @@
-name: Build, Publish and Deploy store-staging-gliff
+name: Build, Publish and Deploy store-production-gliff
 
 on:
   push:
