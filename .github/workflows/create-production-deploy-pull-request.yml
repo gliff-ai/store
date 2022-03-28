@@ -1,4 +1,4 @@
-name: production deploy
+name: create production deploy PR
 on:
   schedule:
     - cron: "00 06 * * 2"
