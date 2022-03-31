@@ -646,7 +646,9 @@ def stripe_webhook(request):
         # Fulfill the purchase...
         complete_payment_registration(session)
 
-    # if event["type"] == "": TODO Handle invoice payments to update expiry date
+    # if event["type"] == "":
+    # TODO Handle invoice payments to update expiry date
+    # TODO Handle cancellation hook?
 
     return 200
 
