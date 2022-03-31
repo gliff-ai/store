@@ -65,8 +65,6 @@ def create_stripe_customer(email, name, user_id, team_id, ip):
             "expand": ["tax"],
         }
 
-        print("createe_stripe sicsomter")
-        print(ip)
         if ip and not ipaddress.ip_address(ip).is_private:
             kwargs["tax"] = {"ip_address": ip}
         else:
@@ -475,7 +473,7 @@ def cancel(request):
     try:
         user = request.auth
         team = Team.objects.get(owner_id=user.id)
-        print(team)
+
         if user.team.owner_id != user.id:
             return 403, {"message": "Only owners can cancel plans"}
 
