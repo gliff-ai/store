@@ -21,6 +21,7 @@ from server.api.schemas import (
     AddonPrices,
     PaymentOut,
     UpdatePlanIn,
+    AllPlans,
 )
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
@@ -180,6 +181,14 @@ def calculate_plan(team: Team):
 
     plan["is_custom"] = team.tier.is_custom
 
+    if plan["trial_end"] and datetime.fromtimestamp(plan["trial_end"], timezone.utc) > datetime.now(tz=timezone.utc):
+        plan["is_trial"] = True
+    else:
+        plan["is_trial"] = False
+
+    if team.billing.cancel_date:
+        plan["cancel_date"] = datetime.timestamp(team.billing.cancel_date)
+
     return plan
 
 
@@ -248,7 +257,7 @@ def calculate_limits(team):
 
 @router.get(
     "/payment-method",
-    response={200: PaymentOut, 403: Error, 422: Error, 500: Error},
+    response={200: PaymentOut, 204: None, 403: Error, 422: Error, 500: Error},
 )
 def get_payments(request):
     user = request.auth
@@ -257,16 +266,19 @@ def get_payments(request):
     if hasattr(team, "custombilling"):
         return 422, {"message": "Payment methods for custom plans cannot be shown here"}
 
-    subscription = stripe.Subscription.retrieve(team.billing.subscription_id)
-    payment_method = stripe.PaymentMethod.retrieve(subscription["default_payment_method"])
+    methods = stripe.Customer.list_payment_methods(team.billing.stripe_customer_id, type="card")
 
-    payment = dict(
-        number=f"**** **** **** **** {payment_method.card.last4}",
-        expiry=f"{payment_method.card.exp_month}/{payment_method.card.exp_year}",
-        brand=payment_method.card.brand,
-        name=payment_method.billing_details.name,
-    )
-    return payment
+    if len(methods.data):
+        payment_method = methods.data[0]
+        payment = dict(
+            number=f"**** **** **** **** {payment_method.card.last4}",
+            expiry=f"{payment_method.card.exp_month}/{payment_method.card.exp_year}",
+            brand=payment_method.card.brand,
+            name=payment_method.billing_details.name,
+        )
+        return payment
+
+    return 204, None
 
 
 @router.get(
@@ -305,7 +317,6 @@ def get_plan_limits(request):
     return calculate_limits(team)
 
 
-# TODO
 @router.post(
     "/plan/",
     response={200: CurrentPlanOut, 403: Error, 422: Error, 500: Error},
@@ -334,13 +345,13 @@ def update_current_plan(request, payload: UpdatePlanIn):
     # Check they haven't exceeded limits for downgrading
     limits = calculate_limits(team)
 
-    if limits["users"] > new_tier.base_user_limit and new_tier.base_user_limit is not None:
+    if new_tier.base_user_limit is not None and limits["users"] > new_tier.base_user_limit:
         return 422, {"message": "Too many users to switch to this plan"}
 
-    if limits["projects"] > new_tier.base_project_limit and new_tier.base_project_limit is not None:
+    if new_tier.base_project_limit is not None and limits["projects"] > new_tier.base_project_limit:
         return 422, {"message": "Too many projects to switch to this plan"}
 
-    if limits["collaborators"] > new_tier.base_collaborator_limit and new_tier.base_collaborator_limit is not None:
+    if new_tier.base_collaborator_limit is not None and limits["collaborators"] > new_tier.base_collaborator_limit:
         return 422, {"message": "Too many collaborators to switch to this plan"}
 
     if not subscription.default_payment_method and limits["storage"] > limits["storage_included_limit"]:
@@ -396,6 +407,38 @@ def get_current_plan(request):
 
 
 @router.get(
+    "/plans",
+    response={200: AllPlans, 403: Error, 500: Error},
+)
+def get_all_plans(request):
+    user = request.auth
+    tiers = Tier.objects.filter(is_custom=False)
+    team = Team.objects.get(owner_id=user.id)
+
+    if user.team.owner_id != user.id:
+        return 403, {"message": "Only owners can view plan details"}
+
+    limits = calculate_limits(team)
+    prices = list()
+
+    for tier in tiers:
+        # Check they haven't exceeded limits for downgrading
+        if (
+            tier.id != team.tier_id
+            and (tier.base_user_limit is None or limits["users"] <= tier.base_user_limit)
+            and (tier.base_project_limit is None or limits["projects"] <= tier.base_project_limit)
+            and (tier.base_collaborator_limit is None or limits["collaborators"] <= tier.base_collaborator_limit)
+        ):
+            if tier.stripe_flat_price_id:
+                price = stripe.Price.retrieve(tier.stripe_flat_price_id, expand=["tiers"])
+                prices.append({"id": tier.id, "name": tier.name, "price": price.unit_amount})
+            else:
+                prices.append({"id": tier.id, "name": tier.name, "price": 0})
+
+    return {"tiers": prices}
+
+
+@router.get(
     "/addon-prices",
     response={200: AddonPrices, 422: Error, 403: Error, 500: Error},
 )
@@ -432,7 +475,7 @@ def cancel(request):
     try:
         user = request.auth
         team = Team.objects.get(owner_id=user.id)
-
+        print(team)
         if user.team.owner_id != user.id:
             return 403, {"message": "Only owners can cancel plans"}
 
@@ -441,14 +484,11 @@ def cancel(request):
 
         res = stripe.Subscription.delete(team.billing.subscription_id)
 
-        if res.status != "cancelled":
+        if res.status != "canceled":
             return 500, {"message": "There was an error cancelling, contact us at contact@gliff.ai"}
 
-        team.billing.cancel_date = res.cancelled_at
-        team.save()
-
-        users = User.objects.filter(team=team.id)
-        users.update(is_active=False)
+        team.billing.cancel_date = datetime.fromtimestamp(res.canceled_at, timezone.utc)
+        team.billing.save()
 
         return 200
 
@@ -482,13 +522,14 @@ def addon(request, payload: AddonIn):
 
         subscription = stripe.Subscription.retrieve(team.billing.subscription_id)
 
-        # TODO support invoice billing check here
-        if not subscription.default_payment_method:
+        methods = stripe.Customer.list_payment_methods(team.billing.stripe_customer_id, type="card")
+
+        if not methods.data or len(methods.data) == 0:
             return 422, {"message": "No valid payment method"}
 
         if team.tier.base_project_limit is not None and payload.projects > 0:
             # the user doesn't have unlimited projects
-            projects = addons["projects"] + payload.projects
+            projects = (addons["projects"] or 0) + payload.projects
             items.append(
                 {
                     "price": team.tier.stripe_project_price_id,
@@ -498,7 +539,7 @@ def addon(request, payload: AddonIn):
             )
 
         if payload.collaborators > 0:
-            collaborators = addons["collaborators"] + payload.collaborators
+            collaborators = (addons["collaborators"] or 0) + payload.collaborators
             items.append(
                 {
                     "price": team.tier.stripe_collaborator_price_id,
@@ -508,7 +549,7 @@ def addon(request, payload: AddonIn):
             )
 
         if payload.users > 0:
-            users = addons["users"] + payload.users
+            users = (addons["users"] or 0) + payload.users
             items.append(
                 {
                     "price": team.tier.stripe_user_price_id,
@@ -560,8 +601,8 @@ def create_auth_checkout_session(request):
                     "subscription_id": team.billing.subscription_id,
                 },
             },
-            success_url=settings.BASE_URL + "/billing/success",
-            cancel_url=settings.BASE_URL + "/billing/error",
+            success_url=settings.BASE_URL + "/billing?card_status=success",
+            cancel_url=settings.BASE_URL + "/billing?card_status=error",
             metadata={"tier_id": tier.id, "tier_name": tier.name, "team_id": team.id},
             billing_address_collection="required",
             # If we need these we either need to add them manually thro Stripe or add our own form elements _somewhere_
@@ -576,62 +617,55 @@ def create_auth_checkout_session(request):
 
 
 #
-# @router.post(
-#     "/webhook",
-#     response={200: None, 400: Error},
-#     auth=None,
-# )
-# def stripe_webhook(request):
-#     payload = request.body
-#     event = None
-#     try:
-#         sig_header = request.META["HTTP_STRIPE_SIGNATURE"]
-#
-#         event = stripe.Webhook.construct_event(payload, sig_header, endpoint_secret)
-#     except ValueError as e:
-#         # Invalid payload
-#         logger.warning(f"Received ValueError {e}")
-#         return 400, {"message": "Invalid Payload"}
-#     except KeyError as e:
-#         logger.warning(f"Received KeyError {e}")
-#         return 400, {"message": "No Signature"}
-#     except stripe.error.SignatureVerificationError as e:
-#         # Invalid signature
-#         logger.warning(f"Received VerificationError {e}")
-#         return 400, {"message": "Invalid Signature"}
-#
-#     # Handle them completing checkout. Add the billling info and update the tier
-#     if event["type"] == "checkout.session.completed":
-#         session = event["data"]["object"]
-#
-#         # Fulfill the purchase...
-#         complete_payment(session)
-#
-#     # if event["type"] == "": TODO Handle invoice payments to update expiry date
-#
-#     return 200
+@router.post(
+    "/webhook",
+    response={200: None, 400: Error},
+    auth=None,
+)
+def stripe_webhook(request):
+    payload = request.body
+    event = None
+    try:
+        sig_header = request.META["HTTP_STRIPE_SIGNATURE"]
+
+        event = stripe.Webhook.construct_event(payload, sig_header, endpoint_secret)
+    except ValueError as e:
+        # Invalid payload
+        logger.warning(f"Received ValueError {e}")
+        return 400, {"message": "Invalid Payload"}
+    except KeyError as e:
+        logger.warning(f"Received KeyError {e}")
+        return 400, {"message": "No Signature"}
+    except stripe.error.SignatureVerificationError as e:
+        # Invalid signature
+        logger.warning(f"Received VerificationError {e}")
+        return 400, {"message": "Invalid Signature"}
+
+    # Handle them completing checkout.
+    if event["type"] == "checkout.session.completed":
+        session = event["data"]["object"]
+
+        # Fulfill the purchase...
+        complete_payment_registration(session)
+
+    # if event["type"] == "": TODO Handle invoice payments to update expiry date
+
+    return 200
 
 
-# def complete_payment(session):
-#     try:
-#         logger.info(session)
-#
-#         subscription = stripe.Subscription.retrieve(session["subscription"])
-#         metadata = session["metadata"]
-#
-#         billing = Billing.objects.create(
-#             stripe_customer_id=subscription["customer"],
-#             start_date=datetime.fromtimestamp(subscription["current_period_start"], timezone.utc),
-#             renewal_date=datetime.fromtimestamp(subscription["current_period_end"], timezone.utc),
-#             team_id=metadata.team_id,
-#             subscription_id=subscription["id"],
-#         )
-#
-#         billing.save()
-#
-#         Team.objects.filter(id=metadata.team_id).update(tier_id=metadata.tier_id)
-#
-#         return True
-#     except Exception as e:
-#         logger.error(e)
-#         return False
+# We've got a new payment method, make it the default for the customer
+def complete_payment_registration(session):
+    try:
+        logger.info(session)
+
+        intent = stripe.SetupIntent.retrieve(session["setup_intent"])
+
+        stripe.Customer.modify(
+            session["customer"],
+            invoice_settings={"default_payment_method": intent["payment_method"]},
+        )
+
+        return True
+    except Exception as e:
+        logger.error(e)
+        return False
