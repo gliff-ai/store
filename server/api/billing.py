@@ -123,7 +123,7 @@ def calculate_plan(team: Team):
     plan = dict(tier_name=team.tier.name, tier_id=team.tier.id)
 
     # If a team doesn't have billing information, that means they signed up on V1 so we should migrate them
-    if not team.billing:
+    if not hasattr(team, "billing"):
         logger.info(f"Migrating {team.id} to billing 2.0")
 
         create_stripe_subscription(
