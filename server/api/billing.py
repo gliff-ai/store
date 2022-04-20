@@ -78,7 +78,7 @@ def create_stripe_customer(email, name, user_id, team_id, ip):
         return None
 
 
-def create_stripe_subscription(email, name, user_id: int, team_id: int, tier: Tier, ip: str):
+def create_stripe_subscription(email, name, user_id: int, team_id: int, tier: Tier, ip: str, trial=True):
     try:
         customer = create_stripe_customer(email, name, user_id, team_id, ip)
 
@@ -89,7 +89,7 @@ def create_stripe_subscription(email, name, user_id: int, team_id: int, tier: Ti
             subscription = stripe.Subscription.create(
                 customer=customer,
                 items=line_items,
-                trial_period_days=30,
+                trial_period_days=30 if trial else None,
                 automatic_tax={
                     "enabled": True,
                 },
@@ -127,7 +127,7 @@ def calculate_plan(team: Team):
         logger.info(f"Migrating {team.id} to billing 2.0")
 
         create_stripe_subscription(
-            team.owner.email, team.owner.userprofile.name, team.owner.id, team.id, team.tier, "127.0.0.1"
+            team.owner.email, team.owner.userprofile.name, team.owner.id, team.id, team.tier, "127.0.0.1", False
         )
 
     subscription = stripe.Subscription.retrieve(team.billing.subscription_id)
