@@ -122,6 +122,14 @@ def calculate_plan_total(base, addons):
 def calculate_plan(team: Team):
     plan = dict(tier_name=team.tier.name, tier_id=team.tier.id)
 
+    # If a team doesn't have billing information, that means they signed up on V1 so we should migrate them
+    if not team.billing:
+        logger.info(f"Migrating {team.id} to billing 2.0")
+
+        create_stripe_subscription(
+            team.owner.email, team.owner.userprofile.name, team.owner.id, team.id, team.tier, "127.0.0.1"
+        )
+
     subscription = stripe.Subscription.retrieve(team.billing.subscription_id)
 
     plan["current_period_end"] = subscription.current_period_end
