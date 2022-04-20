@@ -1,0 +1,22 @@
+{
+    "_meta": {
+      "template_version": 0
+    },
+    "fixtures": [
+      {
+        "name": "essentials-base-test-product",
+        "path": "/v1/products/essentials-base-test-product",
+        "method": "delete"
+      },
+      {
+        "name": "small-team-base-test-product",
+        "path": "/v1/products/small-team-base-test-product",
+        "method": "delete"
+      },
+      {
+        "name": "growing-team-base-test-product",
+        "path": "/v1/products/growing-team-base-test-product",
+        "method": "delete"
+      }
+    ]
+  }
