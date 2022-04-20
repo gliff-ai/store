@@ -73,6 +73,7 @@ class Tier(models.Model):
     base_storage_limit = models.IntegerField(null=True)
 
     is_custom = models.BooleanField(null=False, default=False)
+    custom_subscription_id = models.CharField(null=True, blank=True, max_length=50, unique=True)
 
 
 class Team(models.Model):
@@ -114,6 +115,8 @@ class Billing(models.Model):
     stripe_customer_id = models.CharField(max_length=255, unique=True)
     start_date = models.DateTimeField(blank=True, null=True)
     renewal_date = models.DateTimeField(blank=True, null=True)
+    trial_start = models.DateTimeField(blank=True, null=True)
+    trial_end = models.DateTimeField(blank=True, null=True)
     subscription_id = models.CharField(max_length=255, blank=True)
     cancel_date = models.DateTimeField(blank=True, null=True)
 

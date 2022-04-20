@@ -11,6 +11,7 @@ from ninja import Router
 
 from django.conf import settings
 from myauth.models import UserProfile, Tier, Team, Invite, User, Recovery, EmailVerification
+from .billing import create_stripe_customer, create_stripe_subscription
 from .schemas import (
     UserProfileIn,
     UserProfileOut,
@@ -26,11 +27,19 @@ import server.emails as email_template
 router = Router()
 
 
+def get_client_ip(request):
+    x_forwarded_for = request.META.get("HTTP_X_FORWARDED_FOR")
+    if x_forwarded_for:
+        ip = x_forwarded_for.split(",")[0]
+    else:
+        ip = request.META.get("REMOTE_ADDR")
+    return ip
+
+
 # We create a userprofile, and if a team hasn't been specified, we create them a team
-@router.post("/", response={200: UserProfileOut, 409: Error})
+@router.post("/", response={200: UserProfileOut, 409: Error, 422: Error})
 def create_user(request, payload: UserProfileIn):
     user = request.auth
-
     if hasattr(user, "userprofile"):
         return 409, {"message": "User Exists"}
 
@@ -41,10 +50,35 @@ def create_user(request, payload: UserProfileIn):
     is_collaborator = False
 
     if payload.team_id is None:
-        # Create a team for this user. All teams are on the basic plan until we have processed payment
+        # Create a team for this user, and a Stripe subscription
         # use the sign up name for default team name
-        tier = Tier.objects.get(name__exact="COMMUNITY")
+
+        if payload.tier_id:
+            # Check this tier is allowed (ie it hasn't been used!). We could potentially add more checks here
+            # (such as email address restrictions) but likely not needed now
+            if payload.tier_id < 10000:
+                return 409, {"message": "Invalid Tier ID"}
+
+            tier = Tier.objects.get(id=payload.tier_id)
+
+            if not tier:
+                return 409, {"message": "Invalid Tier ID"}
+
+            # Has this plan already been used?
+            if Team.objects.filter(tier_id=tier.id):
+                logger.error(f"Custom Tier already used - ({tier.id})")
+                return 409, {"message": "This tier is unavailable"}
+
+        else:
+            tier = Tier.objects.get(name__exact=settings.DEFAULT_PLAN)
+
         team = Team.objects.create(owner_id=user.id, name=f"{payload.name}'s Team", tier_id=tier.id, usage=0)
+
+        # The IP address helps us guess what tax they are going to want
+        subscription, billing = create_stripe_subscription(
+            user.email, payload.name, user.id, team.id, tier, get_client_ip(request)
+        )
+
     else:
         try:
             invite = Invite.objects.get(from_team=payload.team_id, uid=payload.invite_id, email=user.email)
