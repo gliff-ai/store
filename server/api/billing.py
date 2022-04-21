@@ -340,9 +340,12 @@ def update_current_plan(request, payload: UpdatePlanIn):
         return 422, {"message": "You can't change to a custom plan, contact us"}
 
     subscription = stripe.Subscription.retrieve(team.billing.subscription_id)
+    stripe_customer = stripe.Customer.retrieve(team.billing.stripe_customer_id)
+
+    has_payment = subscription.default_payment_method or stripe_customer.invoice_settings.default_payment_method
 
     # TODO support invoice billing check here
-    if not subscription.default_payment_method and new_tier.id != 1:
+    if not has_payment and new_tier.id != 1:
         return 422, {"message": "No valid payment method"}
 
     if current_tier.id == new_tier:
@@ -360,7 +363,7 @@ def update_current_plan(request, payload: UpdatePlanIn):
     if new_tier.base_collaborator_limit is not None and limits["collaborators"] > new_tier.base_collaborator_limit:
         return 422, {"message": "Too many collaborators to switch to this plan"}
 
-    if not subscription.default_payment_method and limits["storage"] > limits["storage_included_limit"]:
+    if not has_payment and limits["storage"] > limits["storage_included_limit"]:
         return 422, {"message": "Storage exceeds included amount, and not payment method registered"}
 
     items = stripe.SubscriptionItem.list(subscription=team.billing.subscription_id, expand=["data.price.tiers"])
