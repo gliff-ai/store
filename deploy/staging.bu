@@ -56,6 +56,10 @@ storage:
                 - store.env
               volumes:
                 - /var/datadrive:/app/media:z
+              deploy:
+                  restart_policy:
+                    condition: any
+                    delay: 5s
               logging:
                 driver: syslog
                 options:
