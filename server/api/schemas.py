@@ -73,6 +73,7 @@ class InvitedProfileOut(Schema):
 class TeamsOut(Schema):
     profiles: List[UserProfileOut]
     pending_invites: List[InvitedProfileOut]
+    owner: UserProfileOut
 
 
 class CheckoutSessionIn(Schema):
