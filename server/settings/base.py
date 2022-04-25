@@ -138,3 +138,6 @@ CANCEL_URL = config("CANCEL_URL", default="http://localhost:3000/signup/cancel")
 RUN_TASK_UPDATE_STORAGE = False
 
 TEST_MODE = False
+
+
+DEFAULT_PLAN = "PRO"  # COMMUNITY | PRO | TEAM
