@@ -70,10 +70,16 @@ class InvitedProfileOut(Schema):
     is_collaborator: bool
 
 
+class OwnerOut(Schema):
+    id: int
+    name: str
+    email: str
+
+
 class TeamsOut(Schema):
     profiles: List[UserProfileOut]
     pending_invites: List[InvitedProfileOut]
-    owner: UserProfileOut
+    owner: OwnerOut
 
 
 class CheckoutSessionIn(Schema):
