@@ -72,7 +72,6 @@ class InvitedProfileOut(Schema):
 
 class OwnerOut(Schema):
     id: int
-    name: str
     email: str
 
 
