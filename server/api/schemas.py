@@ -42,6 +42,10 @@ class UserProfileIn(Schema):
     tier_id: int = None
 
 
+class UserProfileUpdateIn(Schema):
+    recovery_key: str
+
+
 class TeamSchema(Schema):
     id: int
     name: str
