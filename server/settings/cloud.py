@@ -28,7 +28,7 @@ DATABASES = {
         "PASSWORD": get_env_value("POSTGRES_PASSWORD"),
         "USER": get_env_value("POSTGRES_USER"),
         "PORT": 5432,
-        "CONN_MAX_AGE": None,
+        "CONN_MAX_AGE": 900,
     }
 }
 
