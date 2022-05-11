@@ -360,6 +360,8 @@ def verify_email(request, verification_id: str):
 
         user.save()
 
+        validation.delete()
+
         # Send welcome email
         try:
             message = Mail(
