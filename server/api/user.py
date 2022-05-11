@@ -14,6 +14,7 @@ from myauth.models import UserProfile, Tier, Team, Invite, User, Recovery, Email
 from .billing import create_stripe_customer, create_stripe_subscription
 from .schemas import (
     UserProfileIn,
+    UserProfileUpdateIn,
     UserProfileOut,
     Error,
     InviteCreated,
@@ -150,7 +151,7 @@ def get_user(request):
 
 
 @router.put("/", response=UserProfileOut)  # Update a user profile
-def update_user(request, payload: UserProfileIn):
+def update_user(request, payload: UserProfileUpdateIn):
     user = request.auth
 
     # You can only actually change a recovery key
