@@ -3,6 +3,27 @@ version: 1.4.0
 
 storage:
   files:
+    # Add any packages that we want installing in the Environment line here (https://github.com/coreos/fedora-coreos-tracker/issues/681#issuecomment-974301872)
+    # - path: /etc/systemd/system/rpm-ostree-install.service.d/rpms.conf
+    #  mode: 0644
+    #  contents:
+    #    inline: |
+    #      [Service]
+    #      Environment=RPMS="SPACE DELIM PACKAGE NAMES"
+
+    # Stop updates for now as they break the AZ agent
+    - path: /etc/zincati/config.d/90-disable-auto-updates.toml
+      contents:
+        inline: |
+          [updates]
+          enabled = false
+
+    - path: /etc/zincati/config.d/51-rollout-wariness.toml
+      contents:
+        inline: |
+          [identity]
+          rollout_wariness = 0.5
+
     - path: /var/home/core/bin/docker-compose
       mode: 0755
       contents:
@@ -56,10 +77,6 @@ storage:
                 - store.env
               volumes:
                 - /var/datadrive:/app/media:z
-              deploy:
-                  restart_policy:
-                    condition: any
-                    delay: 5s
               logging:
                 driver: syslog
                 options:
@@ -68,6 +85,25 @@ storage:
       
 systemd:
   units:
+    - name: rpm-ostree-install.service
+      enabled: true
+      contents: |
+        [Unit]
+        Description=Layer additional rpms
+        Wants=network-online.target
+        After=network-online.target
+        # We run before `zincati.service` to avoid conflicting rpm-ostree transactions.
+        Before=zincati.service
+        ConditionPathExists=!/var/lib/%N.stamp
+        ConditionPathExists=/etc/systemd/system/rpm-ostree-install.service.d/rpms.conf
+        [Service]
+        Type=oneshot
+        RemainAfterExit=yes
+        ExecStart=/usr/bin/rpm-ostree install --apply-live --allow-inactive $RPMS
+        ExecStart=/bin/touch /var/lib/%N.stamp
+        [Install]
+        WantedBy=multi-user.target
+
     - name: onboot.timer
       enabled: true
       contents: |
