@@ -3,6 +3,19 @@ version: 1.4.0
 
 storage:
   files:
+    # Stop updates for now as they break the AZ agent
+    - path: /etc/zincati/config.d/90-disable-auto-updates.toml
+      contents:
+        inline: |
+          [updates]
+          enabled = false
+
+    - path: /etc/zincati/config.d/51-rollout-wariness.toml
+      contents:
+        inline: |
+          [identity]
+          rollout_wariness = 0.5
+          
     - path: /var/home/core/bin/docker-compose
       mode: 0755
       contents:
