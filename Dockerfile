@@ -19,4 +19,5 @@ EXPOSE 8000
 
 CMD pipenv run makemigrations && \
     pipenv run migrate && \
+    pipenv run update_team_storage_usage && \
     pipenv run serve

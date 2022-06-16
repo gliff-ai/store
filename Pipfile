@@ -30,6 +30,7 @@ format = "black ."
 lint = "flake8 ."
 makemigrations = "python manage.py makemigrations"
 migrate = "python manage.py migrate"
+update_team_storage_usage = "python manage.py update_team_storage_usage"
 serve = "gunicorn -w 4 --bind 0.0.0.0:8000 -k uvicorn.workers.UvicornWorker start:app"
 
 [requires]
