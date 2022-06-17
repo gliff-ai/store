@@ -8,28 +8,28 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('myauth', '0034_free_plan_stripe_id'),
+        ("myauth", "0034_free_plan_stripe_id"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='plugin',
-            name='team',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='myauth.team'),
+            model_name="plugin",
+            name="team",
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="myauth.team"),
         ),
         migrations.AlterField(
-            model_name='team',
-            name='owner',
+            model_name="team",
+            name="owner",
             field=models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL),
         ),
         migrations.AlterField(
-            model_name='tieraddons',
-            name='team',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='myauth.team'),
+            model_name="tieraddons",
+            name="team",
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="myauth.team"),
         ),
         migrations.AlterField(
-            model_name='userprofile',
-            name='team',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='myauth.team'),
+            model_name="userprofile",
+            name="team",
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="myauth.team"),
         ),
     ]
