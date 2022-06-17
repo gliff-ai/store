@@ -1,0 +1,3 @@
+[submodule "etebase-server"]
+	path = etebase-server
+	url = https://github.com/gliff-ai/etebase-server/
