@@ -134,6 +134,8 @@ def update_team_storage_usage():
 
 class Command(BaseCommand):
     def handle(self, *args, **options):
+        if settings.TEST_MODE:
+            return
 
         # add scheduler that runs in the background within the application.
         job_defaults = {"coalesce": True, "max_instances": 1}
