@@ -79,8 +79,7 @@ class Tier(models.Model):
 class Team(models.Model):
     id: int
     name = models.CharField(max_length=200, default="")
-    # Protect means you can't delete an owner, remove the team first!
-    owner = models.OneToOneField(User, on_delete=models.PROTECT)
+    owner = models.OneToOneField(User, on_delete=models.CASCADE)
     tier = models.ForeignKey(Tier, on_delete=models.PROTECT)
     usage = models.IntegerField(verbose_name="Storage usage in MB", null=True)
 
@@ -88,7 +87,7 @@ class Team(models.Model):
 # These are any addons that a user has purchased, the pricing is determined by their tier
 # We generate their usage limits from their tier + any values here
 class TierAddons(models.Model):
-    team = models.ForeignKey(Team, on_delete=models.RESTRICT)
+    team = models.ForeignKey(Team, on_delete=models.CASCADE)
     additional_user_count = models.IntegerField(null=True)
     additional_project_count = models.IntegerField(null=True)
     additional_collaborator_count = models.IntegerField(null=True)
@@ -100,7 +99,7 @@ class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
     name = models.CharField(max_length=200)
     recovery_key = models.TextField(null=True)
-    team = models.ForeignKey(Team, on_delete=models.RESTRICT)
+    team = models.ForeignKey(Team, on_delete=models.CASCADE)
     email_verified = models.DateTimeField(blank=True, null=True)
     accepted_terms_and_conditions = models.DateTimeField(blank=True, null=True)
     is_collaborator = models.BooleanField(null=False, default=False)
@@ -164,7 +163,7 @@ class Plugin(models.Model):
     TYPE = (("Javascript", "Javascript"), ("Python", "Python"), ("AI", "AI"))
 
     id: int
-    team = models.ForeignKey(Team, on_delete=models.RESTRICT)
+    team = models.ForeignKey(Team, on_delete=models.CASCADE)
     type = models.CharField(max_length=20, choices=TYPE)
     name = models.CharField(blank=False, null=False, max_length=50)
     url = models.URLField(blank=False, null=False, max_length=200)
@@ -178,6 +177,12 @@ class TrustedService(models.Model):
     id: int
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     plugin = models.OneToOneField(Plugin, on_delete=models.CASCADE)
+
+
+class Usage(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    date = models.DateTimeField(auto_now_add=True, blank=False, null=False)
+    usage = models.IntegerField(null=False, blank=False)
 
 
 UserType = User
