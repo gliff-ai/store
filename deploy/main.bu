@@ -28,6 +28,14 @@ storage:
       contents:
         source: https://papertrailapp.com/tools/papertrail-bundle.pem
 
+    - path: /var/home/core/bin/manage.sh
+      mode: 0755
+      contents:
+        inline: |
+          #!/bin/bash
+
+          sudo docker exec -it app-store-1 pipenv run python manage.py "$@"
+
     - path: /var/home/core/bin/startup.sh
       mode: 0755
       contents:
