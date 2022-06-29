@@ -3,7 +3,7 @@ from typing import List
 from ninja import Router
 
 from myauth.models import Plugin
-from .schemas import PluginSchema, PluginCreated, Error
+from .schemas import PluginOut, PluginSchema, PluginCreated, Error
 from django.core.exceptions import ObjectDoesNotExist
 from .trusted_service import process_collection_uids, is_valid_url
 from django_etebase.models import Collection
@@ -13,7 +13,7 @@ from loguru import logger
 router = Router()
 
 
-@router.get("/", response={200: List[PluginSchema], 403: Error})
+@router.get("/", response={200: List[PluginOut], 403: Error})
 def get_plugins(request):
     user = request.auth
 
@@ -49,6 +49,8 @@ def create_plugin(request, payload: PluginSchema):
             name=payload.name,
             type=payload.type,
             team_id=user.team.id,
+            author=user.team.name,
+            description=payload.description,
             url=payload.url,
             products=payload.products,
             enabled=payload.enabled,
@@ -73,6 +75,7 @@ def update_plugin(request, payload: PluginSchema):
         plugin = Plugin.objects.get(**filter_args)
 
         plugin.name = payload.name
+        plugin.description = payload.description
         plugin.products = payload.products
         plugin.enabled = payload.enabled
         plugin.save()

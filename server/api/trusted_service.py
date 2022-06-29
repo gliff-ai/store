@@ -10,6 +10,7 @@ from loguru import logger
 from myauth.models import TrustedService, Plugin, User, UserProfile
 from django_etebase.models import Collection
 from .schemas import (
+    TrustedServiceOut,
     TrustedServiceSchema,
     TrustedServiceCreated,
     Error,
@@ -41,7 +42,7 @@ def is_valid_url(url):
         return False
 
 
-@router.get("/", response={200: List[TrustedServiceSchema], 403: Error})
+@router.get("/", response={200: List[TrustedServiceOut], 403: Error})
 def get_trusted_service(request):
     user = request.auth
 
@@ -95,7 +96,9 @@ def create_trusted_service(request, payload: TrustedServiceSchema):
         plugin = Plugin.objects.create(
             team_id=user.team.id,
             type=payload.type,
+            author=user.team.name,
             name=payload.name,
+            description=payload.description,
             url=payload.url,
             products=payload.products,
             enabled=payload.enabled,
@@ -126,6 +129,7 @@ def update_trusted_service(request, payload: TrustedServiceSchema):
         plugin = Plugin.objects.get(**filter_args)
 
         plugin.name = payload.name
+        plugin.description = payload.description
         plugin.products = payload.products
         plugin.enabled = payload.enabled
         plugin.save()

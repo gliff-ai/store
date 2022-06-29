@@ -11,18 +11,25 @@ TierSchema = create_schema(Tier)
 class PluginSchema(Schema):
     type: str
     name: str
+    description: str
     url: str
     products: str
     enabled: bool
     collection_uids: Optional[List[str]] = None
 
 
+class PluginOut(PluginSchema):
+    author: str
+    
 class PluginCreated(Schema):
     id: int
 
 
 class TrustedServiceSchema(PluginSchema):
     username: str
+
+class TrustedServiceOut(TrustedServiceSchema):
+    author: str
 
 
 class TrustedServiceCreated(Schema):
