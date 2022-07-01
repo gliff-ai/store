@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Optional, Dict, Union
 from ninja import Schema
 from ninja.orm import create_schema
 from pydantic import validator, typing, conint
@@ -14,7 +14,7 @@ class PluginSchema(Schema):
     url: str
     products: str
     enabled: bool
-    collection_uids: Optional[List[str]] = None
+    collection_uids: Optional[Union[List[Dict[str, Union[str, bool]]], List[str]]] = None
 
 
 class PluginCreated(Schema):
