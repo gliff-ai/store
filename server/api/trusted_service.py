@@ -17,6 +17,7 @@ from .schemas import (
 
 router = Router()
 
+
 def process_collection_uids(model, collection_uids):
     if collection_uids is not None:
         model.collections.clear()
@@ -48,8 +49,13 @@ def get_trusted_service(request):
 
     for p in plugins:
         ts = TrustedService.objects.get(plugin_id=p.id)
-        current_collections = CollectionMember.objects.filter(user__email=ts.user.email).values_list("collection__uid", flat=True)
-        p.collection_uids = [{"uid": uid, "is_invite_pending": uid not in current_collections } for uid in p.collections.values_list("uid", flat=True)]
+        current_collections = CollectionMember.objects.filter(user__email=ts.user.email).values_list(
+            "collection__uid", flat=True
+        )
+        p.collection_uids = [
+            {"uid": uid, "is_invite_pending": uid not in current_collections}
+            for uid in p.collections.values_list("uid", flat=True)
+        ]
         p.username = ts.user.username
     return plugins
 
