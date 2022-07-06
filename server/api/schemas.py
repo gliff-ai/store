@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Optional, Union
 from ninja import Schema
 from ninja.orm import create_schema
 from pydantic import validator, typing, conint
@@ -20,7 +20,12 @@ class PluginSchema(Schema):
 
 class PluginOut(PluginSchema):
     author: str
-    
+
+
+class PluginIn(PluginSchema):
+    origin_id: Union[int, None]
+
+
 class PluginCreated(Schema):
     id: int
 
@@ -28,8 +33,13 @@ class PluginCreated(Schema):
 class TrustedServiceSchema(PluginSchema):
     username: str
 
-class TrustedServiceOut(TrustedServiceSchema):
-    author: str
+
+class TrustedServiceOut(TrustedServiceSchema, PluginOut):
+    pass
+
+
+class TrustedServiceIn(TrustedServiceSchema, PluginIn):
+    pass
 
 
 class TrustedServiceCreated(Schema):

@@ -1,45 +1,19 @@
 from datetime import datetime, timezone
 from typing import List
-from django.core.exceptions import ObjectDoesNotExist, ValidationError
-from django.core.validators import URLValidator
-
+from django.core.exceptions import ObjectDoesNotExist
 from ninja import Router
-
 from loguru import logger
-
 from myauth.models import TrustedService, Plugin, User, UserProfile
-from django_etebase.models import Collection
 from .schemas import (
     TrustedServiceOut,
     TrustedServiceSchema,
+    TrustedServiceIn,
     TrustedServiceCreated,
     Error,
 )
+from .helpers import add_plugin, process_collection_uids, is_valid_url, get_author
 
 router = Router()
-
-
-def process_collection_uids(model, collection_uids):
-    if collection_uids is not None:
-        model.collections.clear()
-        for uid in collection_uids:
-            try:
-                collection = Collection.objects.get(uid=uid)
-                model.collections.add(collection)
-
-            except ObjectDoesNotExist:
-                logger.error(f"Project {uid} does not exist.")
-        model.save()
-
-
-def is_valid_url(url):
-    validator = URLValidator()
-    try:
-        validator(url)
-        return True
-    except ValidationError as e:
-        logger.warning(f"Received ValidationError: {e}")
-        return False
 
 
 @router.get("/", response={200: List[TrustedServiceOut], 403: Error})
@@ -51,12 +25,13 @@ def get_trusted_service(request):
     for p in plugins:
         p.collection_uids = p.collections.values_list("uid", flat=True)
         ts = TrustedService.objects.get(plugin_id=p.id)
+        p.author = get_author(p)
         p.username = ts.user.username
     return plugins
 
 
 @router.post("/", response={200: TrustedServiceCreated, 403: Error, 409: Error, 500: Error, 400: Error})
-def create_trusted_service(request, payload: TrustedServiceSchema):
+def create_trusted_service(request, payload: TrustedServiceIn):
     user = request.auth
 
     if user.team.owner_id is not user.id:
@@ -93,23 +68,9 @@ def create_trusted_service(request, payload: TrustedServiceSchema):
         user_profile.email = user.email
         user_profile.save()
 
-        plugin = Plugin.objects.create(
-            team_id=user.team.id,
-            type=payload.type,
-            author=user.team.name,
-            name=payload.name,
-            description=payload.description,
-            url=payload.url,
-            products=payload.products,
-            enabled=payload.enabled,
-        )
+        plugin_id = add_plugin(payload, user.team.id)
 
-        process_collection_uids(plugin, payload.collection_uids)
-
-        ts = TrustedService.objects.create(
-            user_id=ts_user.id,
-            plugin_id=plugin.id,
-        )
+        ts = TrustedService.objects.create(user_id=ts_user.id, plugin_id=plugin_id)
 
         return {"id": ts.id}
     except Exception as e:

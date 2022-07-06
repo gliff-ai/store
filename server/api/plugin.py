@@ -1,14 +1,11 @@
 from typing import List
-
-from ninja import Router
-
-from myauth.models import Plugin
-from .schemas import PluginOut, PluginSchema, PluginCreated, Error
-from django.core.exceptions import ObjectDoesNotExist
-from .trusted_service import process_collection_uids, is_valid_url
-from django_etebase.models import Collection
-
 from loguru import logger
+from ninja import Router
+from myauth.models import Plugin
+from .schemas import PluginOut, PluginSchema, PluginCreated, PluginIn, Error
+from django.core.exceptions import ObjectDoesNotExist
+from .helpers import is_valid_url, get_author, add_plugin, process_collection_uids
+
 
 router = Router()
 
@@ -20,13 +17,14 @@ def get_plugins(request):
     filter_args = {"team_id": user.userprofile.team.id, "type": "Javascript"}
     plugins = Plugin.objects.filter(**filter_args)
     for p in plugins:
+        p.author = get_author(p)
         p.collection_uids = p.collections.values_list("uid", flat=True)
 
     return plugins
 
 
 @router.post("/", response={200: PluginCreated, 403: Error, 500: Error, 400: Error})
-def create_plugin(request, payload: PluginSchema):
+def create_plugin(request, payload: PluginIn):
     user = request.auth
 
     if user.team.owner_id is not user.id:
@@ -45,20 +43,8 @@ def create_plugin(request, payload: PluginSchema):
         pass
 
     try:
-        plugin = Plugin.objects.create(
-            name=payload.name,
-            type=payload.type,
-            team_id=user.team.id,
-            author=user.team.name,
-            description=payload.description,
-            url=payload.url,
-            products=payload.products,
-            enabled=payload.enabled,
-        )
-
-        process_collection_uids(plugin, payload.collection_uids)
-
-        return {"id": plugin.id}
+        plugin_id = add_plugin(payload, user.team.id)
+        return {"id": plugin_id}
     except Exception as e:
         logger.error(e)
 
