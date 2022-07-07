@@ -4,7 +4,7 @@ from ninja import Router
 from myauth.models import Plugin
 from .schemas import PluginOut, PluginSchema, PluginCreated, PluginIn, Error
 from django.core.exceptions import ObjectDoesNotExist
-from .helpers import is_valid_url, get_author, add_plugin, process_collection_uids
+from .helpers import is_valid_url, edit_plugin, get_author, add_plugin
 
 
 router = Router()
@@ -60,13 +60,7 @@ def update_plugin(request, payload: PluginSchema):
         filter_args = {"team_id": user.userprofile.team.id, "url": payload.url}
         plugin = Plugin.objects.get(**filter_args)
 
-        plugin.name = payload.name
-        plugin.description = payload.description
-        plugin.products = payload.products
-        plugin.enabled = payload.enabled
-        plugin.save()
-
-        process_collection_uids(plugin, payload.collection_uids)
+        edit_plugin(plugin, payload)
 
         return {"id": plugin.id}
     except Exception as e:

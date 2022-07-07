@@ -1,6 +1,6 @@
 from loguru import logger
 from myauth.models import Plugin
-from .schemas import PluginIn
+from .schemas import PluginIn, PluginSchema
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.core.validators import URLValidator
 from django_etebase.models import Collection
@@ -28,12 +28,24 @@ def add_plugin(payload: PluginIn, team_id: int) -> int:
         url=payload.url,
         products=payload.products,
         enabled=payload.enabled,
+        is_public=payload.is_public,
     )
     plugin.origin_id = plugin.id if payload.origin_id is None else payload.origin_id
     plugin.save()
 
     process_collection_uids(plugin, payload.collection_uids)
     return plugin.id
+
+
+def edit_plugin(plugin: Plugin, payload: PluginSchema) -> None:
+    plugin.name = payload.name
+    plugin.description = payload.description
+    plugin.products = payload.products
+    plugin.enabled = payload.enabled
+    plugin.is_public = payload.is_public
+    plugin.save()
+
+    process_collection_uids(plugin, payload.collection_uids)
 
 
 def get_author(plugin: Plugin) -> str:

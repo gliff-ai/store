@@ -11,7 +11,7 @@ from .schemas import (
     TrustedServiceCreated,
     Error,
 )
-from .helpers import add_plugin, process_collection_uids, is_valid_url, get_author
+from .helpers import edit_plugin, add_plugin, is_valid_url, get_author
 
 router = Router()
 
@@ -70,7 +70,12 @@ def create_trusted_service(request, payload: TrustedServiceIn):
 
         plugin_id = add_plugin(payload, user.team.id)
 
-        ts = TrustedService.objects.create(user_id=ts_user.id, plugin_id=plugin_id)
+        ts = TrustedService.objects.create(
+            user_id=ts_user.id,
+            plugin_id=plugin_id,
+            public_key=payload.public_key,
+            encrypted_access_key=payload.encrypted_access_key,
+        )
 
         return {"id": ts.id}
     except Exception as e:
@@ -89,13 +94,7 @@ def update_trusted_service(request, payload: TrustedServiceSchema):
         filter_args = {"team_id": user.userprofile.team.id, "url": payload.url}
         plugin = Plugin.objects.get(**filter_args)
 
-        plugin.name = payload.name
-        plugin.description = payload.description
-        plugin.products = payload.products
-        plugin.enabled = payload.enabled
-        plugin.save()
-
-        process_collection_uids(plugin, payload.collection_uids)
+        edit_plugin(plugin, payload)
 
         ts = TrustedService.objects.get(plugin_id=plugin.id)
         user_profile = ts.user.userprofile

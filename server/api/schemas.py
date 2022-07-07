@@ -1,8 +1,7 @@
-from typing import List, Optional, Union
+from typing import List, Optional, Union, Any
 from ninja import Schema
 from ninja.orm import create_schema
 from pydantic import validator, typing, conint
-
 from myauth.models import Tier
 
 TierSchema = create_schema(Tier)
@@ -16,6 +15,7 @@ class PluginSchema(Schema):
     products: str
     enabled: bool
     collection_uids: Optional[List[str]] = None
+    is_public: bool
 
 
 class PluginOut(PluginSchema):
@@ -32,6 +32,8 @@ class PluginCreated(Schema):
 
 class TrustedServiceSchema(PluginSchema):
     username: str
+    public_key: Union[str, None]
+    encrypted_access_key: Union[str, None]
 
 
 class TrustedServiceOut(TrustedServiceSchema, PluginOut):

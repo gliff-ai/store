@@ -172,12 +172,15 @@ class Plugin(models.Model):
     products = models.CharField(max_length=20, choices=PRODUCTS)
     enabled = models.BooleanField(null=False, default=False)
     collections = models.ManyToManyField(Collection, blank=True)
+    is_public = models.BooleanField(blank=False, null=False, default=False)
 
 
 class TrustedService(models.Model):
     id: int
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     plugin = models.OneToOneField(Plugin, on_delete=models.CASCADE)
+    public_key = models.CharField(max_length=100, blank=True, null=True)
+    encrypted_access_key = models.CharField(max_length=100, blank=True, null=True)
 
 
 class Usage(models.Model):
