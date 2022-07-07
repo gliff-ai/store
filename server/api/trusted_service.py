@@ -27,6 +27,8 @@ def get_trusted_service(request):
         ts = TrustedService.objects.get(plugin_id=p.id)
         p.author = get_author(p)
         p.username = ts.user.username
+        p.public_key = ts.public_key
+        p.encrypted_access_key = ts.encrypted_access_key
     return plugins
 
 
