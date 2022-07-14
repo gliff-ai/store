@@ -172,7 +172,7 @@ class Plugin(models.Model):
     products = models.CharField(max_length=20, choices=PRODUCTS)
     enabled = models.BooleanField(null=False, default=False)
     collections = models.ManyToManyField(Collection, blank=True)
-    is_public = models.BooleanField(blank=False, null=False, default=False)
+    is_public = models.BooleanField(blank=True, null=True, default=False)
 
 
 class TrustedService(models.Model):
