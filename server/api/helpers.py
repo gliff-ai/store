@@ -42,7 +42,7 @@ def add_plugin(payload: PluginSchema, team_id: int) -> Plugin:
         description=payload.description,
         url=payload.url,
         products=payload.products,
-        enabled=payload.enabled if is_origin else False,
+        enabled=payload.enabled if is_origin else True,
         is_public=payload.is_public if is_origin else None,
     )
     plugin.origin_id = plugin.id if payload.origin_id is None else payload.origin_id
