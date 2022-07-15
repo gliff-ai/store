@@ -8,13 +8,18 @@ from myauth.models import Tier
 TierSchema = create_schema(Tier)
 
 
+class CollectionUid(Schema):
+    uid: str
+    is_invite_pending: bool
+
+
 class PluginSchema(Schema):
     type: str
     name: str
     url: str
     products: str
     enabled: bool
-    collection_uids: Optional[Union[List[Dict[str, Union[str, bool]]], List[str]]] = None
+    collection_uids: Optional[Union[List[CollectionUid], List[str]]] = None
 
 
 class PluginCreated(Schema):
