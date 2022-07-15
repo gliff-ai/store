@@ -1,6 +1,7 @@
 from loguru import logger
-from myauth.models import Plugin
-from .schemas import PluginIn, PluginSchema
+from typing import List
+from myauth.models import Plugin, TrustedService
+from .schemas import PluginSchema
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.core.validators import URLValidator
 from django_etebase.models import Collection
@@ -19,7 +20,21 @@ def process_collection_uids(model, collection_uids):
         model.save()
 
 
-def add_plugin(payload: PluginIn, team_id: int) -> int:
+def process_plugins(plugins: List[Plugin]) -> List[Plugin]:
+    for p in plugins:
+        if p is not None:
+            p.author = get_author(p)
+            p.collection_uids = p.collections.values_list("uid", flat=True)
+            if p.type == "Python" or p.type == "AI":
+                ts = TrustedService.objects.get(plugin_id=p.id)
+                p.username = ts.user.username
+                p.public_key = ts.public_key
+                p.encrypted_access_key = ts.encrypted_access_key
+    return plugins
+
+
+def add_plugin(payload: PluginSchema, team_id: int) -> Plugin:
+    is_origin = payload.origin_id is None
     plugin = Plugin.objects.create(
         team_id=team_id,
         name=payload.name,
@@ -27,14 +42,14 @@ def add_plugin(payload: PluginIn, team_id: int) -> int:
         description=payload.description,
         url=payload.url,
         products=payload.products,
-        enabled=payload.enabled,
-        is_public=payload.is_public,
+        enabled=payload.enabled if is_origin else False,
+        is_public=payload.is_public if is_origin else None,
     )
     plugin.origin_id = plugin.id if payload.origin_id is None else payload.origin_id
     plugin.save()
 
     process_collection_uids(plugin, payload.collection_uids)
-    return plugin.id
+    return plugin
 
 
 def edit_plugin(plugin: Plugin, payload: PluginSchema) -> None:

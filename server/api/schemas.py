@@ -15,36 +15,29 @@ class PluginSchema(Schema):
     products: str
     enabled: bool
     collection_uids: Optional[List[str]] = None
-    is_public: bool
-
-
-class PluginOut(PluginSchema):
-    author: str
-
-
-class PluginIn(PluginSchema):
+    is_public: Union[bool, None]  # is_public is only set for origin plugins, while copies of a plugin cannot be shared
     origin_id: Union[int, None]
 
 
-class PluginCreated(Schema):
-    id: int
+class TrustedServiceSchema(Schema):
+    username: Optional[str]
+    public_key: Optional[Union[str, None]]
+    encrypted_access_key: Optional[Union[str, None]]
 
 
-class TrustedServiceSchema(PluginSchema):
-    username: str
-    public_key: Union[str, None]
-    encrypted_access_key: Union[str, None]
+class PluginOutSchema(PluginSchema, TrustedServiceSchema):
+    author: str
 
 
-class TrustedServiceOut(TrustedServiceSchema, PluginOut):
+class PluginInSchema(PluginSchema, TrustedServiceSchema):
     pass
 
 
-class TrustedServiceIn(TrustedServiceSchema, PluginIn):
-    pass
+class PluginDeleteSchema(Schema):
+    url: str
 
 
-class TrustedServiceCreated(Schema):
+class PluginCreatedSchema(Schema):
     id: int
 
 
