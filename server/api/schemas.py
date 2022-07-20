@@ -46,6 +46,15 @@ class UserProfileUpdateIn(Schema):
     recovery_key: str
 
 
+class UserFeedbackSchema(Schema):
+    rating: int
+    comment: str
+
+
+class FieldCreatedSchema(Schema):
+    id: int
+
+
 class TeamSchema(Schema):
     id: int
     name: str
