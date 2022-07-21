@@ -1,5 +1,5 @@
 from datetime import datetime, timezone
-from typing import List
+from typing import List, Dict, Union
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.core.validators import URLValidator
 
@@ -8,12 +8,8 @@ from ninja import Router
 from loguru import logger
 
 from myauth.models import TrustedService, Plugin, User, UserProfile
-from django_etebase.models import Collection
-from .schemas import (
-    TrustedServiceSchema,
-    TrustedServiceCreated,
-    Error,
-)
+from django_etebase.models import Collection, CollectionMember
+from .schemas import TrustedServiceSchema, TrustedServiceCreated, Error
 
 router = Router()
 
@@ -42,14 +38,20 @@ def is_valid_url(url):
 
 
 @router.get("/", response={200: List[TrustedServiceSchema], 403: Error})
-def get_trusted_service(request):
+def get_trusted_service(request, response=TrustedServiceSchema):
     user = request.auth
 
     plugins = Plugin.objects.filter(team_id=user.userprofile.team.id).exclude(type="Javascript")
 
     for p in plugins:
-        p.collection_uids = p.collections.values_list("uid", flat=True)
         ts = TrustedService.objects.get(plugin_id=p.id)
+        current_collections = CollectionMember.objects.filter(user__email=ts.user.email).values_list(
+            "collection__uid", flat=True
+        )
+        p.collection_uids: List[Dict[str, Union[str, bool]]] = [
+            {"uid": uid, "is_invite_pending": uid not in current_collections}
+            for uid in p.collections.values_list("uid", flat=True)
+        ]
         p.username = ts.user.username
     return plugins
 
