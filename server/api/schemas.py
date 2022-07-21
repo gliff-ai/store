@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Optional, Union
 from ninja import Schema
 from ninja.orm import create_schema
 from pydantic import validator, typing, conint
@@ -46,8 +46,8 @@ class UserProfileUpdateIn(Schema):
     recovery_key: str
 
 
-class UserFeedbackSchema(Schema):
-    rating: int
+class CreateUserFeedbackSchema(Schema):
+    rating: Union[int, None]
     comment: str
 
 
