@@ -189,8 +189,10 @@ class UserFeedback(models.Model):
         (1, "fair"),
         (0, "poor"),
     )
-    rating = models.PositiveSmallIntegerField(choices=RATE_CHOICES)
+    user = models.ForeignKey(User, null=True, on_delete=models.SET_NULL)
+    rating = models.PositiveSmallIntegerField(choices=RATE_CHOICES, blank=True, null=True)
     comment = models.TextField(blank=True, max_length=500)
+    date = models.DateTimeField(auto_now_add=True)
 
 
 class Usage(models.Model):
