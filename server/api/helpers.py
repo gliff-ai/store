@@ -1,10 +1,10 @@
 from loguru import logger
-from typing import List
+from typing import List, Dict, Union
 from myauth.models import Plugin, TrustedService
 from .schemas import PluginSchema
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.core.validators import URLValidator
-from django_etebase.models import Collection
+from django_etebase.models import Collection, CollectionMember
 
 
 def process_collection_uids(model, collection_uids):
@@ -24,12 +24,23 @@ def process_plugins(plugins: List[Plugin]) -> List[Plugin]:
     for p in plugins:
         if p is not None:
             p.author = get_author(p)
-            p.collection_uids = p.collections.values_list("uid", flat=True)
+            if p.type == "Javascript":
+                p.collection_uids = p.collections.values_list("uid", flat=True)
+
             if p.type == "Python" or p.type == "AI":
                 ts = TrustedService.objects.get(plugin_id=p.id)
+
+                current_collections = CollectionMember.objects.filter(user__email=ts.user.email).values_list(
+                    "collection__uid", flat=True
+                )
+                p.collection_uids: List[Dict[str, Union[str, bool]]] = [
+                    {"uid": uid, "is_invite_pending": uid not in current_collections}
+                    for uid in p.collections.values_list("uid", flat=True)
+                ]
                 p.username = ts.user.username
                 p.public_key = ts.public_key
                 p.encrypted_access_key = ts.encrypted_access_key
+
     return plugins
 
 
