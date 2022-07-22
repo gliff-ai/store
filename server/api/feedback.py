@@ -26,7 +26,7 @@ def can_request_feedback(request):
     try:
         # feedback collected in the last 30 days
         feedback = UserFeedback.objects.filter(
-            Q(user_id=user.id) & Q(date__gte=timezone.now() + timezone.timedelta(days=30))
+            Q(user_id=user.id) & Q(date__gte=timezone.now() - timezone.timedelta(days=30))
         )
         if len(feedback) == 0:
             return True
