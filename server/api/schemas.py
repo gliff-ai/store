@@ -19,7 +19,6 @@ class PluginSchema(Schema):
     url: str
     products: str
     enabled: bool
-    collection_uids: Optional[Union[List[CollectionUid], List[str]]] = None
     is_public: Union[bool, None]  # is_public is only set for origin plugins, while copies of a plugin cannot be shared
     origin_id: Union[int, None]
 
@@ -31,11 +30,12 @@ class TrustedServiceSchema(Schema):
 
 
 class PluginOutSchema(PluginSchema, TrustedServiceSchema):
+    collection_uids: Union[List[CollectionUid],  List[str]]  = None
     author: str
 
 
 class PluginInSchema(PluginSchema, TrustedServiceSchema):
-    pass
+    collection_uids: List[str] = None
 
 
 class PluginDeleteSchema(Schema):

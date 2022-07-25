@@ -1,7 +1,7 @@
 from loguru import logger
 from typing import List, Dict, Union
 from myauth.models import Plugin, TrustedService
-from .schemas import PluginSchema
+from .schemas import PluginInSchema
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.core.validators import URLValidator
 from django_etebase.models import Collection, CollectionMember
@@ -44,7 +44,7 @@ def process_plugins(plugins: List[Plugin]) -> List[Plugin]:
     return plugins
 
 
-def add_plugin(payload: PluginSchema, team_id: int) -> Plugin:
+def add_plugin(payload: PluginInSchema, team_id: int) -> Plugin:
     is_origin = payload.origin_id is None
     plugin = Plugin.objects.create(
         team_id=team_id,
@@ -63,7 +63,7 @@ def add_plugin(payload: PluginSchema, team_id: int) -> Plugin:
     return plugin
 
 
-def edit_plugin(plugin: Plugin, payload: PluginSchema) -> None:
+def edit_plugin(plugin: Plugin, payload: PluginInSchema) -> None:
     plugin.name = payload.name
     plugin.description = payload.description
     plugin.products = payload.products
