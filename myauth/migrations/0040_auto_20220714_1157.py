@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('myauth', '0039_auto_20220707_1016'),
+        ("myauth", "0039_auto_20220707_1016"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='plugin',
-            name='is_public',
+            model_name="plugin",
+            name="is_public",
             field=models.BooleanField(blank=True, default=False, null=True),
         ),
     ]
