@@ -30,7 +30,7 @@ class TrustedServiceSchema(Schema):
 
 
 class PluginOutSchema(PluginSchema, TrustedServiceSchema):
-    collection_uids: Union[List[CollectionUid],  List[str]]  = None
+    collection_uids: Union[List[CollectionUid], List[str]] = None
     author: str
 
 

@@ -89,7 +89,7 @@ def create_plugin(request, payload: PluginInSchema):
                 user_profile.email = user.email
                 user_profile.save()
 
-                ts = TrustedService.objects.create(
+                TrustedService.objects.create(
                     user_id=ts_user.id,
                     plugin_id=plugin.id,
                     public_key=payload.public_key,
