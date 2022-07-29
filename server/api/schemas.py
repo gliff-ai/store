@@ -63,6 +63,15 @@ class UserProfileUpdateIn(Schema):
     recovery_key: str
 
 
+class CreateUserFeedbackSchema(Schema):
+    rating: Union[int, None]
+    comment: str
+
+
+class FieldCreatedSchema(Schema):
+    id: int
+
+
 class TeamSchema(Schema):
     id: int
     name: str
