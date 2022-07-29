@@ -179,6 +179,22 @@ class TrustedService(models.Model):
     plugin = models.OneToOneField(Plugin, on_delete=models.CASCADE)
 
 
+class UserFeedback(models.Model):
+    """Model for storing users' feedback."""
+
+    RATE_CHOICES = (
+        (4, "excellent"),
+        (3, "very good"),
+        (2, "good"),
+        (1, "fair"),
+        (0, "poor"),
+    )
+    user = models.ForeignKey(User, null=True, on_delete=models.SET_NULL)
+    rating = models.PositiveSmallIntegerField(choices=RATE_CHOICES, blank=True, null=True)
+    comment = models.TextField(blank=True, max_length=500)
+    date = models.DateTimeField(auto_now_add=True)
+
+
 class Usage(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     date = models.DateTimeField(auto_now_add=True, blank=False, null=False)
