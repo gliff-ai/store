@@ -31,6 +31,7 @@ class EnforceCollabMiddleware:
             ("POST", "/item/fetch_updates/"),
             ("POST", "/item/transaction/"),
             ("POST", "/item/batch/"),
+            ("POST", "/django/api/feedback"),
         ]
 
         for (method, path) in allowed_routes:

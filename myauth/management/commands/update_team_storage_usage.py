@@ -7,7 +7,7 @@ from django.conf import settings
 from apscheduler.schedulers.background import BackgroundScheduler
 from django_apscheduler.jobstores import DjangoJobStore
 from django.core.management.base import BaseCommand
-from myauth.models import Team, User, Billing, Tier
+from myauth.models import Team, User, Billing, Tier, Usage
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail
 
@@ -108,6 +108,8 @@ def update_team_storage_usage():
         if user_id in user_ids:
             # Add this users usage to their team usage
             usage = int(round(data_select[user_id] * 10 ** -6))
+            u = Usage.objects.create(user, usage=usage)
+            u.save()
             teams[user.team.id] = teams.get(user.team.id, 0) + usage
             logger.info(f"Updated team {user.team.id} with {user_id}: new usage = {teams[user.team.id]}")
 
@@ -132,6 +134,8 @@ def update_team_storage_usage():
 
 class Command(BaseCommand):
     def handle(self, *args, **options):
+        if settings.TEST_MODE:
+            return
 
         # add scheduler that runs in the background within the application.
         job_defaults = {"coalesce": True, "max_instances": 1}

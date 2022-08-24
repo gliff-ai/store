@@ -23,6 +23,7 @@ from .api.billing import router as billing_router
 from .api.trusted_service import router as trusted_service_router
 from .api.plugin import router as plugin_router
 from .api.sentry import router as sentry_router
+from .api.feedback import router as feedback_router
 
 
 class ApiKey(APIKeyHeader):
@@ -59,6 +60,7 @@ api.add_router("/project", project_router)
 api.add_router("/tunnel", sentry_router)
 api.add_router("/trusted_service", trusted_service_router)
 api.add_router("/plugin", plugin_router)
+api.add_router("/feedback", feedback_router)
 
 
 urlpatterns = [

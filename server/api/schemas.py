@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Optional, Dict, Union
 from ninja import Schema
 from ninja.orm import create_schema
 from pydantic import validator, typing, conint
@@ -8,13 +8,18 @@ from myauth.models import Tier
 TierSchema = create_schema(Tier)
 
 
+class CollectionUid(Schema):
+    uid: str
+    is_invite_pending: bool
+
+
 class PluginSchema(Schema):
     type: str
     name: str
     url: str
     products: str
     enabled: bool
-    collection_uids: Optional[List[str]] = None
+    collection_uids: Optional[Union[List[CollectionUid], List[str]]] = None
 
 
 class PluginCreated(Schema):
@@ -44,6 +49,15 @@ class UserProfileIn(Schema):
 
 class UserProfileUpdateIn(Schema):
     recovery_key: str
+
+
+class CreateUserFeedbackSchema(Schema):
+    rating: Union[int, None]
+    comment: str
+
+
+class FieldCreatedSchema(Schema):
+    id: int
 
 
 class TeamSchema(Schema):
