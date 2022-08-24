@@ -225,6 +225,41 @@ def create_invite(request, email, is_collaborator):
         return 500, {"message": "unknown error"}
 
 
+@router.post("/invite/delete/", response={200: None, 409: Error, 500: Error})
+def delete_invite(request, payload: CreateInvite):
+    try:
+
+        # try:
+        #     invitee = User.objects.get(email=payload.email)
+        #     print(invitee)
+        #     if invitee is not None:
+        #         return 409, {"message": "user has already accepted invite"}
+
+        # except ObjectDoesNotExist as e:
+        #     logger.info(f"Received ObjectDoesNotExist error {e}")
+        #     pass
+
+        print([i.email for i in Invite.objects.all()])
+        invite = Invite.objects.get(email=payload.email)
+        print(invite)
+        invite.delete()
+        print(invite)
+
+        # invite.save()
+
+        logger.info("invite deleted")
+
+        return 200
+
+    except IntegrityError as e:
+        logger.warning(f"Received IntegrityError {e}")
+        return 409, {"message": "user is already invited to a team"}
+
+    except Exception as e:
+        logger.warning(f"Received Exception {e}")
+        return 500, {"message": "unknown error"}
+
+
 ### These routes have no auth as user either won't have an account or won't be logged in when they are used
 @router.post("/verify_email", auth=None, response={201: None, 409: Error})
 def request_validation_email(request, payload: CreateInvite):
