@@ -66,7 +66,7 @@ storage:
           #!/bin/bash
 
           export ACCESS_TOKEN=$(docker run mcr.microsoft.com/azure-cli /bin/bash -c "az login --identity --username /subscriptions/1eb9ce28-83a1-4fb9-bf41-3cd2442ef0eb/resourcegroups/gliff_staging/providers/Microsoft.ManagedIdentity/userAssignedIdentities/vm_registry_access_store > /dev/null; az acr login --name gliff --expose-token --only-show-errors --output tsv --query accessToken")
-          echo $ACCESS_TOKEN | docker login gliff.azurecr.io -u 00000000-0000-0000-0000-000000000000 --password-stdin
+          echo $ACCESS_TOKEN | docker login gliffai.azurecr.io -u 00000000-0000-0000-0000-000000000000 --password-stdin
 
           # Get Store.env
           docker run -v /var/app:/var/app:z mcr.microsoft.com/azure-cli  /bin/bash -c "az login --identity --username /subscriptions/1eb9ce28-83a1-4fb9-bf41-3cd2442ef0eb/resourcegroups/gliff_staging/providers/Microsoft.ManagedIdentity/userAssignedIdentities/vm_registry_access_store > /dev/null; az storage blob download     --account-name staginggliff     --container-name env     --name store.env     --file /var/app/store.env --auth=login"
@@ -78,7 +78,7 @@ storage:
 
           services:
             store:
-              image: "gliff.azurecr.io/store:${TAG}"
+              image: "gliffai.azurecr.io/store:${TAG}"
               ports:
                 - "80:8000"
               env_file:
