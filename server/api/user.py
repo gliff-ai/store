@@ -239,13 +239,8 @@ def delete_invite(request, payload: CreateInvite):
         #     logger.info(f"Received ObjectDoesNotExist error {e}")
         #     pass
 
-        print([i.email for i in Invite.objects.all()])
         invite = Invite.objects.get(email=payload.email)
-        print(invite)
         invite.delete()
-        print(invite)
-
-        # invite.save()
 
         logger.info("invite deleted")
 
