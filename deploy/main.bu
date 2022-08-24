@@ -70,7 +70,7 @@ storage:
 
           services:
             store:
-              image: "gliff.azurecr.io/store:${TAG}"
+              image: "gliffai.azurecr.io/store:${TAG}"
               ports:
                 - "80:8000"
               env_file:
