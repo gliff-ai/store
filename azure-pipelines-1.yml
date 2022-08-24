@@ -3,7 +3,7 @@ trigger:
 
 stages:
 - stage: Build
-  displayName: Build and push stage
+  displayName: Build and push production
 
   jobs:
     - deployment: VMDeploy
