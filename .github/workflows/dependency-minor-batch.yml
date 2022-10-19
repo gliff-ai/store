@@ -1,7 +1,8 @@
 name: scheduled batch of minor/patch updates
 on:
-  schedule:
-    - cron: "00 06 * * 1"
+  workflow_dispatch:
+#   schedule:
+#     - cron: "00 06 * * 1"
 
 jobs:
   npm_update:
