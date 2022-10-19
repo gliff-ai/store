@@ -1,9 +1,9 @@
 name: Build, Publish and Deploy store-staging-gliff
 
 on:
-  push:
-    branches:
-      - staging
+#   push:
+#     branches:
+#       - staging
   workflow_dispatch:
 
 jobs:
