@@ -2,7 +2,6 @@ from typing import List, Optional, Dict, Union
 from ninja import Schema
 from ninja.orm import create_schema
 from pydantic import validator, typing, conint
-
 from myauth.models import Tier
 
 TierSchema = create_schema(Tier)
@@ -16,21 +15,34 @@ class CollectionUid(Schema):
 class PluginSchema(Schema):
     type: str
     name: str
+    description: str
     url: str
     products: str
     enabled: bool
-    collection_uids: Optional[Union[List[CollectionUid], List[str]]] = None
+    is_public: Union[bool, None]  # is_public is only set for origin plugins, while copies of a plugin cannot be shared
+    origin_id: Union[int, None]
 
 
-class PluginCreated(Schema):
-    id: int
+class TrustedServiceSchema(Schema):
+    username: Optional[str]
+    public_key: Optional[Union[str, None]]
+    encrypted_access_key: Optional[Union[str, None]]
 
 
-class TrustedServiceSchema(PluginSchema):
-    username: str
+class PluginOutSchema(PluginSchema, TrustedServiceSchema):
+    collection_uids: Union[List[CollectionUid], List[str]] = None
+    author: str
 
 
-class TrustedServiceCreated(Schema):
+class PluginInSchema(PluginSchema, TrustedServiceSchema):
+    collection_uids: List[str] = None
+
+
+class PluginDeleteSchema(Schema):
+    url: str
+
+
+class PluginCreatedSchema(Schema):
     id: int
 
 

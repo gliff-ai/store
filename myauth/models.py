@@ -163,20 +163,24 @@ class Plugin(models.Model):
     TYPE = (("Javascript", "Javascript"), ("Python", "Python"), ("AI", "AI"))
 
     id: int
-    team = models.ForeignKey(Team, on_delete=models.CASCADE)
-    type = models.CharField(max_length=20, choices=TYPE)
+    team = models.ForeignKey(Team, on_delete=models.CASCADE)  # cannot be edited by user
+    type = models.CharField(max_length=20, choices=TYPE)  # cannot be edited by user
+    url = models.URLField(blank=False, null=False, max_length=200)  # cannot be edited by user
+    origin = models.ForeignKey("self", blank=True, null=True, on_delete=models.CASCADE)  # cannot be edited by user
     name = models.CharField(blank=False, null=False, max_length=50)
-    url = models.URLField(blank=False, null=False, max_length=200)
+    description = models.CharField(blank=True, null=False, max_length=500)
     products = models.CharField(max_length=20, choices=PRODUCTS)
     enabled = models.BooleanField(null=False, default=False)
     collections = models.ManyToManyField(Collection, blank=True)
+    is_public = models.BooleanField(blank=True, null=True, default=False)
 
 
 class TrustedService(models.Model):
-
     id: int
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     plugin = models.OneToOneField(Plugin, on_delete=models.CASCADE)
+    public_key = models.CharField(max_length=100, blank=True, null=True)
+    encrypted_access_key = models.CharField(max_length=100, blank=True, null=True)
 
 
 class UserFeedback(models.Model):
