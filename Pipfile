@@ -19,7 +19,7 @@ django-apscheduler = "==0.6.0"
 gunicorn = ">=20.1.0"
 
 [dev-packages]
-black = "==22.1.0"
+black = "==23.1.0"
 flake8 = ">=3.9.2"
 mypy-extensions = ">=0.4.3"
 mypy = ">=0.910"
